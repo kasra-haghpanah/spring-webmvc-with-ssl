@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,17 @@ import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
+
+
+/*    @Bean
+    public OpenApiCustomizer openApiCustomizer() {
+
+        final String applicationPath = MessageFormat.format("/{0}/", Properties.getApplicationName());
+
+        return openApi -> openApi.addServersItem(new Server()
+                .url("https://localhost:8443/spring")
+                .description("Local HTTPS Server"));
+    }*/
 
     @Bean
     public GroupedOpenApi publicApi() {

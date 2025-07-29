@@ -7,6 +7,9 @@ import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+
 //https://www.baeldung.com/spring-boot-reactor-netty
 @Configuration
 @DependsOn("properties")
@@ -26,23 +29,37 @@ public class TomcatWebServerFactorySslCustomizer implements WebServerFactoryCust
         ssl.setKeyPassword("kasra123");
         ssl.setKeyStorePassword("kasra123");
         serverFactory.setSsl(ssl);
-        serverFactory.setPort(Properties.getServerPort()); // یا از Properties بخوانید
+        serverFactory.setPort(getPort()); // یا از Properties بخوانید
 
-        //serverFactory.setPort(Properties.getServerPort());
-/*
+    }
 
-        InetAddress address = null;
-        try {
-            address = InetAddress.getByName("127.0.0.1");
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
+    public static int getPort() {
+        // دریافت پورت از تنظیمات یا properties
+        int preferredPort = Properties.getServerPort();
+
+        // اگر پورت 0 باشد، Spring Boot به صورت خودکار یک پورت آزاد انتخاب می‌کند
+        // یا می‌توانید از SocketUtils برای پیدا کردن پورت آزاد استفاده کنید
+        int actualPort = preferredPort;
+
+        if (preferredPort == 0) {
+            // پیدا کردن پورت آزاد به صورت تصادفی
+            actualPort = findAvailableTcpPort(8080, 8999);
         }
-        serverFactory.setAddress(address);
-*/
-        //final String applicationPath = MessageFormat.format("/{0}",environment.getProperty("spring.application.name"));
-        //((ConfigurableServletWebServerFactory) serverFactory).setContextPath(applicationPath);
+
+        return actualPort;
+    }
 
 
+    public static int findAvailableTcpPort(int minPort, int maxPort) {
+        for (int port = minPort; port <= maxPort; port++) {
+            try (ServerSocket socket = new ServerSocket(port)) {
+                socket.setReuseAddress(true);
+                return port;
+            } catch (IOException ignored) {
+                // پورت در دسترس نیست، برو بعدی
+            }
+        }
+        throw new IllegalStateException("No available port in range " + minPort + " - " + maxPort);
     }
 
 
