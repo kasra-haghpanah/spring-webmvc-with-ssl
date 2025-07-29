@@ -58,7 +58,7 @@
 
         <plugins>
             <plugin>
-                <!-- java -jar spring.jar -Dserver.port=8442  -->
+                <!-- java -Dserver.port=8442 -jar spring.jar  -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
