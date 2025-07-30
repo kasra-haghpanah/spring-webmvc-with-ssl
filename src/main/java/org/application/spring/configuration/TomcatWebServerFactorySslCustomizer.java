@@ -10,7 +10,7 @@ import org.springframework.context.annotation.DependsOn;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-//https://www.baeldung.com/spring-boot-reactor-netty
+
 @Configuration
 @DependsOn("properties")
 public class TomcatWebServerFactorySslCustomizer implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
@@ -18,13 +18,14 @@ public class TomcatWebServerFactorySslCustomizer implements WebServerFactoryCust
     @Override
     public void customize(TomcatServletWebServerFactory serverFactory) {
 
-        // keytool -genkeypair -alias alias -keyalg RSA -keysize 2048 -storetype JKS -keystore sample.jks -validity 3650
+        //java_path/bin/keytool.exe
+        // keytool -genkeypair -alias myAlias -keyalg RSA -keysize 2048 -storetype JKS -keystore sample.jks -validity 3650
 
         // keytool -list -v -keystore C:\Users\98911\Desktop\Technical-inistitue-of-Tehran\project\spring\target\classes\jks\sample.jks
         Ssl ssl = new Ssl();
         ssl.setEnabled(true);
         ssl.setKeyStore("classpath:jks/sample.jks");
-        ssl.setKeyAlias("alias");
+        ssl.setKeyAlias("myAlias");
         ssl.setKeyStoreType("JKS");
         ssl.setKeyPassword("kasra123");
         ssl.setKeyStorePassword("kasra123");

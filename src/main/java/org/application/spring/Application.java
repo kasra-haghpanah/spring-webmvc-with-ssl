@@ -2,10 +2,8 @@ package org.application.spring;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
-// http://localhost:8181/spring/swagger-ui/index.html
-@ComponentScan(basePackages = {"org.application.spring"})
+// https://localhost:8443/spring/swagger-ui/index.html
 @SpringBootApplication
 public class Application {
 
