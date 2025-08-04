@@ -1,4 +1,4 @@
-package org.application.spring.bean;
+package org.application.spring.bean.type;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;

@@ -20,13 +20,8 @@ public class SampleController {
     @RequestMapping(value = "/orders/{orderId}", method = RequestMethod.GET)
     @ResponseBody
     public String getUserOrder(@PathVariable int orderId) {
-
-
         orderService.completeOrder(orderId);
-        //userRepository.findAll();
-        //model.addAttribute("authors", authorRepository.findAll());
         return "salam doustan";
-
     }
 
 

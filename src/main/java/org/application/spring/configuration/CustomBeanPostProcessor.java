@@ -1,6 +1,6 @@
 package org.application.spring.configuration;
 
-import org.application.spring.bean.LifeCycleDemoBean;
+import org.application.spring.bean.type.LifeCycleDemoBean;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation.Configuration;
