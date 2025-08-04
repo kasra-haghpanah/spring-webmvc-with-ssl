@@ -21,7 +21,7 @@ import java.text.MessageFormat;
 import java.util.List;
 
 @Configuration
-public class SwaggerConfig {
+public class OpenApiConfig {
 
     @Bean
     public GroupedOpenApi publicApi() {
