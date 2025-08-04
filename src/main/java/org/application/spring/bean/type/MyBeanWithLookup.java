@@ -26,6 +26,8 @@ public abstract class MyBeanWithLookup {
 
     public void print() {
         System.out.println("myBeanWithLookup is printing!");
-        getMyInnerBean();
+        MyInnerBean myInnerBean = getMyInnerBean();
+        myInnerBean.destroy();
+
     }
 }
