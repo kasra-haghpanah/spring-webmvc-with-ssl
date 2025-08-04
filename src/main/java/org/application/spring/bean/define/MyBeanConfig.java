@@ -3,6 +3,7 @@ package org.application.spring.bean.define;
 import org.application.spring.bean.type.MyBean;
 import org.application.spring.bean.type.MyBeanWithLookup;
 import org.application.spring.bean.type.MyInnerBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -20,11 +21,11 @@ public class MyBeanConfig {
     }
 
     @Bean("myBeanWithLookup")
-    public MyBeanWithLookup myBeanWithLookup() {
+    public MyBeanWithLookup myBeanWithLookup(ApplicationContext applicationContext){
         return new MyBeanWithLookup() {
             @Override
             public MyInnerBean getMyInnerBean() {
-                return null;
+                return applicationContext.getBean(MyInnerBean.class);
             }
         };
     }

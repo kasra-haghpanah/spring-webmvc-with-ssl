@@ -21,7 +21,7 @@ public abstract class MyBeanWithLookup {
         System.out.println("myBeanWithLookup created");
     }
 
-    @Lookup
+    //@Lookup
     public abstract MyInnerBean getMyInnerBean();// method injection
 
     public void print() {
