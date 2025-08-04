@@ -11,12 +11,6 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class MyBeanConfig {
 
-    @Bean("myInnerBean")
-    @Scope("prototype")
-    public MyInnerBean myInnerBean() {
-        return new MyInnerBean();
-    }
-
 
     @Bean("myBean")
     @DependsOn({"myInnerBean"})
@@ -26,7 +20,6 @@ public class MyBeanConfig {
     }
 
     @Bean("myBeanWithLookup")
-    @Scope("singleton")
     public MyBeanWithLookup myBeanWithLookup() {
         return new MyBeanWithLookup() {
             @Override
