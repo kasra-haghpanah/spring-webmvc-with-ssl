@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <bean scope="singleton" name="blockBean" class="org.application.spring.bean.xml.Block" />
+
+    <bean scope="singleton" name="apartmentAsSetterInjection" class="org.application.spring.bean.xml.Apartment">
+        <property name="block" ref="blockBean" />
+        <property name="code" value="123" />
+        <property name="name" value="York Tower" />
+    </bean>
+
+    <bean scope="singleton" name="apartmentAsConstructorInjection" class="org.application.spring.bean.xml.Apartment">
+        <constructor-arg index="0" ref="blockBean" />
+        <constructor-arg index="1" type="int" value="124" />
+        <constructor-arg index="2" type="java.lang.String" value="Kasra Tower" />
+    </bean>
+
+</beans>

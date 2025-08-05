@@ -2,7 +2,6 @@ package org.application.spring.bean.type;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import org.springframework.beans.factory.annotation.Lookup;
 
 public abstract class MyBeanWithLookup {
 

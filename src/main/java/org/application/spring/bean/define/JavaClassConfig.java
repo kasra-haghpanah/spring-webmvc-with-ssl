@@ -10,7 +10,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Scope;
 
 @Configuration
-public class MyBeanConfig {
+public class JavaClassConfig {
 
 
     @Bean("myBean")

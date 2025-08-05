@@ -84,6 +84,19 @@
                 </configuration>
             </plugin>
 
+
+            <!-- read maven property by application.properties -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <delimiters>
+                        <delimiter>@</delimiter>
+                    </delimiters>
+                    <useDefaultDelimiters>false</useDefaultDelimiters>
+                </configuration>
+            </plugin>
+
         </plugins>
 
         <finalName>${artifactId}</finalName>
