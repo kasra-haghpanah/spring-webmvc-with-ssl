@@ -2,14 +2,13 @@ package org.application.spring.configuration;
 
 
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.models.ExternalDocumentation;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.SpecVersion;
+import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.StringSchema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
@@ -42,17 +41,19 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .specVersion(SpecVersion.V31)
                 .servers(List.of(new Server().url(applicationPath)))
-//                .components(
-//                        new Components()
-//                                .addSecuritySchemes(
-//                                        securitySchemeName,
-//                                        new SecurityScheme()
-//                                                .description("For calling services, you could not add the bearer word at the beginning of your token.")
-//                                                .name("Bearer Authentication")
-//                                                .type(SecurityScheme.Type.HTTP)
-//                                                .scheme("bearer")
-//                                                .bearerFormat("JWT")))
-//                .security(List.of(new SecurityRequirement().addList(securitySchemeName)))
+                // security
+                .components(
+                        new Components()
+                                .addSecuritySchemes(
+                                        securitySchemeName,
+                                        new SecurityScheme()
+                                                .description("For calling services, you could not add the bearer word at the beginning of your token.")
+                                                .name("Bearer Authentication")
+                                                .type(SecurityScheme.Type.HTTP)
+                                                .scheme("bearer")
+                                                .bearerFormat("JWT")))
+                .security(List.of(new SecurityRequirement().addList(securitySchemeName)))
+                // security
                 .info(
                         new Info()
                                 .title("spring-microservice-reactive")

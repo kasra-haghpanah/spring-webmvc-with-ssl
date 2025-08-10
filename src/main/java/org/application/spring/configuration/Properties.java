@@ -18,6 +18,7 @@ public class Properties {
         config.put("spring.application.name", environment.getProperty("spring.application.name"));
         config.put("springdoc.api-docs.version", environment.getProperty("springdoc.api-docs.version"));
         config.put("springdoc.packagesToScan", environment.getProperty("springdoc.packagesToScan"));
+        config.put("app.jwt-secret", environment.getProperty("app.jwt-secret"));
 
         //config.put("redis.host", environment.getProperty("redis.host"));
         //config.put("redis.port", environment.getProperty("redis.port"));
@@ -40,8 +41,14 @@ public class Properties {
         return get("springdoc.api-docs.version", String.class);
     }
 
-    public static String getSpringdocPackagesToScan() {
-        return get("springdoc.packagesToScan", String.class);
+    public static String[] getSpringdocPackagesToScan() {
+        String list = get("springdoc.packagesToScan", String.class);
+        return list.split(",");
     }
+
+    public static String getAppJwtSecret() {
+        return get("app.jwt-secret", String.class);
+    }
+
 
 }
