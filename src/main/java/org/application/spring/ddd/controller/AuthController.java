@@ -31,7 +31,11 @@ public class AuthController {
         this.userDetailsService = userDetailsService;
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @RequestMapping(
+            value = "/login",
+            method = RequestMethod.POST,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
@@ -42,19 +46,18 @@ public class AuthController {
     }
 
     @RequestMapping(value = "/unauthorized", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @ResponseBody
+    //@ResponseBody
     public String unauthorized(Model model) {
         model.addAttribute("content", "شما احراز هویت نشده‌اید.");
         return "unauthorized"; // فایل unauthorized.html در مسیر templates
     }
 
     @RequestMapping(value = "/forbidden", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
-    @ResponseBody
+    //@ResponseBody
     public String forbidden(Model model) {
         model.addAttribute("content", "شما مجوز لازم را ندارید.");
         return "forbidden"; // فایل forbidden.html در مسیر templates
     }
-
 
 
 }
