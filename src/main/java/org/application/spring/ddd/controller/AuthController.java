@@ -4,18 +4,17 @@ import org.application.spring.configuration.security.AuthRequest;
 import org.application.spring.configuration.security.AuthResponse;
 import org.application.spring.configuration.security.JwtService;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth")
+//@RequestMapping("/api/auth")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -32,7 +31,7 @@ public class AuthController {
         this.userDetailsService = userDetailsService;
     }
 
-    @PostMapping("/login")
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
@@ -41,5 +40,22 @@ public class AuthController {
         final String jwt = jwtService.generateToken(user);
         return ResponseEntity.ok(new AuthResponse(jwt));
     }
+
+    @RequestMapping(value = "/unauthorized", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @ResponseBody
+    public String unauthorized(Model model) {
+        model.addAttribute("content", "شما احراز هویت نشده‌اید.");
+        return "unauthorized"; // فایل unauthorized.html در مسیر templates
+    }
+
+    @RequestMapping(value = "/forbidden", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @ResponseBody
+    public String forbidden(Model model) {
+        model.addAttribute("content", "شما مجوز لازم را ندارید.");
+        return "forbidden"; // فایل forbidden.html در مسیر templates
+    }
+
+
+
 }
 

@@ -109,7 +109,7 @@ public class SecurityConfig {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("{\"error\": \"شما احراز هویت نشده‌اید.\"}");
                 } else {
-                    response.sendRedirect("/unauthorized.html");
+                    response.sendRedirect("/spring/unauthorized");
                 }
 
             }
@@ -130,7 +130,7 @@ public class SecurityConfig {
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     response.getWriter().write("{\"error\": \"شما مجوز لازم را ندارید.\"}");
                 } else {
-                    response.sendRedirect("/forbidden.html");
+                    response.sendRedirect("/spring/forbidden");
                 }
 
             }
@@ -159,8 +159,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/spring/api/auth/**",
-                                "/api/auth/**",
+                                "/spring/login",
+                                "/spring/unauthorized",
+                                "/spring/forbidden",
 
                                 "/spring/swagger-ui/**",
                                 "/spring/v3/api-docs/**",
@@ -173,7 +174,7 @@ public class SecurityConfig {
                                 "/webjars/**"
                         )
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/public/**", "/spring/xml/bean/sample")
+                        .requestMatchers(HttpMethod.GET, "/spring/xml/bean/sample", "/make/mybean")
                         .access((authentication, context) -> {
                             // مثال ساده: فقط کاربران با نقش ADMIN اجازه دارند
                             return authentication.get().getAuthorities().stream()

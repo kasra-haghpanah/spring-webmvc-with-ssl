@@ -70,20 +70,33 @@ public class OpenApiConfig {
     public OperationCustomizer addGlobalItemToRequest() {
         return (Operation operation, HandlerMethod handlerMethod) -> {
 
-            Parameter headerParameter = new Parameter().in(ParameterIn.HEADER.toString()).required(false).
+            Parameter headerParameter = new Parameter()
+                    .in(ParameterIn.HEADER.toString())
+                    .required(false).
                     schema(
-                            new StringSchema()._default("en")._enum(List.of("en", "fa"))._default("fa").required(List.of("en"))
+                            new StringSchema().
+                                    _default("en").
+                                    _enum(List.of("en", "fa")).
+                                    _default("fa")
+                                    //.required(List.of("en"))
                     )
                     .name("Accept-Language");
             operation.addParametersItem(headerParameter);
 
 
-            Parameter headerParameter2 = new Parameter().in(ParameterIn.HEADER.toString()).required(false).
-                    schema(
-                            new StringSchema()._default("application/json")._enum(List.of("application/json", "text/html"))
+
+            Parameter headerParameter2 = new Parameter()
+                    .in(ParameterIn.HEADER.toString())
+                    .required(true)
+                    .schema(new StringSchema()
+                            ._default("application/json")
+                            ._enum(List.of("application/json", "text/html"))
+                            .example("application/json") // اضافه کردن example
                     )
-                    .name("Accept");
+                    .name("Accept")
+                    .allowEmptyValue(false);
             operation.addParametersItem(headerParameter2);
+
 
 
             Parameter queryParameter = new Parameter().in(ParameterIn.QUERY.name().toString()).required(false).
