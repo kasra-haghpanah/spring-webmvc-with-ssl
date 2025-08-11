@@ -78,6 +78,14 @@ public class OpenApiConfig {
             operation.addParametersItem(headerParameter);
 
 
+            Parameter headerParameter2 = new Parameter().in(ParameterIn.HEADER.toString()).required(false).
+                    schema(
+                            new StringSchema()._default("application/json")._enum(List.of("application/json", "text/html"))
+                    )
+                    .name("Accept");
+            operation.addParametersItem(headerParameter2);
+
+
             Parameter queryParameter = new Parameter().in(ParameterIn.QUERY.name().toString()).required(false).
                     schema(
                             new StringSchema()._default("export")._enum(List.of("import", "export"))._default("export")
