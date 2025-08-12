@@ -52,8 +52,6 @@ public class AuthController {
     //@ResponseBody
     public String unauthorized(Model model) {
         model.addAttribute("content", "شما احراز هویت نشده‌اید.");
-
-
         return "unauthorized"; // فایل unauthorized.html در مسیر templates
     }
 

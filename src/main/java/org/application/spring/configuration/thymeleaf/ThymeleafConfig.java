@@ -76,12 +76,13 @@ public class ThymeleafConfig implements WebMvcConfigurer {
         resolver.setCharacterEncoding("UTF-8");
         resolver.setTemplateMode(TemplateMode.HTML);
 
-        //resolver.setCacheable(true);
+        resolver.setCacheable(false);
         //resolver.setCacheablePatterns(Set.of("/**"));
 
         resolver.setCheckExistence(true);
         return resolver;
     }
+
 
     @Bean
     public SpringTemplateEngine templateEngine(ITemplateResolver thymeleafTemplateResolver) {
