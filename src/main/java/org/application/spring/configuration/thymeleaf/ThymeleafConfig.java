@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
@@ -25,7 +24,6 @@ public class ThymeleafConfig implements WebMvcConfigurer {
 
     public static final String[] resourceHandler;
     public static final String[] resourceLocations;
-    private final ApplicationContext applicationContext;
 
     static {
 
@@ -53,10 +51,6 @@ public class ThymeleafConfig implements WebMvcConfigurer {
 
     }
 
-    public ThymeleafConfig(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
-
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // https://www.baeldung.com/cachable-static-assets-with-spring-mvc
@@ -73,9 +67,9 @@ public class ThymeleafConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public ITemplateResolver thymeleafTemplateResolver() {
+    public ITemplateResolver thymeleafTemplateResolver(ApplicationContext applicationContext){
         final SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
-        resolver.setApplicationContext(this.applicationContext);
+        resolver.setApplicationContext(applicationContext);
         resolver.setPrefix("classpath:/templates/");
         resolver.setSuffix(".html");
         resolver.setCharacterEncoding("UTF-8");
@@ -104,12 +98,6 @@ public class ThymeleafConfig implements WebMvcConfigurer {
         viewResolver.setContentType("text/html; charset=UTF-8");
         //viewResolver.setOrder(1);
         return viewResolver;
-    }
-
-
-    @Override
-    public void configureViewResolvers(ViewResolverRegistry registry) {
-        registry.viewResolver(applicationContext.getBean("thymeleafViewResolver", ThymeleafViewResolver.class));
     }
 
 }
