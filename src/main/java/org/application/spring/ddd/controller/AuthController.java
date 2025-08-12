@@ -11,7 +11,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 //@RequestMapping("/api/auth")
@@ -45,10 +48,12 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(jwt));
     }
 
-    @RequestMapping(value = "/unauthorized", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = "/unauthorized", method = RequestMethod.GET)
     //@ResponseBody
     public String unauthorized(Model model) {
         model.addAttribute("content", "شما احراز هویت نشده‌اید.");
+
+
         return "unauthorized"; // فایل unauthorized.html در مسیر templates
     }
 

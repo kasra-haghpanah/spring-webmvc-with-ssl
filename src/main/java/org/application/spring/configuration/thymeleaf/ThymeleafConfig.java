@@ -79,11 +79,9 @@ public class ThymeleafConfig implements WebMvcConfigurer {
         //resolver.setCacheable(true);
         //resolver.setCacheablePatterns(Set.of("/**"));
 
-        resolver.setCheckExistence(false);
+        resolver.setCheckExistence(true);
         return resolver;
     }
-
-
 
     @Bean
     public SpringTemplateEngine templateEngine(ITemplateResolver thymeleafTemplateResolver) {
@@ -93,14 +91,17 @@ public class ThymeleafConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public ViewResolver thymeleafViewResolver(SpringTemplateEngine templateEngine) {
+    public ThymeleafViewResolver thymeleafViewResolver(SpringTemplateEngine templateEngine) {
         ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
         viewResolver.setTemplateEngine(templateEngine);
         viewResolver.setCharacterEncoding("UTF-8");
         viewResolver.setContentType("text/html; charset=UTF-8");
-        viewResolver.setOrder(1);
+        //viewResolver.setOrder(1);
         return viewResolver;
     }
+
+
+
 
 /*    @Override
     public void configureViewResolvers(ViewResolverRegistry registry) {
