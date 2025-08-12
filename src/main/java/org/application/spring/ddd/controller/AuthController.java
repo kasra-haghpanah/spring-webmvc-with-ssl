@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.ui.Model;
@@ -40,7 +41,7 @@ public class AuthController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
         final UserDetails user = userDetailsService.loadUserByUsername(request.getUsername());
@@ -55,7 +56,7 @@ public class AuthController {
         return "unauthorized"; // فایل unauthorized.html در مسیر templates
     }
 
-    @RequestMapping(value = "/forbidden", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
+    @RequestMapping(value = "/forbidden", method = RequestMethod.GET/*, produces = MediaType.TEXT_HTML_VALUE*/)
     //@ResponseBody
     public String forbidden(Model model) {
         model.addAttribute("content", "شما مجوز لازم را ندارید.");
