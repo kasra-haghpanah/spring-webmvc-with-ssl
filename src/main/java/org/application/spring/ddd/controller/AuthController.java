@@ -50,14 +50,12 @@ public class AuthController {
     }
 
     @RequestMapping(value = "/unauthorized", method = RequestMethod.GET)
-    //@ResponseBody
     public String unauthorized(Model model) {
         model.addAttribute("content", "شما احراز هویت نشده‌اید.");
         return "unauthorized"; // فایل unauthorized.html در مسیر templates
     }
 
     @RequestMapping(value = "/forbidden", method = RequestMethod.GET/*, produces = MediaType.TEXT_HTML_VALUE*/)
-    //@ResponseBody
     public String forbidden(Model model) {
         model.addAttribute("content", "شما مجوز لازم را ندارید.");
         return "forbidden"; // فایل forbidden.html در مسیر templates

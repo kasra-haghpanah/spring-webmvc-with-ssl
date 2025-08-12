@@ -76,10 +76,8 @@ public class OpenApiConfig {
                     .required(false)
                     .schema(
                             new StringSchema()
-                                    //_default("en").
                                     ._enum(List.of("en", "fa"))
                                     ._default("fa")
-                            //.required(List.of("en"))
                     );
 
             operation.addParametersItem(headerParameter1);
@@ -89,7 +87,7 @@ public class OpenApiConfig {
                     .in(ParameterIn.HEADER.toString())
                     .required(true)
                     .schema(new StringSchema()
-                            ._enum(List.of("application/json", "text/html", "*/*"))
+                            ._enum(List.of("application/json", "text/html"))
                             ._default("application/json")
                             .example("application/json") // اضافه کردن example
                     )

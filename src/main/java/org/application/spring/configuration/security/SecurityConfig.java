@@ -97,7 +97,11 @@ public class SecurityConfig {
     public AuthenticationEntryPoint authenticationEntryPoint() {
 
         return (request, response, authException) -> {
-            if (request.getHeader("Accept-Response").contains("application/json")) {
+            String accept = request.getHeader("Accept-Response");
+            if (accept == null) {
+                accept = "";
+            }
+            if (accept.contains("application/json")) {
                 response.setContentType("application/json;charset=UTF-8");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("{\"error\": \"شما احراز هویت نشده‌اید.\"}");
@@ -112,7 +116,11 @@ public class SecurityConfig {
     public AccessDeniedHandler accessDeniedHandler() {
 
         return (request, response, accessDeniedException) -> {
-            if (request.getHeader("Accept-Response").contains("application/json")) {
+            String accept = request.getHeader("Accept-Response");
+            if (accept == null) {
+                accept = "";
+            }
+            if (accept.contains("application/json")) {
                 response.setContentType("application/json;charset=UTF-8");
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.getWriter().write("{\"error\": \"شما مجوز لازم را ندارید.\"}");
