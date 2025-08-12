@@ -6,15 +6,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
+import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.thymeleaf.spring6.ISpringTemplateEngine;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring6.view.ThymeleafViewResolver;
-import org.thymeleaf.spring6.view.reactive.ThymeleafReactiveViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
@@ -73,7 +71,7 @@ public class ThymeleafConfig implements WebMvcConfigurer {
     public ITemplateResolver thymeleafTemplateResolver(ApplicationContext applicationContext) {
         final SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
         resolver.setApplicationContext(applicationContext);
-        resolver.setPrefix("classpath:templates/");
+        resolver.setPrefix("classpath:/templates/");
         resolver.setSuffix(".html");
         resolver.setCharacterEncoding("UTF-8");
         resolver.setTemplateMode(TemplateMode.HTML);
@@ -85,17 +83,22 @@ public class ThymeleafConfig implements WebMvcConfigurer {
         return resolver;
     }
 
+
+
     @Bean
-    public ISpringTemplateEngine thymeleafTemplateEngine(ITemplateResolver thymeleafTemplateResolver) {
+    public SpringTemplateEngine templateEngine(ITemplateResolver thymeleafTemplateResolver) {
         SpringTemplateEngine templateEngine = new SpringTemplateEngine();
         templateEngine.setTemplateResolver(thymeleafTemplateResolver);
         return templateEngine;
     }
 
     @Bean
-    public ThymeleafViewResolver thymeleafViewResolver(ISpringTemplateEngine thymeleafTemplateEngine) {
+    public ViewResolver thymeleafViewResolver(SpringTemplateEngine templateEngine) {
         ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
-        viewResolver.setTemplateEngine(thymeleafTemplateEngine);
+        viewResolver.setTemplateEngine(templateEngine);
+        viewResolver.setCharacterEncoding("UTF-8");
+        viewResolver.setContentType("text/html; charset=UTF-8");
+        viewResolver.setOrder(1);
         return viewResolver;
     }
 
