@@ -71,36 +71,41 @@ public class OpenApiConfig {
         return (Operation operation, HandlerMethod handlerMethod) -> {
 
             Parameter headerParameter1 = new Parameter()
+                    .name("Accept-Language")
                     .in(ParameterIn.HEADER.toString())
                     .required(false)
                     .schema(
-                            new StringSchema().
+                            new StringSchema()
                                     //_default("en").
-                                            _enum(List.of("en", "fa")).
-                                    _default("fa")
+                                    ._enum(List.of("en", "fa"))
+                                    ._default("fa")
                             //.required(List.of("en"))
-                    )
-                    .name("Accept-Language");
+                    );
+
             operation.addParametersItem(headerParameter1);
 
             Parameter headerParameter2 = new Parameter()
+                    .name("Accept-Response")
                     .in(ParameterIn.HEADER.toString())
                     .required(true)
                     .schema(new StringSchema()
-                                    ._enum(List.of("*/*", "application/json", "text/html"))
-                                    ._default("application/json")
-                            //.example("application/json") // اضافه کردن example
+                            ._enum(List.of("application/json", "text/html", "*/*"))
+                            ._default("application/json")
+                            .example("application/json") // اضافه کردن example
                     )
-                    .name("Accept")
                     .allowEmptyValue(false);
             operation.addParametersItem(headerParameter2);
 
 
-            Parameter queryParameter = new Parameter().in(ParameterIn.QUERY.name().toString()).required(false).
+            Parameter queryParameter = new Parameter()
+                    .name("general-query")
+                    .in(ParameterIn.QUERY.toString())
+                    .required(false).
                     schema(
-                            new StringSchema()._default("export")._enum(List.of("import", "export"))._default("export")
-                    )
-                    .name("general-query");
+                            new StringSchema()
+                                    ._enum(List.of("import", "export"))
+                                    ._default("export")
+                    );
             operation.addParametersItem(queryParameter);
 
             return operation;
