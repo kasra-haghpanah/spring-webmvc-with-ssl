@@ -20,12 +20,6 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private final String SECRET_KEY;
-
-    public JwtService() {
-        SECRET_KEY = Properties.getAppJwtSecret();
-    }
-
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -45,7 +39,7 @@ public class JwtService {
                 .claim("roles", userDetails.getAuthorities())
                 .addClaims(map)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000 * Properties.getAppJwtExpirationHours()))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -68,7 +62,7 @@ public class JwtService {
     }
 
     private Key getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(Properties.getAppJwtSecret());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }
