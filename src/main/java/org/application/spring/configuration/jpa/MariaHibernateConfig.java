@@ -17,6 +17,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.MessageFormat;
 
 @Configuration("mriaHibernateConfig")
 @EnableTransactionManagement
@@ -26,9 +30,33 @@ import javax.sql.DataSource;
 })
 public class MariaHibernateConfig {
 
+    public static void createDbIfNotExists(String dbUrl, String dbUsername, String dbPassword) {
+// ابتدا بدون مشخص کردن نام دیتابیس متصل شوید تا دیتابیس ایجاد شود
+        HikariConfig initialConfig = new HikariConfig();
+        String dbName = dbUrl.substring(dbUrl.lastIndexOf('/') + 1);
+        dbUrl = dbUrl.substring(0, dbUrl.lastIndexOf('/'));
+        initialConfig.setJdbcUrl(dbUrl);
+        initialConfig.setUsername(dbUsername);
+        initialConfig.setPassword(dbPassword);
+
+        try (HikariDataSource ds = new HikariDataSource(initialConfig);
+             Connection connection = ds.getConnection();
+             Statement statement = connection.createStatement()) {
+            String sql = MessageFormat.format("CREATE DATABASE IF NOT EXISTS {0}", dbName);
+            statement.execute(sql);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to create database", e);
+        }
+    }
 
     @Bean
     public DataSource dataSource() {
+
+        createDbIfNotExists(
+                Properties.getSpringDatasourceUrl(),
+                Properties.getSpringDatasourceUsername(),
+                Properties.getSpringDatasourcePassword()
+        );
         //DriverManagerDataSource ds = new DriverManagerDataSource();
         HikariConfig config = new HikariConfig();
         config.setDriverClassName(Properties.getSpringDatasourceDriverClassName());
@@ -46,7 +74,7 @@ public class MariaHibernateConfig {
     }
 
     @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource){
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
 
