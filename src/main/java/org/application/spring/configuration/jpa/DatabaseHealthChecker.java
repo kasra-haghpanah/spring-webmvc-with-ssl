@@ -15,7 +15,7 @@ import java.sql.SQLException;
 
 @Configuration
 @EnableScheduling
-@DependsOn({"mriaHibernateConfig"})
+@DependsOn({"mariaHibernateConfig"})
 public class DatabaseHealthChecker {
 
     private final DataSource dataSource;

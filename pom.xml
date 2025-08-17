@@ -28,6 +28,10 @@
     </scm>
     <properties>
         <java.version>24</java.version>
+        <jjwt.version>0.11.5</jjwt.version>
+        <mariadb.version>3.5.5</mariadb.version>
+        <ulid.version>8.3.0</ulid.version>
+        <hibernate-types-60.version>2.21.1</hibernate-types-60.version>
     </properties>
     <dependencies>
         <dependency>
@@ -62,18 +66,18 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.11.5</version>
+            <version>${jjwt.version}</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.11.5</version>
+            <version>${jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>0.11.5</version>
+            <version>${jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
         <!-- JWT Support -->
@@ -102,9 +106,27 @@
         <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
-            <version>3.5.5</version>
+            <version>${mariadb.version}</version>
         </dependency>
         <!-- JDBC Driver (مثلاً برای Mariadb) -->
+
+
+        <!-- to make ulid generator -->
+        <dependency>
+            <groupId>de.huxhorn.sulky</groupId>
+            <artifactId>de.huxhorn.sulky.ulid</artifactId>
+            <version>${ulid.version}</version>
+        </dependency>
+        <!-- to make ulid generator -->
+
+
+        <!-- to handle json type in jpa -->
+        <dependency>
+            <groupId>com.vladmihalcea</groupId>
+            <artifactId>hibernate-types-60</artifactId>
+            <version>${hibernate-types-60.version}</version>
+        </dependency>
+        <!-- to handle json type in jpa -->
 
         <!-- Spring Boot Starter JDBC (برای DataSource) -->
         <dependency>
@@ -181,5 +203,13 @@
         <finalName>${artifactId}</finalName>
 
     </build>
+
+
+    <repositories>
+        <repository>
+            <id>maven-central</id>
+            <url>https://mvnrepository.com/artifact/</url>
+        </repository>
+    </repositories>
 
 </project>

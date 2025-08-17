@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 
-@Configuration("mriaHibernateConfig")
+@Configuration("mariaHibernateConfig")
 @EnableTransactionManagement
 @DependsOn({"properties"})
 @EnableJpaRepositories(basePackages = {
@@ -96,7 +96,7 @@ public class MariaHibernateConfig {
         return emf;
     }
 
-    @Bean
+    @Bean("appTM")
     public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
         return new JpaTransactionManager(emf);
     }
