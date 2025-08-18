@@ -1,4 +1,4 @@
-package org.application.spring.ddd.model;
+package org.application.spring.ddd.model.json.type;
 
 import java.util.List;
 

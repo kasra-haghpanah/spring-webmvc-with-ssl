@@ -1,6 +1,6 @@
 package org.application.spring.ddd.repository;
 
-import org.application.spring.ddd.model.User;
+import org.application.spring.ddd.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

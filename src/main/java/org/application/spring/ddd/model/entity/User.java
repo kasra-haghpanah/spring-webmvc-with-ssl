@@ -1,9 +1,8 @@
-package org.application.spring.ddd.model;
+package org.application.spring.ddd.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
+import org.application.spring.ddd.model.json.converter.AuthorityConverter;
+import org.application.spring.ddd.model.json.type.Authority;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,22 +23,24 @@ public class User extends AppEntity implements UserDetails {
     private String userName;
     @Column(name = "password", length = 150)
     private String password;
-    @Column(name = "authority")
 
-    //@Type(value = JsonBinaryType.class)
+    @Convert(converter = AuthorityConverter.class)
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "authority", columnDefinition = "JSON")
     private Authority authority;
     @Column(name = "firstName", length = 100)
     private String firstName;
     @Column(name = "lastName", length = 100)
     private String lastName;
+    @Column(name = "phoneNumber", length = 13)
+    private String phoneNumber;
     @Column(name = "activationCode")
     private String activationCode;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.authority
-                .roles
+                .getRoles()
                 .stream()
                 .map(role -> {
                     return new SimpleGrantedAuthority(role);
@@ -127,5 +128,11 @@ public class User extends AppEntity implements UserDetails {
         this.lastName = lastName;
     }
 
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
 
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 }

@@ -1,6 +1,6 @@
 package org.application.spring.ddd.service;
 
-import org.application.spring.ddd.model.User;
+import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

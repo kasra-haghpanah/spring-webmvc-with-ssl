@@ -1,4 +1,4 @@
-package org.application.spring.ddd.model;
+package org.application.spring.ddd.model.entity;
 
 
 import de.huxhorn.sulky.ulid.ULID;

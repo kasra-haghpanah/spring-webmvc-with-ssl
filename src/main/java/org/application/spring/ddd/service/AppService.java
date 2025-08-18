@@ -1,6 +1,6 @@
 package org.application.spring.ddd.service;
 
-import org.application.spring.ddd.model.AppEntity;
+import org.application.spring.ddd.model.entity.AppEntity;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

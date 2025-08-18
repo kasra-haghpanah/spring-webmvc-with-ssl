@@ -3,9 +3,8 @@ package org.application.spring.ddd.controller;
 import org.application.spring.configuration.security.AuthRequest;
 import org.application.spring.configuration.security.AuthResponse;
 import org.application.spring.configuration.security.JwtService;
-import org.application.spring.ddd.model.User;
+import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.service.UserService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -56,17 +55,21 @@ public class AuthController {
         return "forbidden"; // فایل forbidden.html در مسیر templates
     }
 
-    @RequestMapping(value = "/signup", method = RequestMethod.GET)
+    @RequestMapping(value = "/signup", method = RequestMethod.POST)
     @ResponseBody
     public User signup(
             @RequestParam String email,
-            @RequestParam String password
+            @RequestParam String password,
+            @RequestParam String firstName,
+            @RequestParam String lastName
     ) {
 
         User user = new User();
         user.setUserName(email);
         user.setPassword(password);
-        userService.save(user);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user = userService.save(user);
         return user; // فایل forbidden.html در مسیر templates
     }
 

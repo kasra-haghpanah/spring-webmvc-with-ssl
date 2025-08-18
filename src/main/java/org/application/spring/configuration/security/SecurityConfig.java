@@ -40,7 +40,7 @@ public class SecurityConfig {
             // In a real application, you would load the user from database
             // This is just an example
 
-            org.application.spring.ddd.model.User user = userService.findByUserName(username);
+            org.application.spring.ddd.model.entity.User user = userService.findByUserName(username);
 
             if (user == null) {
                 throw new UsernameNotFoundException("User not found with username: " + username);
