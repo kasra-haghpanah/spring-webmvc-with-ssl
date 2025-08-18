@@ -3,7 +3,6 @@ package org.application.spring.configuration.security;
 import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.Properties;
 import org.application.spring.ddd.service.UserService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -143,7 +142,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            @Qualifier("jwtAuthFilter") JwtAuthFilter jwtAuthFilter,
+            JwtAuthFilter jwtAuthFilter,
             CorsConfigurationSource corsConfigurationSource,
             AuthenticationEntryPoint authenticationEntryPoint,
             AccessDeniedHandler accessDeniedHandler
@@ -162,9 +161,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/spring/login",
+                                "/spring/signup",
                                 "/spring/unauthorized",
                                 "/spring/forbidden",
-                                "/spring/signup",
 
                                 "/spring/swagger-ui/**",
                                 "/spring/v3/api-docs/**",
@@ -182,7 +181,7 @@ public class SecurityConfig {
                             // مثال ساده: فقط کاربران با نقش ADMIN اجازه دارند
                             return authentication.get().getAuthorities().stream()
                                     .anyMatch(granted -> {
-                                        return granted.getAuthority().equals("ROLE_ADMIN");
+                                        return granted.getAuthority().equals("ADMIN");
                                     }) ?
                                     new AuthorizationDecision(true) : new AuthorizationDecision(false);
                         })

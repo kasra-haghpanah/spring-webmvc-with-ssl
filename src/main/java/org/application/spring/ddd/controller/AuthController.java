@@ -33,12 +33,12 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST/*, produces = MediaType.APPLICATION_JSON_VALUE*/)
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
     public AuthResponse login(@RequestBody AuthRequest request) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         final UserDetails user = userDetailsService.loadUserByUsername(request.getUsername());
-        final String jwt = jwtService.generateToken(user);
+        final String jwt = jwtService.generateToken(userService.findByUserName(request.getUsername()));
         return new AuthResponse(jwt);
     }
 
