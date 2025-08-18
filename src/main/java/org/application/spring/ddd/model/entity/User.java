@@ -51,12 +51,12 @@ public class User extends AppEntity implements UserDetails {
 
     @Override
     public String getPassword() {
-        return "";
+        return this.password;
     }
 
     @Override
     public String getUsername() {
-        return "";
+        return this.userName;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class User extends AppEntity implements UserDetails {
     }
 
     public String getUserName() {
-        return userName;
+        return this.userName;
     }
 
     public void setUserName(String userName) {
@@ -113,7 +113,7 @@ public class User extends AppEntity implements UserDetails {
     }
 
     public String getFirstName() {
-        return firstName;
+        return this.firstName;
     }
 
     public void setFirstName(String firstName) {
@@ -129,7 +129,7 @@ public class User extends AppEntity implements UserDetails {
     }
 
     public String getPhoneNumber() {
-        return phoneNumber;
+        return this.phoneNumber;
     }
 
     public void setPhoneNumber(String phoneNumber) {

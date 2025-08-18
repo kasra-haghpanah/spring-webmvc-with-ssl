@@ -25,9 +25,10 @@ import java.text.MessageFormat;
 @Configuration("mariaHibernateConfig")
 @EnableTransactionManagement
 @DependsOn({"properties"})
-@EnableJpaRepositories(basePackages = {
-        "org.application.spring.ddd.repository"
-})
+@EnableJpaRepositories(
+        basePackages = {"org.application.spring.ddd.repository"},
+        transactionManagerRef = "appTM"
+)
 public class MariaHibernateConfig {
 
     public static void createDbIfNotExists(String dbUrl, String dbUsername, String dbPassword) {

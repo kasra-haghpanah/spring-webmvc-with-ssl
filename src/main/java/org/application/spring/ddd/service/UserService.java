@@ -24,7 +24,7 @@ public class UserService extends AppService<User, String, UserRepository> implem
 
     @Transactional("appTM")
     public User save(User user) {
-        user.setUserName(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setAuthority("ADMIN","USER");
         return this.repository.save(user);
     }

@@ -119,15 +119,6 @@
         </dependency>
         <!-- to make ulid generator -->
 
-
-        <!-- to handle json type in jpa -->
-<!--        <dependency>
-            <groupId>com.vladmihalcea</groupId>
-            <artifactId>hibernate-types-60</artifactId>
-            <version>${hibernate-types-60.version}</version>
-        </dependency>-->
-        <!-- to handle json type in jpa -->
-
         <!-- Spring Boot Starter JDBC (برای DataSource) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

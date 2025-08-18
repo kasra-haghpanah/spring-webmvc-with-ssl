@@ -5,8 +5,6 @@ import org.application.spring.configuration.security.AuthResponse;
 import org.application.spring.configuration.security.JwtService;
 import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.service.UserService;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,12 +33,13 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    @RequestMapping(value = "/login", method = RequestMethod.POST/*, produces = MediaType.APPLICATION_JSON_VALUE*/)
+    @ResponseBody
+    public AuthResponse login(@RequestBody AuthRequest request) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         final UserDetails user = userDetailsService.loadUserByUsername(request.getUsername());
         final String jwt = jwtService.generateToken(user);
-        return ResponseEntity.ok(new AuthResponse(jwt));
+        return new AuthResponse(jwt);
     }
 
     @RequestMapping(value = "/unauthorized", method = RequestMethod.GET)
@@ -61,7 +60,8 @@ public class AuthController {
             @RequestParam String email,
             @RequestParam String password,
             @RequestParam String firstName,
-            @RequestParam String lastName
+            @RequestParam String lastName,
+            @RequestParam String phoneNumber
     ) {
 
         User user = new User();
@@ -69,6 +69,7 @@ public class AuthController {
         user.setPassword(password);
         user.setFirstName(firstName);
         user.setLastName(lastName);
+        user.setPhoneNumber(phoneNumber);
         user = userService.save(user);
         return user; // فایل forbidden.html در مسیر templates
     }

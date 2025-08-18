@@ -6,8 +6,7 @@ public class Authority {
 
     List<String> roles;
 
-    public List<String> getRoles() {
-        return roles;
+    public Authority() {
     }
 
     public Authority(List<String> roles) {
@@ -16,6 +15,10 @@ public class Authority {
 
     public Authority(String... roles) {
         this.roles = List.of(roles);
+    }
+
+    public List<String> getRoles() {
+        return roles;
     }
 
     public void setRoles(List<String> roles) {
