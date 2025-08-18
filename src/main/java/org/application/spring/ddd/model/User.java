@@ -1,13 +1,16 @@
 package org.application.spring.ddd.model;
 
-import jakarta.persistence.*;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import org.hibernate.annotations.Type;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Entity(name = "User")
@@ -22,8 +25,9 @@ public class User extends AppEntity implements UserDetails {
     @Column(name = "password", length = 150)
     private String password;
     @Column(name = "authority")
-    @Lob
-    private String authority;
+
+    @Type(value = JsonBinaryType.class)
+    private Authority authority;
     @Column(name = "firstName", length = 100)
     private String firstName;
     @Column(name = "lastName", length = 100)
@@ -33,14 +37,13 @@ public class User extends AppEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
-        return Arrays
-                .stream(this.authority.split(","))
+        return this.authority
+                .roles
+                .stream()
                 .map(role -> {
                     return new SimpleGrantedAuthority(role);
                 })
                 .collect(Collectors.toSet());
-
     }
 
 
@@ -87,26 +90,24 @@ public class User extends AppEntity implements UserDetails {
         this.password = password;
     }
 
-    public String getAuthority() {
+    public Authority getAuthority() {
         return authority;
     }
 
-    public void setAuthority(String... authority) {
-        if (authority != null && authority.length > 0) {
-            for (int i = 0; i < authority.length; i++) {
-                authority[i] = authority[i].trim().toUpperCase();
-            }
+    public void setAuthority(Authority authority) {
+        this.authority = authority;
+    }
 
-            Set<String> roles = Set.of(authority);
-            String[] authorities = new String[roles.size()];
-            int i = 0;
-            for (String role : roles) {
-                authorities[i++] = role;
-            }
+    public void setAuthority(String... roles) {
+        this.authority = new Authority(roles);
+    }
 
-            this.authority = String.join(",", authorities);
-        }
+    public String getActivationCode() {
+        return activationCode;
+    }
 
+    public void setActivationCode(String activationCode) {
+        this.activationCode = activationCode;
     }
 
     public String getFirstName() {

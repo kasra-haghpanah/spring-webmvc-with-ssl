@@ -1,6 +1,8 @@
 package org.application.spring.configuration.security;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.application.spring.configuration.Properties;
+import org.application.spring.ddd.service.UserService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +14,6 @@ import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -34,12 +35,20 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean("userDetailsService")
-    public UserDetailsService userDetailsService() {
+    public UserDetailsService userDetailsService(UserService userService) {
         return (username) -> {
             // In a real application, you would load the user from database
             // This is just an example
 
-            if ("admin".equals(username)) {
+            org.application.spring.ddd.model.User user = userService.findByUserName(username);
+
+            if (user == null) {
+                throw new UsernameNotFoundException("User not found with username: " + username);
+            }
+
+            return new User(user.getUsername(), user.getPassword(), user.getAuthorities());
+
+/*            if ("admin".equals(username)) {
                 return new User(
                         "admin",
                         "$2a$10$slYQmyNdGzTn7ZLBXBChFOC9f6kFjAqPhccnP6DxlWXx2lPk1C3G6", // password
@@ -53,7 +62,7 @@ public class SecurityConfig {
                 );
             } else {
                 throw new UsernameNotFoundException("User not found with username: " + username);
-            }
+            }*/
 
 
         };
@@ -81,7 +90,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://example.com"));
+        config.setAllowedOrigins(List.of(Properties.getCorsAllowedOrigins()));
         config.setAllowedMethods(List.of("GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE"));
         config.setAllowedHeaders(List.of("*"));
         //config.setAllowedHeaders(Arrays.asList("Content-Type, api_key, Authorization"));
@@ -155,6 +164,7 @@ public class SecurityConfig {
                                 "/spring/login",
                                 "/spring/unauthorized",
                                 "/spring/forbidden",
+                                "/spring/signup",
 
                                 "/spring/swagger-ui/**",
                                 "/spring/v3/api-docs/**",

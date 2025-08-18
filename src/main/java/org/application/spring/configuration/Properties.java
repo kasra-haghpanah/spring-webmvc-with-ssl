@@ -35,6 +35,9 @@ public class Properties {
         config.put("mariadb.connection-timeout", environment.getProperty("mariadb.connection-timeout"));
         config.put("mariadb.pool-name", environment.getProperty("mariadb.pool-name"));
 
+
+        config.put("cors.allowed-origins", environment.getProperty("cors.allowed-origins"));
+
         //config.put("redis.host", environment.getProperty("redis.host"));
         //config.put("redis.port", environment.getProperty("redis.port"));
 
@@ -116,5 +119,14 @@ public class Properties {
     public static String getMariadbPoolName() {
         return get("mariadb.pool-name", String.class);
     }
+
+    public static String[] getCorsAllowedOrigins() {
+        String result = get("cors.allowed-origins", String.class);
+        if (result == null) {
+            return new String[]{};
+        }
+        return result.trim().split(",");
+    }
+
 
 }
