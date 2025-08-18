@@ -1,11 +1,11 @@
 package org.application.spring.ddd.model;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,7 +26,8 @@ public class User extends AppEntity implements UserDetails {
     private String password;
     @Column(name = "authority")
 
-    @Type(value = JsonBinaryType.class)
+    //@Type(value = JsonBinaryType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     private Authority authority;
     @Column(name = "firstName", length = 100)
     private String firstName;
