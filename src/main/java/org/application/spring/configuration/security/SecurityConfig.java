@@ -180,10 +180,6 @@ public class SecurityConfig {
             AccessDeniedHandler accessDeniedHandler
     ) throws Exception {
         return http
-                .csrf(csrf -> csrf.disable())
-                .cors(corsSpec -> {
-                    corsSpec.configurationSource(corsConfigurationSource);
-                })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -213,6 +209,10 @@ public class SecurityConfig {
                         })
                         .anyRequest().authenticated()
                 )
+                .csrf(csrf -> csrf.disable())
+                .cors(corsSpec -> {
+                    corsSpec.configurationSource(corsConfigurationSource);
+                })
                 .exceptionHandling(exceptionHandlingConfigurer -> {
                     exceptionHandlingConfigurer
                             .authenticationEntryPoint(authenticationEntryPoint)
