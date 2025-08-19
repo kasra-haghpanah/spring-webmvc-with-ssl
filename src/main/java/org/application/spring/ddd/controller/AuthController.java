@@ -10,6 +10,7 @@ import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.service.UserService;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.context.MessageSource;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -69,7 +70,11 @@ public class AuthController {
         return "forbidden"; // فایل forbidden.html در مسیر templates
     }
 
-    @RequestMapping(value = "/signup", method = RequestMethod.POST)
+    @RequestMapping(
+            value = "/signup",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
+    )
     @ResponseBody
     public User signup(
             @RequestParam @Valid @Email(message = "field.email") String email,

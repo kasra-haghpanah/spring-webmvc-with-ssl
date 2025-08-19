@@ -184,16 +184,11 @@ public class SecurityConfig {
                 .cors(corsSpec -> {
                     corsSpec.configurationSource(corsConfigurationSource);
                 })
-                .exceptionHandling(exceptionHandlingConfigurer -> {
-                    exceptionHandlingConfigurer
-                            .authenticationEntryPoint(authenticationEntryPoint)
-                            .accessDeniedHandler(accessDeniedHandler);
-                })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/spring/login",
-                                "/spring/signup",
+                                "/spring/signup/**",
                                 "/spring/unauthorized",
                                 "/spring/forbidden",
                                 "/spring/validate/**",
@@ -217,6 +212,11 @@ public class SecurityConfig {
                         })
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(exceptionHandlingConfigurer -> {
+                    exceptionHandlingConfigurer
+                            .authenticationEntryPoint(authenticationEntryPoint)
+                            .accessDeniedHandler(accessDeniedHandler);
+                })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
