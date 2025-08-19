@@ -1,12 +1,18 @@
 package org.application.spring.configuration.thymeleaf;
 
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.application.spring.configuration.exception.RequestLoggingInterceptor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -24,6 +30,7 @@ public class ThymeleafConfig implements WebMvcConfigurer {
 
     public static final String[] resourceHandler;
     public static final String[] resourceLocations;
+    private final RequestLoggingInterceptor interceptor;
 
     static {
 
@@ -51,6 +58,10 @@ public class ThymeleafConfig implements WebMvcConfigurer {
 
     }
 
+    public ThymeleafConfig(RequestLoggingInterceptor interceptor) {
+        this.interceptor = interceptor;
+    }
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // https://www.baeldung.com/cachable-static-assets-with-spring-mvc
@@ -64,6 +75,13 @@ public class ThymeleafConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
 
+    }
+
+
+    // for logging
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(interceptor);
     }
 
     @Bean

@@ -1,8 +1,11 @@
 package org.application.spring.configuration.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.Properties;
+import org.application.spring.configuration.exception.ErrorResponse;
 import org.application.spring.ddd.service.UserService;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -26,8 +29,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.LocaleResolver;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -102,9 +109,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
+    public AuthenticationEntryPoint authenticationEntryPoint(
+            MessageSource messageSource,
+            LocaleResolver localeResolver
+    ) {
 
         return (request, response, authException) -> {
+
+            Locale locale = localeResolver.resolveLocale(request);
             String accept = request.getHeader("Accept-Response");
             if (accept == null) {
                 accept = "";
@@ -112,7 +124,15 @@ public class SecurityConfig {
             if (accept.contains("application/json")) {
                 response.setContentType("application/json;charset=UTF-8");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("{\"error\": \"شما احراز هویت نشده‌اید.\"}");
+
+
+                ErrorResponse error = new ErrorResponse();
+                error.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                Map<String, String> map = new HashMap<>();
+                map.put("error", messageSource.getMessage("error.authentication", new Object[]{}, locale));
+                error.setErrors(map);
+
+                response.getWriter().write(error.toString());
             } else {
                 response.sendRedirect("/spring/unauthorized");
             }
@@ -121,9 +141,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AccessDeniedHandler accessDeniedHandler() {
+    public AccessDeniedHandler accessDeniedHandler(
+            MessageSource messageSource,
+            LocaleResolver localeResolver
+    ) {
 
         return (request, response, accessDeniedException) -> {
+
+            Locale locale = localeResolver.resolveLocale(request);
             String accept = request.getHeader("Accept-Response");
             if (accept == null) {
                 accept = "";
@@ -131,7 +156,14 @@ public class SecurityConfig {
             if (accept.contains("application/json")) {
                 response.setContentType("application/json;charset=UTF-8");
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.getWriter().write("{\"error\": \"شما مجوز لازم را ندارید.\"}");
+
+                ErrorResponse error = new ErrorResponse();
+                error.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                Map<String, String> map = new HashMap<>();
+                map.put("error", messageSource.getMessage("error.authorization", new Object[]{}, locale));
+                error.setErrors(map);
+
+                response.getWriter().write(error.toString());
             } else {
                 response.sendRedirect("/spring/forbidden");
             }
@@ -164,6 +196,7 @@ public class SecurityConfig {
                                 "/spring/signup",
                                 "/spring/unauthorized",
                                 "/spring/forbidden",
+                                "/spring/validate/**",
 
                                 "/spring/swagger-ui/**",
                                 "/spring/v3/api-docs/**",
