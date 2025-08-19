@@ -19,9 +19,9 @@ public class User extends AppEntity implements UserDetails {
     @Transient
     public static final String TABLE_NAME = "user";
 
-    @Column(name = "userName", length = 150)
+    @Column(name = "userName", length = 30)
     private String userName;
-    @Column(name = "password", length = 150)
+    @Column(name = "password", length = 30)
     private String password;
 
     @Convert(converter = AuthorityConverter.class)

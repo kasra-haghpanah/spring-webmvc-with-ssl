@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
     private final LocaleResolver localeResolver;
 
     public GlobalExceptionHandler(MessageSource messageSource, LocaleResolver localeResolver) {
-        ((ResourceBundleMessageSource) messageSource).setDefaultEncoding("UTF-8");
+       // ((ResourceBundleMessageSource) messageSource).setDefaultEncoding("UTF-8");
         this.messageSource = messageSource;
         this.localeResolver = localeResolver;
     }

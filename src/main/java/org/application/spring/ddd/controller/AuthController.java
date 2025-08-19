@@ -78,7 +78,7 @@ public class AuthController {
     @ResponseBody
     public User signup(
             @RequestParam @Valid @Email(message = "field.email") String email,
-            @RequestParam @Valid String password,
+            @RequestParam @Valid @Length(min = 3, max = 30, message = "field.password") String password,
             @RequestParam @Valid @Length(min = 2, max = 100, message = "field.name") String firstName,
             @RequestParam @Valid @Length(min = 2, max = 100, message = "field.name") String lastName,
             @RequestParam @Valid @Length(min = 11, max = 13, message = "field.phoneNumber") String phoneNumber

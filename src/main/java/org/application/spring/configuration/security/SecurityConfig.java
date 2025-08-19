@@ -188,6 +188,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/spring/login",
+                                "/spring/signup",
                                 "/spring/signup/**",
                                 "/spring/unauthorized",
                                 "/spring/forbidden",
