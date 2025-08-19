@@ -32,16 +32,14 @@ import java.util.Locale;
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final MessageSource messageSource;
     private final LocaleResolver localeResolver;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService, UserDetailsService userDetailsService, UserService userService, PasswordEncoder passwordEncoder, MessageSource messageSource, LocaleResolver localeResolver) {
+    public AuthController(AuthenticationManager authenticationManager, UserDetailsService userDetailsService, UserService userService, PasswordEncoder passwordEncoder, MessageSource messageSource, LocaleResolver localeResolver) {
         this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
@@ -54,7 +52,7 @@ public class AuthController {
     public AuthResponse login(@RequestBody AuthRequest request) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         final UserDetails user = userDetailsService.loadUserByUsername(request.getUsername());
-        final String jwt = jwtService.generateToken(userService.findByUserName(request.getUsername()));
+        final String jwt = JwtService.generateToken(userService.findByUserName(request.getUsername()));
         return new AuthResponse(jwt);
     }
 

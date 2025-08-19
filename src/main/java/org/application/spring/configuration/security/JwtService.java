@@ -7,9 +7,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.application.spring.configuration.Properties;
 import org.application.spring.ddd.model.entity.User;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
@@ -17,20 +15,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@DependsOn({"properties"})
-@Service
+//@DependsOn({"properties"})
+//@Service
 public class JwtService {
 
-    public String extractUsername(String token) {
+    public static String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public static  <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public static String generateToken(UserDetails userDetails) {
         Map<String, Object> map = new HashMap<>();
         User user = (User) userDetails;
         map.put("firstName", user.getFirstName());
@@ -47,16 +45,16 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+    public static boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    private static boolean isTokenExpired(String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
 
-    private Claims extractAllClaims(String token) {
+    public static Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
                 .build()
@@ -64,7 +62,7 @@ public class JwtService {
                 .getBody();
     }
 
-    private Key getSignKey() {
+    private static Key getSignKey() {
         byte[] keyBytes = Decoders.BASE64.decode(Properties.getAppJwtSecret());
         return Keys.hmacShaKeyFor(keyBytes);
     }

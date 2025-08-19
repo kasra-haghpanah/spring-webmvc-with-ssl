@@ -1,5 +1,7 @@
 package org.application.spring.configuration.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.Properties;
@@ -210,6 +212,10 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/spring/xml/bean/sample", "/make/mybean")
                         .access((authentication, context) -> {
+
+                            String token = ((HttpServletRequest) context.getRequest()).getHeader("Authorization").substring(7);
+                            Claims claims = JwtService.extractAllClaims(token);
+
                             // مثال ساده: فقط کاربران با نقش ADMIN اجازه دارند
                             return authentication.get().getAuthorities().stream()
                                     .anyMatch(granted -> {

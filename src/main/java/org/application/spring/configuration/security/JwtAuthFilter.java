@@ -18,11 +18,10 @@ import java.io.IOException;
 @Component("jwtAuthFilter")
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
+    //private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
-    public JwtAuthFilter(JwtService jwtService, UserDetailsService userDetailsService) {
-        this.jwtService = jwtService;
+    public JwtAuthFilter(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
@@ -44,7 +43,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         // code
         try {
-            username = jwtService.extractUsername(jwt);
+            username = JwtService.extractUsername(jwt);
         } catch (JwtException e) {
             // اگر JWT نامعتبر بود، ادامه نده
             filterChain.doFilter(request, response);
@@ -54,7 +53,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            if (JwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
