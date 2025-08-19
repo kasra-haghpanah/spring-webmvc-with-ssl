@@ -11,7 +11,7 @@ public class StoreDTO {
     public StoreDTO() {
     }
 
-    @Length(min=10,max = 12, message = "field.string")
+    @Length(min = 2, max = 100, message = "field.name")
     private String name;
 
     @Valid

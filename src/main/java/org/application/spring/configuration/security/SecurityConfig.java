@@ -201,12 +201,9 @@ public class SecurityConfig {
                                 "/spring/swagger-ui/**",
                                 "/spring/v3/api-docs/**",
                                 "/spring/api-docs/**",
-                                "/spring/webjars/**",
+                                "/spring/webjars/**"
 
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/api-docs/**",
-                                "/webjars/**"
+
                         )
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/spring/xml/bean/sample", "/make/mybean")

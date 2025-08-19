@@ -1,11 +1,14 @@
 package org.application.spring.ddd.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import org.application.spring.configuration.security.AuthRequest;
 import org.application.spring.configuration.security.AuthResponse;
 import org.application.spring.configuration.security.JwtService;
 import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.service.UserService;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -69,11 +72,11 @@ public class AuthController {
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     @ResponseBody
     public User signup(
-            @RequestParam String email,
-            @RequestParam String password,
-            @RequestParam String firstName,
-            @RequestParam String lastName,
-            @RequestParam String phoneNumber
+            @RequestParam @Valid @Email(message = "field.email") String email,
+            @RequestParam @Valid String password,
+            @RequestParam @Valid @Length(min = 2, max = 100, message = "field.name") String firstName,
+            @RequestParam @Valid @Length(min = 2, max = 100, message = "field.name") String lastName,
+            @RequestParam @Valid @Length(min = 11, max = 13, message = "field.phoneNumber") String phoneNumber
     ) {
 
         User user = new User();
