@@ -3,6 +3,7 @@ package org.application.spring.ddd.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
 import org.application.spring.configuration.security.AuthRequest;
 import org.application.spring.configuration.security.AuthResponse;
 import org.application.spring.configuration.security.JwtService;
@@ -19,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.LocaleResolver;
 
@@ -26,6 +28,7 @@ import java.util.Locale;
 
 @Controller
 //@RequestMapping("/api/auth")
+@Validated
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -81,7 +84,7 @@ public class AuthController {
             @RequestParam @Valid @Length(min = 3, max = 30, message = "field.password") String password,
             @RequestParam @Valid @Length(min = 2, max = 100, message = "field.name") String firstName,
             @RequestParam @Valid @Length(min = 2, max = 100, message = "field.name") String lastName,
-            @RequestParam @Valid @Length(min = 11, max = 13, message = "field.phoneNumber") String phoneNumber
+            @RequestParam @Valid @Pattern(regexp = "[0-9]{11,13}", message = "field.phone") String phoneNumber
     ) {
 
         User user = new User();

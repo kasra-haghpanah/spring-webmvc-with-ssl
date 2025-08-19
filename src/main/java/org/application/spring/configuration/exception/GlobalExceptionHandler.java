@@ -1,6 +1,8 @@
 package org.application.spring.configuration.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +24,7 @@ public class GlobalExceptionHandler {
     private final LocaleResolver localeResolver;
 
     public GlobalExceptionHandler(MessageSource messageSource, LocaleResolver localeResolver) {
-       // ((ResourceBundleMessageSource) messageSource).setDefaultEncoding("UTF-8");
+        // ((ResourceBundleMessageSource) messageSource).setDefaultEncoding("UTF-8");
         this.messageSource = messageSource;
         this.localeResolver = localeResolver;
     }
@@ -44,5 +46,24 @@ public class GlobalExceptionHandler {
         errorResponse.setErrors(errors);
         return ResponseEntity.badRequest().header("Content-Type", "application/json;charset=UTF-8").body(errorResponse);
     }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+        Map<String, String> errors = new HashMap<>();
+        Locale locale = localeResolver.resolveLocale(request);
+
+        for (ConstraintViolation error : ex.getConstraintViolations()) {
+
+            String localizedMessage = messageSource.getMessage(error.getMessage(), new Object[]{error.getMessageTemplate()}, locale);
+            errors.put(error.getMessageTemplate(), localizedMessage);
+
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setStatus(400);
+        errorResponse.setErrors(errors);
+        return ResponseEntity.badRequest().header("Content-Type", "application/json;charset=UTF-8").body(errorResponse);
+    }
+
 }
 

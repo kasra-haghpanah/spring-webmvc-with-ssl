@@ -19,7 +19,7 @@ public abstract class AppEntity implements Serializable {
         if (this.id == null) {
             this.id = new ULID().nextULID();
         }
-        this.authorization = getHeader("authorization");
+        this.authorization = getHeader("Authorization");
     }
 
     @PreUpdate
@@ -56,7 +56,7 @@ public abstract class AppEntity implements Serializable {
         if (requestAttributes != null) {
             HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
             //request.setAttribute("","");
-            return (T) request.getHeader("authorization");
+            return (T) request.getHeader(key);
         }
         return null;
     }

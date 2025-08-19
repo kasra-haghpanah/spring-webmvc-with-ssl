@@ -180,6 +180,7 @@ public class SecurityConfig {
             AccessDeniedHandler accessDeniedHandler
     ) throws Exception {
         return http
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -189,6 +190,7 @@ public class SecurityConfig {
                                 "/spring/unauthorized",
                                 "/spring/forbidden",
                                 "/spring/validate/**",
+                                "/error",
 
                                 "/spring/swagger-ui/**",
                                 "/spring/v3/api-docs/**",
@@ -209,7 +211,6 @@ public class SecurityConfig {
                         })
                         .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf.disable())
                 .cors(corsSpec -> {
                     corsSpec.configurationSource(corsConfigurationSource);
                 })
