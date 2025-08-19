@@ -21,7 +21,7 @@ public class User extends AppEntity implements UserDetails {
 
     @Column(name = "userName", length = 30)
     private String userName;
-    @Column(name = "password", length = 30)
+    @Column(name = "password", length = 150)
     private String password;
 
     @Convert(converter = AuthorityConverter.class)

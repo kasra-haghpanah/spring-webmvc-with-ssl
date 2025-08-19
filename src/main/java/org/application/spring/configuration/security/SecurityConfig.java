@@ -181,6 +181,14 @@ public class SecurityConfig {
     ) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
+                .cors(corsSpec -> {
+                    corsSpec.configurationSource(corsConfigurationSource);
+                })
+                .exceptionHandling(exceptionHandlingConfigurer -> {
+                    exceptionHandlingConfigurer
+                            .authenticationEntryPoint(authenticationEntryPoint)
+                            .accessDeniedHandler(accessDeniedHandler);
+                })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -211,14 +219,6 @@ public class SecurityConfig {
                         })
                         .anyRequest().authenticated()
                 )
-                .cors(corsSpec -> {
-                    corsSpec.configurationSource(corsConfigurationSource);
-                })
-                .exceptionHandling(exceptionHandlingConfigurer -> {
-                    exceptionHandlingConfigurer
-                            .authenticationEntryPoint(authenticationEntryPoint)
-                            .accessDeniedHandler(accessDeniedHandler);
-                })
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

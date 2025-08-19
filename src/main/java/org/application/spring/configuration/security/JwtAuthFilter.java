@@ -1,5 +1,6 @@
 package org.application.spring.configuration.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,7 +40,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
-        username = jwtService.extractUsername(jwt);
+        //username = jwtService.extractUsername(jwt);
+
+        // code
+        try {
+            username = jwtService.extractUsername(jwt);
+        } catch (JwtException e) {
+            // اگر JWT نامعتبر بود، ادامه نده
+            filterChain.doFilter(request, response);
+            return;
+        }
+        // code
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
