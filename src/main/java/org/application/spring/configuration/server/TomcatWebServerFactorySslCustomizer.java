@@ -1,6 +1,7 @@
-package org.application.spring.configuration;
+package org.application.spring.configuration.server;
 
 
+import org.application.spring.configuration.properties.Properties;
 import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.Ssl;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;

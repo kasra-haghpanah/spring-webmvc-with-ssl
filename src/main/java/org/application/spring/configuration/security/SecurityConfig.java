@@ -1,12 +1,15 @@
 package org.application.spring.configuration.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.application.spring.configuration.Properties;
 import org.application.spring.configuration.exception.ErrorResponse;
+import org.application.spring.configuration.properties.Properties;
+import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.service.UserService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +21,7 @@ import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,11 +31,14 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.LocaleResolver;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -42,20 +48,36 @@ import java.util.Map;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of(Properties.getCorsAllowedOrigins()));
+        config.setAllowedMethods(List.of("GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE"));
+        config.setAllowedHeaders(List.of("*"));
+        //config.setAllowedHeaders(Arrays.asList("Content-Type, api_key, Authorization"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
     @Bean("userDetailsService")
     public UserDetailsService userDetailsService(UserService userService) {
         return (username) -> {
             // In a real application, you would load the user from database
             // This is just an example
-
-            org.application.spring.ddd.model.entity.User user = userService.findByUserName(username);
-
+            User user = userService.findByUserName(username);
             if (user == null) {
                 throw new UsernameNotFoundException("User not found with username: " + username);
             }
-
-            return new User(user.getUsername(), user.getPassword(), user.getAuthorities());
-
+            return user;
 /*            if ("admin".equals(username)) {
                 return new User(
                         "admin",
@@ -90,24 +112,50 @@ public class SecurityConfig {
             if (!passwordEncoder.matches(password, user.getPassword())) {
                 throw new BadCredentialsException("Invalid credentials");
             }
-
             return new UsernamePasswordAuthenticationToken(user, password, user.getAuthorities());
         };
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(Properties.getCorsAllowedOrigins()));
-        config.setAllowedMethods(List.of("GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE"));
-        config.setAllowedHeaders(List.of("*"));
-        //config.setAllowedHeaders(Arrays.asList("Content-Type, api_key, Authorization"));
-        config.setAllowCredentials(true);
-        config.setMaxAge(3600L);
+    @Bean("jwtAuthFilter")
+    public OncePerRequestFilter jwtAuthFilter(UserDetailsService userDetailsService) {
+        return new OncePerRequestFilter() {
+            @Override
+            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+                final String authHeader = request.getHeader("Authorization");
+                final String jwt;
+                final String username;
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
+                if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                jwt = authHeader.substring(7);
+                //username = jwtService.extractUsername(jwt);
+
+                // code
+                try {
+                    username = JwtUtil.extractUsername(jwt);
+                } catch (JwtException e) {
+                    // اگر JWT نامعتبر بود، ادامه نده
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+                // code
+
+                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    if (JwtUtil.isTokenValid(jwt, userDetails)) {
+                        UsernamePasswordAuthenticationToken authToken =
+                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                    }
+                }
+
+                filterChain.doFilter(request, response);
+            }
+        };
     }
 
     @Bean
@@ -172,11 +220,10 @@ public class SecurityConfig {
         };
     }
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            JwtAuthFilter jwtAuthFilter,
+            @Qualifier("jwtAuthFilter") OncePerRequestFilter jwtAuthFilter,
             CorsConfigurationSource corsConfigurationSource,
             AuthenticationEntryPoint authenticationEntryPoint,
             AccessDeniedHandler accessDeniedHandler
@@ -200,6 +247,7 @@ public class SecurityConfig {
                                 "/spring/unauthorized",
                                 "/spring/forbidden",
                                 "/spring/validate/**",
+                                "/spring/activate/**",
                                 "/error",
 
                                 "/spring/swagger-ui/**",
@@ -213,9 +261,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/spring/xml/bean/sample", "/make/mybean")
                         .access((authentication, context) -> {
 
-                            String token = ((HttpServletRequest) context.getRequest()).getHeader("Authorization").substring(7);
-                            Claims claims = JwtService.extractAllClaims(token);
-
+                            User user = (User) authentication.get().getPrincipal();
                             // مثال ساده: فقط کاربران با نقش ADMIN اجازه دارند
                             return authentication.get().getAuthorities().stream()
                                     .anyMatch(granted -> {
@@ -227,10 +273,5 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

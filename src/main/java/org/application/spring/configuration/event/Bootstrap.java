@@ -1,4 +1,4 @@
-package org.application.spring.configuration;
+package org.application.spring.configuration.event;
 
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.CommandLineRunner;

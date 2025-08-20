@@ -1,8 +1,9 @@
-package org.application.spring.configuration;
+package org.application.spring.configuration.server;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import org.application.spring.configuration.properties.Properties;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;

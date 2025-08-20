@@ -1,16 +1,13 @@
 package org.application.spring.configuration.thymeleaf;
 
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.exception.RequestLoggingInterceptor;
-import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
-import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -92,10 +89,8 @@ public class ThymeleafConfig implements WebMvcConfigurer {
         resolver.setSuffix(".html");
         resolver.setCharacterEncoding("UTF-8");
         resolver.setTemplateMode(TemplateMode.HTML);
-
-        resolver.setCacheable(false);
+        resolver.setCacheable(Properties.getThymeleafCacheable());
         //resolver.setCacheablePatterns(Set.of("/**"));
-
         resolver.setCheckExistence(true);
         return resolver;
     }

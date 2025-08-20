@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html  lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Spring boot 4.0.0-M1</title>
+</head>
+<body>
+<h1>User Activation</h1>
+
+Dear <p th:text="|Dear ${user.username} |" >Dear username!</p>
+<a th:href="${baseUrl} + '/spring/activate/' + ${user.username} + '/' + ${user.activationCode}">Please click this link!</a>
+</body>
+</html>

@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.MessageSource;
-import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,7 +23,6 @@ public class GlobalExceptionHandler {
     private final LocaleResolver localeResolver;
 
     public GlobalExceptionHandler(MessageSource messageSource, LocaleResolver localeResolver) {
-        // ((ResourceBundleMessageSource) messageSource).setDefaultEncoding("UTF-8");
         this.messageSource = messageSource;
         this.localeResolver = localeResolver;
     }
@@ -35,10 +33,8 @@ public class GlobalExceptionHandler {
         Locale locale = localeResolver.resolveLocale(request);
 
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-
             String localizedMessage = messageSource.getMessage(error.getDefaultMessage(), new Object[]{error.getField()}, locale);
             errors.put(error.getField(), localizedMessage);
-
         }
 
         ErrorResponse errorResponse = new ErrorResponse();
@@ -53,10 +49,8 @@ public class GlobalExceptionHandler {
         Locale locale = localeResolver.resolveLocale(request);
 
         for (ConstraintViolation error : ex.getConstraintViolations()) {
-
             String localizedMessage = messageSource.getMessage(error.getMessage(), new Object[]{error.getMessageTemplate()}, locale);
             errors.put(error.getMessageTemplate(), localizedMessage);
-
         }
 
         ErrorResponse errorResponse = new ErrorResponse();

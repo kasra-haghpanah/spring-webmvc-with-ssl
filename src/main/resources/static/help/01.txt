@@ -1,0 +1,36 @@
+راه حل ۱: استفاده از "رمزعبور مخصوص اپلیکیشن" (Recommended)
+این امن‌ترین و بهترین روش است. شما یک رمزعبور یکبارمصرف فقط برای برنامه‌ی خود ایجاد می‌کنید.
+
+فعال کردن تأیید دو مرحله‌ای (2-Step Verification):
+
+ابتدا باید این قابلیت برای حساب Gmail شما فعال باشد. اگر فعال نیست، به آدرس زیر رفته و آن را روشن کنید:
+
+https://myaccount.google.com/security
+
+در بخش «How you sign in to Google»، گزینه «2-Step Verification» را فعال کنید.
+
+** ایجاد رمزعبور مخصوص اپلیکیشن:**
+
+پس از فعال کردن تأیید دو مرحله‌ای، به صفحه‌ی ایجاد رمزعبور بروید:
+
+https://myaccount.google.com/apppasswords
+
+در قسمت «Select app»، یک نام توصیفی برای برنامه‌ی خود انتخاب کنید (مثلاً Spring Boot App).
+
+روی «Generate» کلیک کنید.
+
+یک رمزعبور ۱۶ رقمی برای شما نمایش داده می‌شود (با فاصله، چیزی شبیه abcd efgh ijkl mnop). این رمز را کپی کنید. این تنها باری است که آن را می‌بینید.
+
+استفاده در کانفیگ Spring Boot:
+
+حالا در فایل application.properties (یا application.yml) پروژه‌ی خود، به جای استفاده از رمزعبور اصلی حساب، از این رمزعبور ۱۶ رقمی استفاده کنید. 注意：وقتی رمز را کپی میکنید، فاصله های بین کاراکترها را حذف کنید تا یک رشته 16 کاراکتری پیوسته داشته باشید.
+
+# application.properties
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your.email@gmail.com # آدرس ایمیل شما
+spring.mail.password=abcd efgh ijkl mnop # رمزعبور ۱۶ رقمی تولید شده (بدون فاصله)
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+# برخی مواقع به این property نیز نیاز است
+spring.mail.properties.mail.smtp.starttls.required=true

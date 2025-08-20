@@ -1,4 +1,4 @@
-package org.application.spring.configuration;
+package org.application.spring.configuration.properties;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -27,19 +27,16 @@ public class Properties {
         config.put("spring.jpa.properties.hibernate.dialect", environment.getProperty("spring.jpa.properties.hibernate.dialect"));
         config.put("spring.jpa.show-sql", environment.getProperty("spring.jpa.show-sql"));
         config.put("spring.jpa.hibernate.ddl-auto", environment.getProperty("spring.jpa.hibernate.ddl-auto"));
-
-
         config.put("mariadb.maximum-pool-size", environment.getProperty("mariadb.maximum-pool-size"));
         config.put("mariadb.minimum-idle", environment.getProperty("mariadb.minimum-idle"));
         config.put("mariadb.idleTimeout", environment.getProperty("mariadb.idleTimeout"));
         config.put("mariadb.connection-timeout", environment.getProperty("mariadb.connection-timeout"));
         config.put("mariadb.pool-name", environment.getProperty("mariadb.pool-name"));
-
-
         config.put("cors.allowed-origins", environment.getProperty("cors.allowed-origins"));
-
-        //config.put("redis.host", environment.getProperty("redis.host"));
-        //config.put("redis.port", environment.getProperty("redis.port"));
+        config.put("thymeleaf.cacheable", environment.getProperty("thymeleaf.cacheable"));
+        config.put("email.username", environment.getProperty("email.username"));
+        config.put("email.password", environment.getProperty("email.password"));
+        config.put("email.base-url", environment.getProperty("email.base-url"));
 
     }
 
@@ -126,6 +123,22 @@ public class Properties {
             return new String[]{};
         }
         return result.trim().split(",");
+    }
+
+    public static Boolean getThymeleafCacheable() {
+        return Boolean.valueOf(get("thymeleaf.cacheable", String.class));
+    }
+
+    public static String getEmailUsername() {
+        return get("email.username", String.class);
+    }
+
+    public static String getEmailPassword() {
+        return get("email.password", String.class);
+    }
+
+    public static String getEmailBaseUrl() {
+        return get("email.base-url", String.class);
     }
 
 

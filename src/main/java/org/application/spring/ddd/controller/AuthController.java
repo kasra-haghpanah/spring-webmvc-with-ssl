@@ -6,8 +6,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import org.application.spring.configuration.security.AuthRequest;
 import org.application.spring.configuration.security.AuthResponse;
-import org.application.spring.configuration.security.JwtService;
+import org.application.spring.configuration.security.JwtUtil;
 import org.application.spring.ddd.model.entity.User;
+import org.application.spring.ddd.service.MailService;
 import org.application.spring.ddd.service.UserService;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.context.MessageSource;
@@ -17,7 +18,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.LocaleResolver;
 
 import java.util.Locale;
+import java.util.UUID;
 
 @Controller
 //@RequestMapping("/api/auth")
@@ -34,17 +35,17 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
     private final MessageSource messageSource;
     private final LocaleResolver localeResolver;
+    private final MailService mailService;
 
-    public AuthController(AuthenticationManager authenticationManager, UserDetailsService userDetailsService, UserService userService, PasswordEncoder passwordEncoder, MessageSource messageSource, LocaleResolver localeResolver) {
+    public AuthController(AuthenticationManager authenticationManager, UserDetailsService userDetailsService, UserService userService, MessageSource messageSource, LocaleResolver localeResolver, MailService mailService) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
         this.messageSource = messageSource;
         this.localeResolver = localeResolver;
+        this.mailService = mailService;
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -52,7 +53,7 @@ public class AuthController {
     public AuthResponse login(@RequestBody AuthRequest request) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         final UserDetails user = userDetailsService.loadUserByUsername(request.getUsername());
-        final String jwt = JwtService.generateToken(userService.findByUserName(request.getUsername()));
+        final String jwt = JwtUtil.generateToken(userService.findByUserName(request.getUsername()));
         return new AuthResponse(jwt);
     }
 
@@ -91,8 +92,25 @@ public class AuthController {
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setPhoneNumber(phoneNumber);
+        user.setActivationCode(UUID.randomUUID().toString());
+        user.setAuthority("ADMIN", "USER");
         user = userService.save(user);
+        mailService.sendActivationMail(user);
         return user; // فایل forbidden.html در مسیر templates
+    }
+
+
+    @RequestMapping(
+            value = "/activate/{username}/{activationCode}",
+            method = RequestMethod.GET
+    )
+    @ResponseBody
+    public String activate(
+            @PathVariable("username") @Valid @Email(message = "field.email") String email,
+            @PathVariable("activationCode") @Valid @Length(min = 3, max = 100, message = "field.password") String activationCode
+    ) {
+        int isUpdate = userService.updateUserForActivationCode(email);
+        return "isUpdate -> " + isUpdate;
     }
 
 

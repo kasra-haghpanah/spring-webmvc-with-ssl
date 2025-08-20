@@ -11,14 +11,19 @@ public class UserService extends AppService<User, String, UserRepository> implem
 
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository repository, PasswordEncoder passwordEncoder) {
-        super(repository);
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        super(userRepository);
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User findByUserName(String userName) {
         return repository.findByUserName(userName);
+    }
+
+    @Override
+    public int updateUserForActivationCode(String email) {
+        return this.repository.updateUserForActivationCode(email);
     }
 
 
