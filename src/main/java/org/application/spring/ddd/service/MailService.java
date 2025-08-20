@@ -16,23 +16,27 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 
 @Service
 @DependsOn({"properties"})
 public class MailService {
 
-    private final JavaMailSender javaMailSender;
-    private final SpringTemplateEngine templateEngine;
     private final String baseUrl = Properties.getEmailBaseUrl();
 
-    public MailService(JavaMailSender javaMailSender, SpringTemplateEngine templateEngine) {
+    private final JavaMailSender javaMailSender;
+    private final SpringTemplateEngine templateEngine;
+    private final ExecutorService virtualThreadExecutor;
+
+    public MailService(JavaMailSender javaMailSender, SpringTemplateEngine templateEngine, ExecutorService virtualThreadExecutor) {
         this.javaMailSender = javaMailSender;
         this.templateEngine = templateEngine;
+        this.virtualThreadExecutor = virtualThreadExecutor;
     }
 
     public void sendSimpleMail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("kasrakhpk1985@gmail.com");
+        message.setFrom(Properties.getEmailUsername());
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
@@ -75,8 +79,12 @@ public class MailService {
         return "ok";
     }
 
-    public String sendActivationMail(User user) {
-        return sendMailFromTemplate(user, "email/activation", "User Activation");
+    public void sendActivationMail(User user) {
+
+        virtualThreadExecutor.submit(() -> {
+            return sendMailFromTemplate(user, "email/activation", "User Activation");
+        });
+
     }
 
 }
