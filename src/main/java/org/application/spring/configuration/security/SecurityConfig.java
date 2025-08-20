@@ -233,6 +233,13 @@ public class SecurityConfig {
                 .cors(corsSpec -> {
                     corsSpec.configurationSource(corsConfigurationSource);
                 })
+                .headers(headers -> headers
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .preload(true)
+                                .maxAgeInSeconds(31536000) // یک سال
+                        )
+                )
                 .exceptionHandling(exceptionHandlingConfigurer -> {
                     exceptionHandlingConfigurer
                             .authenticationEntryPoint(authenticationEntryPoint)
