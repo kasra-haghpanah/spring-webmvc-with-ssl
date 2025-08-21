@@ -39,14 +39,36 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.LocaleResolver;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    // مسیرهایی که نباید توکن بررسی شوند
+    private static final String[] PUBLIC_PATHS = {
+            "/spring/login",
+            "/spring/signup",
+            "/spring/signup/",
+            "/spring/signup/**",
+            "/spring/unauthorized",
+            "/spring/forbidden",
+            "/spring/validate/",
+            "/spring/activate/**",
+            "/error",
+            "/spring/check/exception",
+            "/spring/swagger-ui/",
+            "/spring/v3/api-docs/",
+            "/spring/api-docs/",
+            "/spring/webjars/"
+    };
+
+
+
+    private static boolean isPublicPath(String path) {
+        //return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+       return Arrays.stream(PUBLIC_PATHS).anyMatch(path::startsWith);
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -124,6 +146,13 @@ public class SecurityConfig {
                 final String authHeader = request.getHeader("Authorization");
                 final String jwt;
                 final String username;
+                // **************************************
+                // اگر مسیر عمومی بود، بدون بررسی توکن عبور کن
+                if (isPublicPath(request.getRequestURI())) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+                // **************************************
 
                 if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                     filterChain.doFilter(request, response);
@@ -247,24 +276,7 @@ public class SecurityConfig {
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/spring/login",
-                                "/spring/signup",
-                                "/spring/signup/**",
-                                "/spring/unauthorized",
-                                "/spring/forbidden",
-                                "/spring/validate/**",
-                                "/spring/activate/**",
-                                "/error",
-                                "/spring/check/exception",
-
-                                "/spring/swagger-ui/**",
-                                "/spring/v3/api-docs/**",
-                                "/spring/api-docs/**",
-                                "/spring/webjars/**"
-
-
-                        )
+                        .requestMatchers(PUBLIC_PATHS)
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/spring/xml/bean/sample", "/make/mybean")
                         .access((authentication, context) -> {

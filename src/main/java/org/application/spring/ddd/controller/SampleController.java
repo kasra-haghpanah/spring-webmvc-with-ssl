@@ -2,6 +2,7 @@ package org.application.spring.ddd.controller;
 
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.application.spring.configuration.exception.ApplicationException;
 import org.application.spring.listener.OrderService;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -39,7 +40,7 @@ public class SampleController {
     public String checkException(HttpServletRequest request) {
         Locale locale = localeResolver.resolveLocale(request);
         if (1 == 1) {
-            throw new RuntimeException("error.authentication");
+            throw new ApplicationException("check.exception", 402, "test-one", 2);
         }
         return "salam doustan";
     }

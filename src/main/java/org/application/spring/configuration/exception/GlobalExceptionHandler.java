@@ -59,5 +59,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().header("Content-Type", "application/json;charset=UTF-8").body(errorResponse);
     }
 
+    @ExceptionHandler(ApplicationException.class)
+    public ResponseEntity<ErrorResponse> handleRuntimeException(ApplicationException ex, HttpServletRequest request) {
+        Map<String, String> errors = new HashMap<>();
+        Locale locale = localeResolver.resolveLocale(request);
+
+        String message = messageSource.getMessage(ex.getMessage(), ex.getVariables(), locale);
+        errors.put(ex.getMessage(), message);
+
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setStatus(ex.getStatusCode());
+        errorResponse.setErrors(errors);
+        return ResponseEntity.status(ex.getStatusCode()).header("Content-Type", "application/json;charset=UTF-8").body(errorResponse);
+    }
+
 }
 
