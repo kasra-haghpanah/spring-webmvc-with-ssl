@@ -100,7 +100,7 @@ public class User extends AppEntity implements UserDetails {
         this.authority = authority;
     }
 
-    public void setAuthority(String... roles) {
+    public void addAuthorities(String... roles) {
         this.authority = new Authority(roles);
     }
 

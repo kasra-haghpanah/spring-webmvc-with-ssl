@@ -93,7 +93,7 @@ public class AuthController {
         user.setLastName(lastName);
         user.setPhoneNumber(phoneNumber);
         user.setActivationCode(UUID.randomUUID().toString());
-        user.setAuthority("ADMIN", "USER");
+        user.addAuthorities("ADMIN", "USER");
         user = userService.save(user);
         mailService.sendActivationMail(user);
         return user; // فایل forbidden.html در مسیر templates
