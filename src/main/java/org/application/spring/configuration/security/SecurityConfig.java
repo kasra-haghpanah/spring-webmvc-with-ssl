@@ -65,7 +65,6 @@ public class SecurityConfig {
 
 
     private static boolean isPublicPath(String path) {
-        //return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
         return Arrays.stream(PUBLIC_PATHS).anyMatch(path::startsWith);
     }
 
