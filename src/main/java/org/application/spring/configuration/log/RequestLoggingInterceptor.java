@@ -51,6 +51,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
                 ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 request.getMethod(),
                 request.getRequestURI(),
+                request.getQueryString(),
                 extractHeaders(request),
                 extractRequestBody(request),
                 extractHeaders(response),

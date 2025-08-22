@@ -14,6 +14,7 @@ public class Properties {
 
     public Properties(Environment environment) {
 
+        config.put("version", environment.getProperty("version"));
         config.put("server.port", environment.getProperty("server.port"));
         config.put("spring.application.name", environment.getProperty("spring.application.name"));
         config.put("springdoc.api-docs.version", environment.getProperty("springdoc.api-docs.version"));
@@ -154,6 +155,10 @@ public class Properties {
 
     public static String getLogPath() {
         return get("log.path", String.class);
+    }
+
+    public static String getVersion() {
+        return get("version", String.class);
     }
 
 
