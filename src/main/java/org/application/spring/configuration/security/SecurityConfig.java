@@ -49,8 +49,6 @@ public class SecurityConfig {
     // مسیرهایی که نباید توکن بررسی شوند
     private static final String[] PUBLIC_PATHS = {
             "/spring/login",
-            "/spring/signup",
-            "/spring/signup/",
             "/spring/signup/**",
             "/spring/unauthorized",
             "/spring/forbidden",

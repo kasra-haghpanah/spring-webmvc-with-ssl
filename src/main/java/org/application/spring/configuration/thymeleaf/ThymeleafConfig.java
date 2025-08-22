@@ -1,11 +1,10 @@
 package org.application.spring.configuration.thymeleaf;
 
 
-import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.log.RequestLoggingInterceptor;
+import org.application.spring.configuration.properties.Properties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -22,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableWebMvc
-//@ComponentScan(basePackages = "org.application.spring.ddd.controller")
 public class ThymeleafConfig implements WebMvcConfigurer {
 
     public static final String[] resourceHandler;
