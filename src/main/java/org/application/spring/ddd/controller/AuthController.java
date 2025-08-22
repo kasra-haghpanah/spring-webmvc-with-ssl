@@ -54,7 +54,7 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
         final UserDetails user = userDetailsService.loadUserByUsername(authRequest.username());
         ((User) user).setIp(request.getRemoteAddr());
-        final String jwt = JwtUtil.generateToken((User) user);
+        final String jwt = JwtUtil.generateToken(user, request.getRemoteAddr());
         return new AuthResponse(jwt);
     }
 

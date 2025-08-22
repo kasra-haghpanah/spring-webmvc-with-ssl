@@ -135,9 +135,7 @@ public class SecurityConfig {
         return authentication -> {
             String username = authentication.getName();
             String password = authentication.getCredentials().toString();
-
             UserDetails user = userDetailsService.loadUserByUsername(username);
-
             if (!passwordEncoder.matches(password, user.getPassword())) {
                 throw new BadCredentialsException("Invalid credentials");
             }
@@ -165,6 +163,7 @@ public class SecurityConfig {
                 final String authHeader = request.getHeader("Authorization");
                 final String jwt;
                 final String username;
+                final String ip;
                 // for logging
                 request.setAttribute("start-time", System.nanoTime());
                 ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 4_096);
@@ -172,24 +171,16 @@ public class SecurityConfig {
                 // for logging
                 // **************************************
                 // اگر مسیر عمومی بود، بدون بررسی توکن عبور کن
-
-
                 if (isPublicPath(request.getRequestURI())) {
                     filterChain(wrappedRequest, wrappedResponse, filterChain);
                     return;
                 }
-
                 // **************************************
-
                 if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                     filterChain(wrappedRequest, wrappedResponse, filterChain);
                     return;
                 }
-
                 jwt = authHeader.substring(7);
-                //username = jwtService.extractUsername(jwt);
-
-                String ip = null;
                 // code
                 try {
                     Claims claims = JwtUtil.extractAllClaims(jwt);
@@ -200,7 +191,6 @@ public class SecurityConfig {
                     filterChain(wrappedRequest, wrappedResponse, filterChain);
                     return;
                 }
-                // code
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
