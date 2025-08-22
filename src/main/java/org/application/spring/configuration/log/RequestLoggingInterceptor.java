@@ -1,9 +1,8 @@
 package org.application.spring.configuration.log;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import net.logstash.logback.argument.StructuredArguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -71,13 +70,13 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
                 ex != null ? getStackTrace(ex) : null
         );
 
-        String jsonLog = null;
+/*        String jsonLog = null;
         try {
             jsonLog = new ObjectMapper().writeValueAsString(log);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
-        }
-        logger.info(jsonLog);
+        }*/
+        logger.info("Request completed!", StructuredArguments.f(log));
 
     }
 
