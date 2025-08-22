@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -45,6 +46,7 @@ import java.util.*;
 
 @Configuration
 @EnableWebSecurity
+@DependsOn({"properties"})
 public class SecurityConfig {
 
     // مسیرهایی که نباید توکن بررسی شوند
