@@ -4,6 +4,7 @@ import java.util.Map;
 
 public record LogstashHttpLog(
         String timestamp,
+        Long duration,
         String method,
         String path,
         String queryString,

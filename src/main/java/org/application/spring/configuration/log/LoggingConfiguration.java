@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 @Configuration
 public class LoggingConfiguration {
 
-    @PostConstruct
+    //@PostConstruct
     public void setupJsonLogging() {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         context.reset();
@@ -55,8 +55,8 @@ public class LoggingConfiguration {
         rootLogger.addAppender(fileAppender); // ← اینجا متد موجوده چون Logger از Logbackه
     }
 
-    //@PostConstruct
-/*    public void setupLogstashAppender() {
+    @PostConstruct
+    public void setupLogstashAppender() {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         context.reset();
 
@@ -82,10 +82,10 @@ public class LoggingConfiguration {
         fileAppender.start();
 
         // اتصال به روت لاگر
-        ch.qos.logback.classic.Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
+        Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
         rootLogger.detachAndStopAllAppenders(); // حذف اپندرهای قبلی
         rootLogger.addAppender(fileAppender);
         rootLogger.setLevel(Level.INFO);
-    }*/
+    }
 }
 

@@ -47,8 +47,18 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
             Exception ex
     ) {
 
+        if (ex == null) {
+            ex = (Exception) request.getAttribute("loggedException");
+        }
+
+        Long duration = (Long) request.getAttribute("start-time");
+        if (duration != null) {
+            duration = (System.nanoTime() - duration) / 1000_000;
+        }
+
         LogstashHttpLog log = new LogstashHttpLog(
                 ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                duration,
                 request.getMethod(),
                 request.getRequestURI(),
                 request.getQueryString(),

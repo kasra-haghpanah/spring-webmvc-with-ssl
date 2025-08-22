@@ -31,6 +31,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex, HttpServletRequest request) {
         Map<String, String> errors = new HashMap<>();
         Locale locale = localeResolver.resolveLocale(request);
+        request.setAttribute("loggedException", ex);
 
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             String localizedMessage = messageSource.getMessage(error.getDefaultMessage(), new Object[]{error.getField()}, locale);
@@ -47,6 +48,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
         Map<String, String> errors = new HashMap<>();
         Locale locale = localeResolver.resolveLocale(request);
+        request.setAttribute("loggedException", ex);
 
         for (ConstraintViolation error : ex.getConstraintViolations()) {
             String localizedMessage = messageSource.getMessage(error.getMessage(), new Object[]{error.getMessageTemplate()}, locale);
@@ -63,6 +65,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleRuntimeException(ApplicationException ex, HttpServletRequest request) {
         Map<String, String> errors = new HashMap<>();
         Locale locale = localeResolver.resolveLocale(request);
+        request.setAttribute("loggedException", ex);
 
         String message = messageSource.getMessage(ex.getMessage(), ex.getVariables(), locale);
         errors.put(ex.getMessage(), message);

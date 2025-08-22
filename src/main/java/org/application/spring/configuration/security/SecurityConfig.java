@@ -147,6 +147,7 @@ public class SecurityConfig {
                 final String jwt;
                 final String username;
                 // for logging
+                request.setAttribute("start-time", System.nanoTime());
                 ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 4_096);
                 ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
                 // for logging
