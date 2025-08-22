@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.application.spring.configuration.properties.Properties;
+import org.application.spring.ddd.model.entity.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Key;
@@ -18,16 +19,17 @@ public class JwtUtil {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public static  <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public static <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    public static String generateToken(UserDetails userDetails) {
+    public static String generateToken(User user) {
 
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
-                .claim("roles", userDetails.getAuthorities())
+                .setSubject(user.getUsername())
+                .claim("roles", user.getAuthorities())
+                .claim("ip", user.getIp())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 3600000 * Properties.getAppJwtExpirationHours()))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)

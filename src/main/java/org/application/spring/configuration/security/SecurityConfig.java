@@ -1,5 +1,6 @@
 package org.application.spring.configuration.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,8 +33,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -92,7 +96,7 @@ public class SecurityConfig {
     }
 
     @Bean("userDetailsService")
-    public UserDetailsService userDetailsService(UserService userService, HttpServletRequest request) {
+    public UserDetailsService userDetailsService(UserService userService) {
         return (username) -> {
             // In a real application, you would load the user from database
             // This is just an example
@@ -100,7 +104,7 @@ public class SecurityConfig {
             if (user == null) {
                 throw new UsernameNotFoundException("User not found with username: " + username);
             }
-            user.setIp(request.getRemoteAddr());
+            //user.setIp(remoteAddress);
             return user;
 /*            if ("admin".equals(username)) {
                 return new User(
@@ -125,6 +129,7 @@ public class SecurityConfig {
     @Bean("authenticationManager")
     public AuthenticationManager authenticationManager(
             UserDetailsService userDetailsService,
+            HttpServletRequest request,
             PasswordEncoder passwordEncoder
     ) {
         return authentication -> {
@@ -138,6 +143,18 @@ public class SecurityConfig {
             }
             return new UsernamePasswordAuthenticationToken(user, password, user.getAuthorities());
         };
+    }
+
+    private static void filterChain(
+            ContentCachingRequestWrapper wrappedRequest,
+            ContentCachingResponseWrapper wrappedResponse,
+            FilterChain filterChain
+    ) {
+        try {
+            filterChain.doFilter(wrappedRequest, wrappedResponse);
+        } catch (Exception ex) {
+            throw new ApplicationException(ex.getMessage(), 500, new Object[]{});
+        }
     }
 
     @Bean("jwtAuthFilter")
@@ -156,48 +173,38 @@ public class SecurityConfig {
                 // **************************************
                 // اگر مسیر عمومی بود، بدون بررسی توکن عبور کن
 
-                try {
-                    if (isPublicPath(request.getRequestURI())) {
-                        filterChain.doFilter(wrappedRequest, wrappedResponse);
-                        return;
-                    }
-                } catch (Exception ex) {
-                    throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
-                    //request.setAttribute("loggedException", ex);
+
+                if (isPublicPath(request.getRequestURI())) {
+                    filterChain(wrappedRequest, wrappedResponse, filterChain);
+                    return;
                 }
+
                 // **************************************
 
                 if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-
-                    try {
-                        filterChain.doFilter(wrappedRequest, wrappedResponse);
-                        return;
-                    } catch (Exception ex) {
-                        throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
-                        //request.setAttribute("loggedException", ex);
-                    }
+                    filterChain(wrappedRequest, wrappedResponse, filterChain);
+                    return;
                 }
 
                 jwt = authHeader.substring(7);
                 //username = jwtService.extractUsername(jwt);
 
+                String ip = null;
                 // code
                 try {
-                    username = JwtUtil.extractUsername(jwt);
+                    Claims claims = JwtUtil.extractAllClaims(jwt);
+                    username = (String) claims.get("sub");
+                    ip = (String) claims.get("ip");
                 } catch (JwtException e) {
                     // اگر JWT نامعتبر بود، ادامه نده
-                    try {
-                        filterChain.doFilter(wrappedRequest, wrappedResponse);
-                    } catch (Exception ex) {
-                        throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
-                        //request.setAttribute("loggedException", ex);
-                    }
+                    filterChain(wrappedRequest, wrappedResponse, filterChain);
                     return;
                 }
                 // code
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    ((User) userDetails).setIp(ip);
                     if (JwtUtil.isTokenValid(jwt, userDetails)) {
                         UsernamePasswordAuthenticationToken authToken =
                                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -206,12 +213,7 @@ public class SecurityConfig {
                     }
                 }
 
-                try {
-                    filterChain.doFilter(wrappedRequest, wrappedResponse);
-                } catch (Exception ex) {
-                    throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
-                    //request.setAttribute("loggedException", ex);
-                }
+                filterChain(wrappedRequest, wrappedResponse, filterChain);
 
             }
         };
@@ -285,8 +287,7 @@ public class SecurityConfig {
             @Qualifier("jwtAuthFilter") OncePerRequestFilter jwtAuthFilter,
             CorsConfigurationSource corsConfigurationSource,
             AuthenticationEntryPoint authenticationEntryPoint,
-            AccessDeniedHandler accessDeniedHandler,
-            HttpServletRequest request
+            AccessDeniedHandler accessDeniedHandler
     ) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
@@ -313,7 +314,7 @@ public class SecurityConfig {
                         .access((authentication, context) -> {
 
                             User user = (User) authentication.get().getPrincipal();
-                            if (!user.getIp().equals(User.getClientIp(request))) {
+                            if (!user.getIp().equals(context.getRequest().getRemoteAddr())) {
                                 return new AuthorizationDecision(false);
                             }
                             // مثال ساده: فقط کاربران با نقش ADMIN اجازه دارند

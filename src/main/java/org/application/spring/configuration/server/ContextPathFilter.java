@@ -29,7 +29,7 @@ public class ContextPathFilter implements Filter {
             try {
                 chain.doFilter(new ContextPathRequestWrapper(httpRequest, contextPath), response);
             } catch (Exception ex) {
-                throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
+                throw new ApplicationException(ex.getMessage(), 500, new Object[]{});
                 //request.setAttribute("loggedException", ex);
             }
 
@@ -37,7 +37,7 @@ public class ContextPathFilter implements Filter {
             try {
                 chain.doFilter(request, response);
             } catch (Exception ex) {
-                throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
+                throw new ApplicationException(ex.getMessage(), 500, new Object[]{});
                 //request.setAttribute("loggedException", ex);
             }
         }
