@@ -57,13 +57,13 @@ public class OpenApiConfig {
                 // security
                 .info(
                         new Info()
-                                .title("spring-microservice-reactive")
+                                .title("spring-webmvc")
                                 .version("v0.0.1")
                                 .license(new License().name("Apache 2.0").url("http://springdoc.org"))
                 )
                 .externalDocs(new ExternalDocumentation()
                         .description("this sample is about a spring mvc project")
-                        .url("https://github.com/kasra-haghpanah/spring-microservice-reactive"));
+                        .url("https://github.com/kasra-haghpanah/spring-webmvc-with-ssl"));
 
     }
 

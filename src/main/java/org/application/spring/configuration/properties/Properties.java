@@ -37,6 +37,9 @@ public class Properties {
         config.put("email.username", environment.getProperty("email.username"));
         config.put("email.password", environment.getProperty("email.password"));
         config.put("email.base-url", environment.getProperty("email.base-url"));
+        config.put("database-health-checker.schedule.period-in-second", environment.getProperty("database-health-checker.schedule.period-in-second"));
+        config.put("database-health-checker.backoff.period-in-second", environment.getProperty("database-health-checker.backoff.period-in-second"));
+        config.put("log.path", environment.getProperty("log.path"));
 
     }
 
@@ -139,6 +142,18 @@ public class Properties {
 
     public static String getEmailBaseUrl() {
         return get("email.base-url", String.class);
+    }
+
+    public static int getDatabaseHealthCheckerSchedulePeriodInSecond() {
+        return Integer.valueOf(get("database-health-checker.schedule.period-in-second", String.class));
+    }
+
+    public static int getDatabaseHealthCheckerBackoffPeriodInSecond() {
+        return Integer.valueOf(get("database-health-checker.backoff.period-in-second", String.class));
+    }
+
+    public static String getLogPath() {
+        return get("log.path", String.class);
     }
 
 

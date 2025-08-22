@@ -36,3 +36,4 @@ build/
 /.gitattributes
 /mvnw.cmd
 /mvnw
+/logs/

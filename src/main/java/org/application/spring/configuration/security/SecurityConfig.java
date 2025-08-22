@@ -37,6 +37,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.util.ContentCachingRequestWrapper;
 
 import java.io.IOException;
 import java.util.*;
@@ -57,17 +58,16 @@ public class SecurityConfig {
             "/spring/activate/**",
             "/error",
             "/spring/check/exception",
-            "/spring/swagger-ui/",
-            "/spring/v3/api-docs/",
-            "/spring/api-docs/",
-            "/spring/webjars/"
+            "/spring/swagger-ui/**",
+            "/spring/v3/api-docs/**",
+            "/spring/api-docs/**",
+            "/spring/webjars/**"
     };
-
 
 
     private static boolean isPublicPath(String path) {
         //return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
-       return Arrays.stream(PUBLIC_PATHS).anyMatch(path::startsWith);
+        return Arrays.stream(PUBLIC_PATHS).anyMatch(path::startsWith);
     }
 
     @Bean
@@ -146,16 +146,26 @@ public class SecurityConfig {
                 final String authHeader = request.getHeader("Authorization");
                 final String jwt;
                 final String username;
+
+                ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 4_096);
+
+                // بعد از اجرای سایر فیلترها، بدنه قابل خواندن می‌شه
+                byte[] buf = wrappedRequest.getContentAsByteArray();
+                if (buf.length > 0) {
+                    String body = new String(buf, wrappedRequest.getCharacterEncoding());
+                    //logger.info("Request Body: {}", body);
+                }
+
                 // **************************************
                 // اگر مسیر عمومی بود، بدون بررسی توکن عبور کن
                 if (isPublicPath(request.getRequestURI())) {
-                    filterChain.doFilter(request, response);
+                    filterChain.doFilter(wrappedRequest, response);
                     return;
                 }
                 // **************************************
 
                 if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                    filterChain.doFilter(request, response);
+                    filterChain.doFilter(wrappedRequest, response);
                     return;
                 }
 
@@ -167,7 +177,7 @@ public class SecurityConfig {
                     username = JwtUtil.extractUsername(jwt);
                 } catch (JwtException e) {
                     // اگر JWT نامعتبر بود، ادامه نده
-                    filterChain.doFilter(request, response);
+                    filterChain.doFilter(wrappedRequest, response);
                     return;
                 }
                 // code
@@ -182,7 +192,7 @@ public class SecurityConfig {
                     }
                 }
 
-                filterChain.doFilter(request, response);
+                filterChain.doFilter(wrappedRequest, response);
             }
         };
     }
