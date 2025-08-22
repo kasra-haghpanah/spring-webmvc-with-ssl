@@ -3,6 +3,7 @@ package org.application.spring.configuration.server;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import org.application.spring.configuration.exception.ApplicationException;
 import org.application.spring.configuration.properties.Properties;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,9 +26,20 @@ public class ContextPathFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
         if (httpRequest.getRequestURI().startsWith(contextPath + "/")) {
-            chain.doFilter(new ContextPathRequestWrapper(httpRequest, contextPath), response);
+            try {
+                chain.doFilter(new ContextPathRequestWrapper(httpRequest, contextPath), response);
+            } catch (Exception ex) {
+                throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
+                //request.setAttribute("loggedException", ex);
+            }
+
         } else {
-            chain.doFilter(request, response);
+            try {
+                chain.doFilter(request, response);
+            } catch (Exception ex) {
+                throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
+                //request.setAttribute("loggedException", ex);
+            }
         }
     }
 

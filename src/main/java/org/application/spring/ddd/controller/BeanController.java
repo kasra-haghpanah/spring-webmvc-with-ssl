@@ -1,5 +1,6 @@
 package org.application.spring.ddd.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.application.spring.bean.profile.Language;
 import org.application.spring.bean.qualifier.IService;
 import org.application.spring.bean.type.MyBean;
@@ -69,7 +70,7 @@ public class BeanController {
 
     @RequestMapping(value = "/xml/bean/sample", method = RequestMethod.GET)
     @ResponseBody
-    public String xmlBeanSample() {
+    public String xmlBeanSample(HttpServletRequest request) {
         return this.apartment.getBlock().print() + " " + this.apartment.toString() + " " + this.apartmentAsConstructorInjection.toString();
     }
 

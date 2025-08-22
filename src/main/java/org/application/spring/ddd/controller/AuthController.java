@@ -50,10 +50,10 @@ public class AuthController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public AuthResponse login(@RequestBody AuthRequest request) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-        final UserDetails user = userDetailsService.loadUserByUsername(request.username());
-        final String jwt = JwtUtil.generateToken(userService.findByUserName(request.username()));
+    public AuthResponse login(@RequestBody AuthRequest authRequest, HttpServletRequest request) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
+        final UserDetails user = userDetailsService.loadUserByUsername(authRequest.username());
+        final String jwt = JwtUtil.generateToken(userService.findByUserName(authRequest.username()));
         return new AuthResponse(jwt);
     }
 

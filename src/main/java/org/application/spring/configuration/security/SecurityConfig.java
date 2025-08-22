@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.application.spring.configuration.exception.ApplicationException;
 import org.application.spring.configuration.exception.ErrorResponse;
 import org.application.spring.configuration.properties.Properties;
 import org.application.spring.ddd.model.entity.User;
@@ -91,7 +92,7 @@ public class SecurityConfig {
     }
 
     @Bean("userDetailsService")
-    public UserDetailsService userDetailsService(UserService userService) {
+    public UserDetailsService userDetailsService(UserService userService, HttpServletRequest request) {
         return (username) -> {
             // In a real application, you would load the user from database
             // This is just an example
@@ -99,6 +100,7 @@ public class SecurityConfig {
             if (user == null) {
                 throw new UsernameNotFoundException("User not found with username: " + username);
             }
+            user.setIp(request.getRemoteAddr());
             return user;
 /*            if ("admin".equals(username)) {
                 return new User(
@@ -153,15 +155,27 @@ public class SecurityConfig {
                 // for logging
                 // **************************************
                 // اگر مسیر عمومی بود، بدون بررسی توکن عبور کن
-                if (isPublicPath(request.getRequestURI())) {
-                    filterChain.doFilter(wrappedRequest, wrappedResponse);
-                    return;
+
+                try {
+                    if (isPublicPath(request.getRequestURI())) {
+                        filterChain.doFilter(wrappedRequest, wrappedResponse);
+                        return;
+                    }
+                } catch (Exception ex) {
+                    throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
+                    //request.setAttribute("loggedException", ex);
                 }
                 // **************************************
 
                 if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                    filterChain.doFilter(wrappedRequest, wrappedResponse);
-                    return;
+
+                    try {
+                        filterChain.doFilter(wrappedRequest, wrappedResponse);
+                        return;
+                    } catch (Exception ex) {
+                        throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
+                        //request.setAttribute("loggedException", ex);
+                    }
                 }
 
                 jwt = authHeader.substring(7);
@@ -172,7 +186,12 @@ public class SecurityConfig {
                     username = JwtUtil.extractUsername(jwt);
                 } catch (JwtException e) {
                     // اگر JWT نامعتبر بود، ادامه نده
-                    filterChain.doFilter(wrappedRequest, wrappedResponse);
+                    try {
+                        filterChain.doFilter(wrappedRequest, wrappedResponse);
+                    } catch (Exception ex) {
+                        throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
+                        //request.setAttribute("loggedException", ex);
+                    }
                     return;
                 }
                 // code
@@ -187,7 +206,13 @@ public class SecurityConfig {
                     }
                 }
 
-                filterChain.doFilter(wrappedRequest, wrappedResponse);
+                try {
+                    filterChain.doFilter(wrappedRequest, wrappedResponse);
+                } catch (Exception ex) {
+                    throw new ApplicationException(ex.getMessage(), 300, new Object[]{});
+                    //request.setAttribute("loggedException", ex);
+                }
+
             }
         };
     }
@@ -260,7 +285,8 @@ public class SecurityConfig {
             @Qualifier("jwtAuthFilter") OncePerRequestFilter jwtAuthFilter,
             CorsConfigurationSource corsConfigurationSource,
             AuthenticationEntryPoint authenticationEntryPoint,
-            AccessDeniedHandler accessDeniedHandler
+            AccessDeniedHandler accessDeniedHandler,
+            HttpServletRequest request
     ) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
@@ -283,10 +309,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATHS)
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/spring/xml/bean/sample", "/make/mybean")
+                        .requestMatchers(HttpMethod.GET, "/spring/xml/bean/sample", "/spring/make/mybean")
                         .access((authentication, context) -> {
 
                             User user = (User) authentication.get().getPrincipal();
+                            if (!user.getIp().equals(User.getClientIp(request))) {
+                                return new AuthorizationDecision(false);
+                            }
                             // مثال ساده: فقط کاربران با نقش ADMIN اجازه دارند
                             return authentication.get().getAuthorities().stream()
                                     .anyMatch(granted -> {

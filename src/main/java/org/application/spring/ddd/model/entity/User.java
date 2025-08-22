@@ -36,6 +36,8 @@ public class User extends AppEntity implements UserDetails {
     private String phoneNumber;
     @Column(name = "activationCode")
     private String activationCode;
+    @Transient
+    private String ip;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -134,5 +136,13 @@ public class User extends AppEntity implements UserDetails {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 }
