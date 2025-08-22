@@ -144,9 +144,9 @@ public class SecurityConfig {
                 final String authHeader = request.getHeader("Authorization");
                 final String jwt;
                 final String username;
-
+                // for logging
                 ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 4_096);
-
+                // for logging
                 // بعد از اجرای سایر فیلترها، بدنه قابل خواندن می‌شه
                 byte[] buf = wrappedRequest.getContentAsByteArray();
                 if (buf.length > 0) {
