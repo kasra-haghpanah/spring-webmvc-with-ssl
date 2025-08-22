@@ -70,12 +70,6 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
                 ex != null ? getStackTrace(ex) : null
         );
 
-/*        String jsonLog = null;
-        try {
-            jsonLog = new ObjectMapper().writeValueAsString(log);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }*/
         logger.info("Request completed!", StructuredArguments.f(log));
 
     }
