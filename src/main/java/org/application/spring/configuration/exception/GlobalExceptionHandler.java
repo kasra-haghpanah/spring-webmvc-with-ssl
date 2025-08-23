@@ -7,6 +7,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -90,6 +91,23 @@ public class GlobalExceptionHandler {
         errorResponse.setStatus(ex.getStatusCode());
         errorResponse.setErrors(errors);
         return ResponseEntity.status(ex.getStatusCode()).header("Content-Type", "application/json;charset=UTF-8").body(errorResponse);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
+        Map<String, String> errors = new HashMap<>();
+        Locale locale = localeResolver.resolveLocale(request);
+        request.setAttribute("loggedException", ex);
+
+        String message = messageSource.getMessage("error.unexpected", null, "خطای غیرمنتظره‌ای رخ داده است", locale);
+        errors.put("unexpected", message);
+
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        errorResponse.setErrors(errors);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .body(errorResponse);
     }
 
 }

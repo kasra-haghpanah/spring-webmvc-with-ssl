@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -153,7 +154,7 @@ public class SecurityConfig {
         try {
             filterChain.doFilter(wrappedRequest, wrappedResponse);
         } catch (Exception ex) {
-            throw new ApplicationException(ex.getMessage(), 500, new Object[]{});
+            throw new ApplicationException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, new Object[]{});
         }
     }
 

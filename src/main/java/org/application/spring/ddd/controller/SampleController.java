@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.application.spring.configuration.exception.ApplicationException;
 import org.application.spring.listener.OrderService;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,7 +41,7 @@ public class SampleController {
     public String checkException(HttpServletRequest request) {
         Locale locale = localeResolver.resolveLocale(request);
         if (1 == 1) {
-            throw new ApplicationException("check.exception", 402, "test-one", 2);
+            throw new ApplicationException("check.exception", HttpStatus.PAYMENT_REQUIRED, "test-one", 2);
         }
         return "salam doustan";
     }

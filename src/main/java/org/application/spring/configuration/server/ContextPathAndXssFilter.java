@@ -10,6 +10,7 @@ import org.application.spring.configuration.properties.Properties;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -35,7 +36,7 @@ public class ContextPathAndXssFilter implements Filter {
             try {
                 chain.doFilter(new ContextPathAndXssRequestWrapper(httpRequest, contextPath), response);
             } catch (Exception ex) {
-                throw new ApplicationException(ex.getMessage(), 500, new Object[]{});
+                throw new ApplicationException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, new Object[]{});
                 //request.setAttribute("loggedException", ex);
             }
 
@@ -43,7 +44,7 @@ public class ContextPathAndXssFilter implements Filter {
             try {
                 chain.doFilter(request, response);
             } catch (Exception ex) {
-                throw new ApplicationException(ex.getMessage(), 500, new Object[]{});
+                throw new ApplicationException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, new Object[]{});
                 //request.setAttribute("loggedException", ex);
             }
         }
