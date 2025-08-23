@@ -21,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authorization.AuthorizationDecision;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -36,6 +37,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.cors.CorsConfiguration;
@@ -291,6 +293,17 @@ public class SecurityConfig {
                                 .maxAgeInSeconds(31536000) // یک سال
                         )
                 )*/
+                .headers(headers -> headers
+                        // XSS (Cross-Site Scripting) to avoid injecting javascript code on a browser
+                        // فیلتر ضد XSS با Jsoup در Spring Boot
+                        .xssProtection(xss -> {
+                            xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK);
+                        })
+                        .contentSecurityPolicy(csp -> {
+                            // CSP => each client send or upload data just from their domain
+                            csp.policyDirectives("default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'");
+                        })
+                )
                 .exceptionHandling(exceptionHandlingConfigurer -> {
                     exceptionHandlingConfigurer
                             .authenticationEntryPoint(authenticationEntryPoint)

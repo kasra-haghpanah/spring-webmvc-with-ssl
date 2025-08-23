@@ -3,12 +3,17 @@ package org.application.spring.configuration.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.servlet.LocaleResolver;
 
 import java.util.HashMap;
@@ -25,6 +30,17 @@ public class GlobalExceptionHandler {
     public GlobalExceptionHandler(MessageSource messageSource, LocaleResolver localeResolver) {
         this.messageSource = messageSource;
         this.localeResolver = localeResolver;
+    }
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(String.class, new StringTrimmerEditor(true) {
+            @Override
+            public void setAsText(String text) {
+                String sanitized = Jsoup.clean(text, Safelist.basic());
+                super.setAsText(sanitized);
+            }
+        });
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

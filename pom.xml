@@ -29,19 +29,20 @@
     <properties>
         <java.version>24</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <logstash-logback.version>8.1</logstash-logback.version>
         <openapi.version>2.8.9</openapi.version>
         <jjwt.version>0.11.5</jjwt.version>
         <mariadb.version>3.5.5</mariadb.version>
         <ulid.version>8.3.0</ulid.version>
+        <jsoup.version>1.21.1</jsoup.version>
     </properties>
     <dependencies>
 
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>8.1</version>
+            <version>${logstash-logback.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -73,6 +74,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
         </dependency>
         <!-- Spring Security -->
 
@@ -110,11 +117,7 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- Hibernate Core (اختیاری، چون در starter هست) -->
-<!--        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>-->
+        <!-- Spring Boot Starter Data JPA -->
 
         <!-- JDBC Driver (مثلاً برای Mariadb) -->
         <dependency>
