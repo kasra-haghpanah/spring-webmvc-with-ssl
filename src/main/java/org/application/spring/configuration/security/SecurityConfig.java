@@ -146,7 +146,7 @@ public class SecurityConfig {
         };
     }
 
-    private static void filterChain(
+/*    private static void filterChain(
             ContentCachingRequestWrapper wrappedRequest,
             ContentCachingResponseWrapper wrappedResponse,
             FilterChain filterChain
@@ -156,7 +156,7 @@ public class SecurityConfig {
         } catch (Exception ex) {
             throw new ApplicationException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, new Object[]{});
         }
-    }
+    }*/
 
     @Bean("jwtAuthFilter")
     public OncePerRequestFilter jwtAuthFilter(UserDetailsService userDetailsService) {
@@ -171,16 +171,17 @@ public class SecurityConfig {
                 request.setAttribute("start-time", System.nanoTime());
                 ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 4_096);
                 ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
+                wrappedResponse.copyBodyToResponse();
                 // for logging
                 // **************************************
                 // اگر مسیر عمومی بود، بدون بررسی توکن عبور کن
                 if (isPublicPath(request.getRequestURI())) {
-                    filterChain(wrappedRequest, wrappedResponse, filterChain);
+                    filterChain.doFilter(request, response);
                     return;
                 }
                 // **************************************
                 if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                    filterChain(wrappedRequest, wrappedResponse, filterChain);
+                    filterChain.doFilter(request, response);
                     return;
                 }
                 jwt = authHeader.substring(7);
@@ -191,7 +192,7 @@ public class SecurityConfig {
                     ip = (String) claims.get("ip");
                 } catch (JwtException e) {
                     // اگر JWT نامعتبر بود، ادامه نده
-                    filterChain(wrappedRequest, wrappedResponse, filterChain);
+                    filterChain.doFilter(request, response);
                     return;
                 }
 
@@ -206,7 +207,7 @@ public class SecurityConfig {
                     }
                 }
 
-                filterChain(wrappedRequest, wrappedResponse, filterChain);
+                filterChain.doFilter(request, response);
 
             }
         };

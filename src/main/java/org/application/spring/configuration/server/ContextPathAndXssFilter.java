@@ -5,8 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.application.spring.configuration.exception.ApplicationException;
 import org.application.spring.configuration.properties.Properties;
-//import org.jsoup.Jsoup;
-//import org.jsoup.safety.Safelist;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.context.annotation.Configuration;
