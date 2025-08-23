@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.exception.ApplicationException;
 import org.application.spring.configuration.exception.ErrorResponse;
 import org.application.spring.configuration.properties.Properties;
+import org.application.spring.configuration.server.ServerUtil;
 import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.service.UserService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -171,17 +172,22 @@ public class SecurityConfig {
                 request.setAttribute("start-time", System.nanoTime());
                 ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 4_096);
                 ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
-                wrappedResponse.copyBodyToResponse();
                 // for logging
                 // **************************************
                 // اگر مسیر عمومی بود، بدون بررسی توکن عبور کن
                 if (isPublicPath(request.getRequestURI())) {
-                    filterChain.doFilter(request, response);
+                    filterChain.doFilter(wrappedRequest, wrappedResponse);
+                    request.setAttribute("request-body", ServerUtil.getRequestBody(wrappedRequest));
+                    request.setAttribute("response-body", ServerUtil.getResponseBody(wrappedResponse));
+                    wrappedResponse.copyBodyToResponse();
                     return;
                 }
                 // **************************************
                 if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                    filterChain.doFilter(request, response);
+                    filterChain.doFilter(wrappedRequest, wrappedResponse);
+                    request.setAttribute("request-body", ServerUtil.getRequestBody(wrappedRequest));
+                    request.setAttribute("response-body", ServerUtil.getResponseBody(wrappedResponse));
+                    wrappedResponse.copyBodyToResponse();
                     return;
                 }
                 jwt = authHeader.substring(7);
@@ -192,7 +198,10 @@ public class SecurityConfig {
                     ip = (String) claims.get("ip");
                 } catch (JwtException e) {
                     // اگر JWT نامعتبر بود، ادامه نده
-                    filterChain.doFilter(request, response);
+                    filterChain.doFilter(wrappedRequest, wrappedResponse);
+                    request.setAttribute("request-body", ServerUtil.getRequestBody(wrappedRequest));
+                    request.setAttribute("response-body", ServerUtil.getResponseBody(wrappedResponse));
+                    wrappedResponse.copyBodyToResponse();
                     return;
                 }
 
@@ -207,7 +216,10 @@ public class SecurityConfig {
                     }
                 }
 
-                filterChain.doFilter(request, response);
+                filterChain.doFilter(wrappedRequest, wrappedResponse);
+                request.setAttribute("request-body", ServerUtil.getRequestBody(wrappedRequest));
+                request.setAttribute("response-body", ServerUtil.getResponseBody(wrappedResponse));
+                wrappedResponse.copyBodyToResponse();
 
             }
         };

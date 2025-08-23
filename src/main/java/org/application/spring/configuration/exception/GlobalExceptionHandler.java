@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
         }
 
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setStatus(400);
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST);
         errorResponse.setErrors(errors);
         return ResponseEntity.badRequest().header("Content-Type", "application/json;charset=UTF-8").body(errorResponse);
     }
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
         }
 
         ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setStatus(400);
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST);
         errorResponse.setErrors(errors);
         return ResponseEntity.badRequest().header("Content-Type", "application/json;charset=UTF-8").body(errorResponse);
     }

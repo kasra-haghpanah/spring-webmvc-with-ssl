@@ -48,9 +48,11 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
 
         if (ex == null) {
             ex = (Exception) request.getAttribute("loggedException");
+            request.removeAttribute("loggedException");
         }
 
         Long duration = (Long) request.getAttribute("start-time");
+        request.removeAttribute("start-time");
         if (duration != null) {
             duration = (System.nanoTime() - duration) / 1000_000;
         }
@@ -64,7 +66,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
                 extractHeaders(request),
                 extractRequestBody(request),
                 extractHeaders(response),
-                extractResponseBody(response),
+                extractResponseBody(response, request),
                 response.getStatus(),
                 ex != null ? ex.getClass().getSimpleName() : null,
                 ex != null ? getStackTrace(ex) : null
@@ -93,6 +95,14 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
     }
 
     private String extractRequestBody(HttpServletRequest request) {
+
+        String requestBody = (String) request.getAttribute("request-body");
+
+        if (requestBody != null && !requestBody.equals("")) {
+            request.removeAttribute("request-body");
+            return requestBody;
+        }
+
         ContentCachingRequestWrapper wrapper = WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
         if (wrapper != null) {
             byte[] buf = wrapper.getContentAsByteArray();
@@ -105,7 +115,15 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         return null;
     }
 
-    private String extractResponseBody(HttpServletResponse response) {
+    private String extractResponseBody(HttpServletResponse response, HttpServletRequest request) {
+
+        String responseBody = (String) request.getAttribute("response-body");
+
+        if (responseBody != null && !responseBody.equals("")) {
+            request.removeAttribute("response-body");
+            return responseBody;
+        }
+
         ContentCachingResponseWrapper wrapper = WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
         if (wrapper != null) {
             byte[] buf = wrapper.getContentAsByteArray();
