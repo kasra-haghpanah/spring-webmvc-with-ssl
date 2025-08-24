@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import org.application.spring.configuration.security.AuthResponse;
 import org.application.spring.ddd.dto.StoreDTO;
-import org.application.spring.ddd.model.entity.User;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
