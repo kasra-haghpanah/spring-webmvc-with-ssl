@@ -58,7 +58,7 @@ public class SecurityConfig {
             "/spring/signup/**",
             "/spring/unauthorized",
             "/spring/forbidden",
-            "/spring/validate/",
+           // "/spring/validate/",
             "/spring/activate/**",
             "/error",
             "/spring/check/exception",
@@ -311,6 +311,23 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_PATHS)
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/spring/xml/bean/sample", "/spring/make/mybean")
+                        .access((authentication, context) -> {
+
+                            if (!(authentication.get().getPrincipal() instanceof User)) {
+                                return new AuthorizationDecision(false);
+                            }
+                            User user = (User) authentication.get().getPrincipal();
+                            if (!user.getIp().equals(context.getRequest().getRemoteAddr())) {
+                                return new AuthorizationDecision(false);
+                            }
+                            // مثال ساده: فقط کاربران با نقش ADMIN اجازه دارند
+                            return authentication.get().getAuthorities().stream()
+                                    .anyMatch(granted -> {
+                                        return granted.getAuthority().equals("ADMIN");
+                                    }) ?
+                                    new AuthorizationDecision(true) : new AuthorizationDecision(false);
+                        })
+                        .requestMatchers(HttpMethod.POST, "/spring/validate/store")
                         .access((authentication, context) -> {
 
                             if (!(authentication.get().getPrincipal() instanceof User)) {

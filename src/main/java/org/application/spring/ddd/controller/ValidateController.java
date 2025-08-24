@@ -37,6 +37,7 @@ public class ValidateController {
             @RequestParam @Valid @Length(min = 2, max = 100, message = "field.name") String lastName,
             @RequestParam @Valid @Pattern(regexp = "[0-9]{11,13}", message = "field.phone") String phoneNumber
     ) {
+        // <script>alert('XSS')</script><p>Hello <b>World</b></p>
         return new AuthResponse("jwt-token");
     }
 

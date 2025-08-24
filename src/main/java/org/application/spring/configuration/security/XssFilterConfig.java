@@ -1,6 +1,8 @@
 package org.application.spring.configuration.security;
 
 import org.application.spring.configuration.server.ContextPathAndXssFilter;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,4 +17,9 @@ public class XssFilterConfig {
         registration.setOrder(1);
         return registration;
     }
+
+    public static String sanitize(String input) {
+        return input == null ? null : Jsoup.clean(input, Safelist.none());
+    }
+
 }
