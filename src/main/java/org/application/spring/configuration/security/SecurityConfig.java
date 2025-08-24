@@ -58,7 +58,7 @@ public class SecurityConfig {
             "/spring/signup/**",
             "/spring/unauthorized",
             "/spring/forbidden",
-           // "/spring/validate/",
+            // "/spring/validate/",
             "/spring/activate/**",
             "/error",
             "/spring/check/exception",
@@ -274,6 +274,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             @Qualifier("jwtAuthFilter") OncePerRequestFilter jwtAuthFilter,
+            RateLimitingFilter rateLimitingFilter,
             CorsConfigurationSource corsConfigurationSource,
             AuthenticationEntryPoint authenticationEntryPoint,
             AccessDeniedHandler accessDeniedHandler
@@ -347,6 +348,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }
