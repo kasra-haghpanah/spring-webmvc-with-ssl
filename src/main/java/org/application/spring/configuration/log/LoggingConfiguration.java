@@ -14,7 +14,6 @@ import net.logstash.logback.encoder.LogstashEncoder;
 import org.application.spring.configuration.properties.Properties;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 
 import java.nio.charset.StandardCharsets;
 
