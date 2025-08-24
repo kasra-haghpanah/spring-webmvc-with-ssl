@@ -24,8 +24,10 @@ public class LoggingConfiguration {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         context.reset();
 
-        if (Properties.getLogPath() != null && !Properties.getLogPath().equals("")) {
-            setupLogstashLogging(context);
+        String path = Properties.getLogPath();
+
+        if (path != null && !path.equals("")) {
+            setupLogstashLogging(context, path);
         }
 
         if (Properties.getLogConsoleActive()) {
@@ -34,7 +36,7 @@ public class LoggingConfiguration {
 
     }
 
-    public void setupLogstashLogging(LoggerContext context) {
+    public void setupLogstashLogging(LoggerContext context, String path) {
 
         // تعریف encoder با فرمت Logstash
         LogstashEncoder encoder = new LogstashEncoder();
@@ -51,7 +53,7 @@ public class LoggingConfiguration {
         // تعریف فایل لاگ
 
         FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
-        fileAppender.setFile(Properties.getLogPath());
+        fileAppender.setFile(path);
         fileAppender.setEncoder(encoder);
         fileAppender.setContext(context);
         fileAppender.setName("JSON_FILE");

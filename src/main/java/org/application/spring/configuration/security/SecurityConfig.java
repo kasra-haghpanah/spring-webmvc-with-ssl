@@ -147,18 +147,6 @@ public class SecurityConfig {
         };
     }
 
-/*    private static void filterChain(
-            ContentCachingRequestWrapper wrappedRequest,
-            ContentCachingResponseWrapper wrappedResponse,
-            FilterChain filterChain
-    ) {
-        try {
-            filterChain.doFilter(wrappedRequest, wrappedResponse);
-        } catch (Exception ex) {
-            throw new ApplicationException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, new Object[]{});
-        }
-    }*/
-
     @Bean("jwtAuthFilter")
     public OncePerRequestFilter jwtAuthFilter(UserDetailsService userDetailsService) {
         return new OncePerRequestFilter() {
