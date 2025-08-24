@@ -30,22 +30,14 @@ public class ContextPathAndXssFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
+        String path = "";
         if (httpRequest.getRequestURI().startsWith(contextPath + "/")) {
-            try {
-                chain.doFilter(new ContextPathAndXssRequestWrapper(httpRequest, contextPath), response);
-            } catch (Exception ex) {
-                throw new ApplicationException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, new Object[]{});
-                //request.setAttribute("loggedException", ex);
-            }
-
-        } else {
-            try {
-                chain.doFilter(request, response);
-            } catch (Exception ex) {
-                throw new ApplicationException(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, new Object[]{});
-                //request.setAttribute("loggedException", ex);
-            }
+            path = contextPath;
         }
+
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletRequest wrappedRequest = new ContextPathAndXssRequestWrapper(req, path);
+        chain.doFilter(wrappedRequest, response);
     }
 
     @Override
@@ -68,17 +60,19 @@ public class ContextPathAndXssFilter implements Filter {
 
         @Override
         public String getParameter(String name) {
-            return sanitize(super.getParameter(name));
+            String value = super.getParameter(name);
+            return sanitize(value);
         }
 
         @Override
         public String[] getParameterValues(String name) {
             String[] values = super.getParameterValues(name);
             if (values == null) return null;
-
-            return Arrays.stream(values)
-                    .map(this::sanitize)
-                    .toArray(String[]::new);
+            String[] sanitized = new String[values.length];
+            for (int i = 0; i < values.length; i++) {
+                sanitized[i] = sanitize(values[i]);
+            }
+            return sanitized;
         }
 
         @Override
@@ -87,7 +81,7 @@ public class ContextPathAndXssFilter implements Filter {
         }
 
         private String sanitize(String input) {
-            return input == null ? null : Jsoup.clean(input, Safelist.basic());
+            return input == null ? null : Jsoup.clean(input, Safelist.none());
         }
 
 

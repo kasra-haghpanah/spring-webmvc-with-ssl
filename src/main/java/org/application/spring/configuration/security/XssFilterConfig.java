@@ -11,7 +11,7 @@ public class XssFilterConfig {
     public FilterRegistrationBean<ContextPathAndXssFilter> xssFilterRegistration() {
         FilterRegistrationBean<ContextPathAndXssFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new ContextPathAndXssFilter());
-        registration.addUrlPatterns("/*");
+        registration.addUrlPatterns("/spring/*");
         registration.setOrder(1);
         return registration;
     }
