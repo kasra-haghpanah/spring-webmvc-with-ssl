@@ -4,7 +4,9 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.filter.ThresholdFilter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.FileAppender;
 import jakarta.annotation.PostConstruct;
@@ -23,20 +25,21 @@ public class LoggingConfiguration {
     public void setupLogAppender() {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         context.reset();
-
+        Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
+        rootLogger.detachAndStopAllAppenders(); // حذف اپندرهای قبلی
+        rootLogger.setLevel(Level.INFO);
         String path = Properties.getLogPath();
-
-        if (path != null && !path.equals("")) {
-            setupLogstashLogging(context, path);
+        if (path != null && !path.isEmpty()) {
+            rootLogger.addAppender(setupLogstashLogging(context, path));
         }
 
         if (Properties.getLogConsoleActive()) {
-            setupConsoleLogging(context);
+            rootLogger.addAppender(setupConsoleLogging(context));
         }
 
     }
 
-    public void setupLogstashLogging(LoggerContext context, String path) {
+    public Appender<ILoggingEvent> setupLogstashLogging(LoggerContext context, String path) {
 
         // تعریف encoder با فرمت Logstash
         LogstashEncoder encoder = new LogstashEncoder();
@@ -57,17 +60,24 @@ public class LoggingConfiguration {
         fileAppender.setEncoder(encoder);
         fileAppender.setContext(context);
         fileAppender.setName("JSON_FILE");
+
+
+        ThresholdFilter infoFilter = new ThresholdFilter();
+        infoFilter.setLevel("INFO");
+        infoFilter.start();
+        fileAppender.addFilter(infoFilter);
+
         fileAppender.start();
 
         // اتصال به روت لاگر
-        Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
-        rootLogger.detachAndStopAllAppenders(); // حذف اپندرهای قبلی
-        rootLogger.addAppender(fileAppender);
-        rootLogger.setLevel(Level.INFO);
+
+        return fileAppender;
+
+
     }
 
 
-    public void setupConsoleLogging(LoggerContext context) {
+    public Appender<ILoggingEvent> setupConsoleLogging(LoggerContext context) {
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
@@ -78,11 +88,18 @@ public class LoggingConfiguration {
         ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();
         consoleAppender.setContext(context);
         consoleAppender.setEncoder(encoder);
+
+        ThresholdFilter errorFilter = new ThresholdFilter();
+        errorFilter.setLevel(Level.ERROR.toString());
+        errorFilter.start();
+        consoleAppender.addFilter(errorFilter);
+
         consoleAppender.start();
 
-        Logger rootLogger = context.getLogger(Logger.ROOT_LOGGER_NAME);
-        rootLogger.setLevel(Level.ERROR); // فقط خطاها را نمایش بده
-        rootLogger.addAppender(consoleAppender);
+        //rootLogger.setLevel(Level.ALL); // فقط خطاها را نمایش بده
+        return consoleAppender;
+
+
     }
 
 }

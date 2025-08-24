@@ -1,13 +1,7 @@
 package org.application.spring.configuration.log;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.json.UTF8JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import net.logstash.logback.argument.StructuredArgument;
 import net.logstash.logback.argument.StructuredArguments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,16 +25,6 @@ import java.util.Map;
 public class RequestLoggingInterceptor implements HandlerInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(RequestLoggingInterceptor.class);
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
-
-    public static <T> String toJson(T t){
-        try {
-            return JSON_MAPPER.writeValueAsString(t);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -88,22 +72,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
                 ex != null ? getStackTrace(ex) : null
         );
 
-
-/*        try {
-            StructuredArgument arg = StructuredArguments.f(log);
-
-            StringWriter writer = new StringWriter();
-            UTF8JsonGenerator utf8JsonGenerator = new UTF8JsonGenerator();
-            JsonGenerator generator = new JsonFactory().createGenerator(writer);
-            generator.setCodec(new com.fasterxml.jackson.databind.ObjectMapper());
-            StructuredArguments.f(log).writeTo(generator);
-            logger.info(generator.toString());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }*/
-
-        String json = RequestLoggingInterceptor.<LogstashHttpLog>toJson(log);
-        logger.info(json);
+        logger.info("Request completed!", StructuredArguments.f(log));
 
     }
 
