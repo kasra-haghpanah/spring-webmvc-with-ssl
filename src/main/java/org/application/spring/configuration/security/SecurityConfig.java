@@ -330,6 +330,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/spring/xml/bean/sample", "/spring/make/mybean")
                         .access((authentication, context) -> {
 
+                            if (!(authentication.get().getPrincipal() instanceof User)) {
+                                return new AuthorizationDecision(false);
+                            }
                             User user = (User) authentication.get().getPrincipal();
                             if (!user.getIp().equals(context.getRequest().getRemoteAddr())) {
                                 return new AuthorizationDecision(false);
