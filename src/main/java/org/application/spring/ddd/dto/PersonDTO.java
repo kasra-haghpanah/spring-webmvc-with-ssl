@@ -2,7 +2,7 @@ package org.application.spring.ddd.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import org.application.spring.configuration.validation.api.Sanitize;
+import org.application.spring.configuration.security.XssFilterConfig;
 
 public class PersonDTO {
 
@@ -10,11 +10,9 @@ public class PersonDTO {
     @NotBlank(message = "email نباید خالی باشد")
     private String email;
 
-    @Sanitize
     @NotBlank(message = "firstName نباید خالی باشد")
     private String firstName;
 
-    @Sanitize
     @NotBlank(message = "lastName نباید خالی باشد")
     private String lastName;
 
@@ -26,7 +24,7 @@ public class PersonDTO {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = XssFilterConfig.sanitize(email);
     }
 
     public String getFirstName() {
@@ -34,7 +32,7 @@ public class PersonDTO {
     }
 
     public void setFirstName(String firstName) {
-        this.firstName = firstName;
+        this.firstName = XssFilterConfig.sanitize(firstName);
     }
 
     public String getLastName() {
@@ -42,6 +40,6 @@ public class PersonDTO {
     }
 
     public void setLastName(String lastName) {
-        this.lastName = lastName;
+        this.lastName = XssFilterConfig.sanitize(lastName);
     }
 }
