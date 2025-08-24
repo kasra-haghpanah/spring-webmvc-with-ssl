@@ -40,40 +40,29 @@ public class LoggingConfiguration {
     }
 
     public Appender<ILoggingEvent> setupLogstashLogging(LoggerContext context, String path) {
-
         // تعریف encoder با فرمت Logstash
         LogstashEncoder encoder = new LogstashEncoder();
-
         encoder.setVersion(Properties.getVersion());
-        //encoder.setCharset(StandardCharsets.UTF_8);
         //encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n");
         encoder.setIncludeCallerData(true);
         encoder.setIncludeContext(true);
-        encoder.setCustomFields("{\"app\":\"spring-webmvc-with-ssl\",\"env\":\"dev\"}");
+        //encoder.setCustomFields("{\"app\":\"spring-webmvc-with-ssl\",\"env\":\"dev\"}");
         encoder.setContext(context);
         encoder.start();
-
         // تعریف فایل لاگ
-
         FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
         fileAppender.setFile(path);
         fileAppender.setEncoder(encoder);
         fileAppender.setContext(context);
         fileAppender.setName("JSON_FILE");
 
-
         ThresholdFilter infoFilter = new ThresholdFilter();
         infoFilter.setLevel("INFO");
         infoFilter.start();
         fileAppender.addFilter(infoFilter);
-
         fileAppender.start();
-
         // اتصال به روت لاگر
-
         return fileAppender;
-
-
     }
 
 
@@ -93,10 +82,7 @@ public class LoggingConfiguration {
         errorFilter.setLevel(Level.ERROR.toString());
         errorFilter.start();
         consoleAppender.addFilter(errorFilter);
-
         consoleAppender.start();
-
-        //rootLogger.setLevel(Level.ALL); // فقط خطاها را نمایش بده
         return consoleAppender;
 
 
