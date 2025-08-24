@@ -1,16 +1,19 @@
 package org.application.spring.ddd.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
+import org.application.spring.configuration.security.AuthResponse;
 import org.application.spring.ddd.dto.StoreDTO;
+import org.application.spring.ddd.model.entity.User;
+import org.hibernate.validator.constraints.Length;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
-//@Validated
+@Validated
 public class ValidateController {
 
 
@@ -18,6 +21,23 @@ public class ValidateController {
     @ResponseBody
     public String createStore(@RequestBody @Valid StoreDTO storeDTO) {
         return "Store created successfully";
+    }
+
+
+    @RequestMapping(
+            value = "/validate/signup",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
+    )
+    @ResponseBody
+    public AuthResponse signup(
+            @RequestParam @Valid @Email(message = "field.email") String email,
+            @RequestParam @Valid @Length(min = 3, max = 30, message = "field.password") String password,
+            @RequestParam @Valid @Length(min = 2, max = 100, message = "field.name") String firstName,
+            @RequestParam @Valid @Length(min = 2, max = 100, message = "field.name") String lastName,
+            @RequestParam @Valid @Pattern(regexp = "[0-9]{11,13}", message = "field.phone") String phoneNumber
+    ) {
+        return new AuthResponse("jwt-token");
     }
 
 
