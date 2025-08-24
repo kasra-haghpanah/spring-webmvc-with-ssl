@@ -41,6 +41,7 @@ public class Properties {
         config.put("database-health-checker.schedule.period-in-second", environment.getProperty("database-health-checker.schedule.period-in-second"));
         config.put("database-health-checker.backoff.period-in-second", environment.getProperty("database-health-checker.backoff.period-in-second"));
         config.put("log.path", environment.getProperty("log.path"));
+        config.put("log.console.active", environment.getProperty("log.console.active"));
 
     }
 
@@ -161,5 +162,8 @@ public class Properties {
         return get("version", String.class);
     }
 
+    public static Boolean getLogConsoleActive() {
+        return Boolean.valueOf(get("log.console.active", String.class));
+    }
 
 }
