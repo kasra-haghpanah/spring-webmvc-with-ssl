@@ -444,7 +444,7 @@ rate-limiting:
                                     }) ?
                                     new AuthorizationDecision(true) : new AuthorizationDecision(false);
                         })
-                        .requestMatchers(HttpMethod.POST, "/spring/validate/store")
+                        .requestMatchers(HttpMethod.POST, "/spring/validate/store", "/refresh/token")
                         .access((authentication, context) -> {
 
                             if (!(authentication.get().getPrincipal() instanceof User)) {

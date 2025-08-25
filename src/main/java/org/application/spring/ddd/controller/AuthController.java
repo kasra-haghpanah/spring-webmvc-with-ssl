@@ -58,6 +58,18 @@ public class AuthController {
         return new AuthenticationResponse(jwt);
     }
 
+    @RequestMapping(value = "/refresh/token", method = RequestMethod.POST)
+    @ResponseBody
+    public AuthenticationResponse refreshToken(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7);
+        String username = JwtUtil.extractUsername(token);
+
+        final UserDetails user = userDetailsService.loadUserByUsername(username);
+        ((User) user).setIp(request.getRemoteAddr());
+        final String jwt = JwtUtil.generateToken(user, request.getRemoteAddr());
+        return new AuthenticationResponse(jwt);
+    }
+
     @RequestMapping(value = "/unauthorized", method = RequestMethod.GET)
     public String unauthorized(Model model, HttpServletRequest request) {
         Locale locale = localeResolver.resolveLocale(request);
