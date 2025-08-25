@@ -192,6 +192,8 @@ rate-limiting:
       refill-duration: 1s
     * */
 
+        List<Map<String, Object>> list = Properties.getLimitRatingList();
+
         final RateLimitingProperties rateLimitingProperties = new RateLimitingProperties(
                 true,
                 new RateLimitingProperties.Policy(
@@ -201,8 +203,15 @@ rate-limiting:
                         Duration.ofSeconds(Properties.getLimitRatingRefillDurationInSecond()))
         );
 
-        rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/login", 5, 5, Duration.ofSeconds(60)));
-        //rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/**", 5, 5, Duration.ofSeconds(60)));
+        for (Map<String, Object> map : list) {
+
+            String path = (String) map.get("path");
+            Integer capacity = (Integer) map.get("capacity");
+            Integer refillTokens = (Integer) map.get("refill-tokens");
+            Integer duration = (Integer) map.get("duration");
+
+            rateLimitingProperties.add(new RateLimitingProperties.Policy(path, capacity, refillTokens, Duration.ofSeconds(duration)));
+        }
 
         return new OncePerRequestFilter() {
 

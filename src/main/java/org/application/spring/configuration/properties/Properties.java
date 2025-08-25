@@ -1,9 +1,13 @@
 package org.application.spring.configuration.properties;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Configuration("properties")
@@ -46,7 +50,7 @@ public class Properties {
         config.put("limit-rating.capacity", environment.getProperty("limit-rating.capacity"));
         config.put("limit-rating.refill-tokens", environment.getProperty("limit-rating.refill-tokens"));
         config.put("limit-rating.refill-duration-in-second", environment.getProperty("limit-rating.refill-duration-in-second"));
-
+        config.put("limit-rating.list", environment.getProperty("limit-rating.list"));
 
     }
 
@@ -182,5 +186,19 @@ public class Properties {
     public static int getLimitRatingRefillDurationInSecond() {
         return Integer.valueOf(get("limit-rating.refill-duration-in-second", String.class));
     }
+
+
+    public static List<Map<String,Object>> getLimitRatingList() {
+        String value = get("limit-rating.list", String.class);
+        try {
+            return new ObjectMapper().readValue(value, new TypeReference<List<Map<String,Object>>>() {
+            });
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
 
 }
