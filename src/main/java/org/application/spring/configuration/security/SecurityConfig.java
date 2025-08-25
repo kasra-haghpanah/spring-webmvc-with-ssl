@@ -19,6 +19,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -166,7 +167,10 @@ public class SecurityConfig {
 
 
     @Bean("rateLimitingFilter")
-    public OncePerRequestFilter rateLimitingFilter() {
+    public OncePerRequestFilter rateLimitingFilter(
+            MessageSource messageSource,
+            LocaleResolver localeResolver
+    ) {
 
          /*
 rate-limiting:
@@ -190,18 +194,19 @@ rate-limiting:
 
         final RateLimitingProperties rateLimitingProperties = new RateLimitingProperties(
                 true,
-                new RateLimitingProperties.Policy("/spring/**", 10, 10, Duration.ofSeconds(1))
+                new RateLimitingProperties.Policy("/spring/**", 10, 10, Duration.ofSeconds(60))
         );
 
-        //rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/**", 20, 20, Duration.ofSeconds(1)));
-        //rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/**", 5, 5, Duration.ofSeconds(1)));
-
+        //rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/**", 20, 20, Duration.ofSeconds(60)));
+        //rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/**", 5, 5, Duration.ofSeconds(60)));
 
         return new OncePerRequestFilter() {
 
 
             @Override
             protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+                Locale locale = localeResolver.resolveLocale(request);
 
                 if (!rateLimitingProperties.enabled) {
                     filterChain.doFilter(request, response);
@@ -216,13 +221,23 @@ rate-limiting:
                     filterChain.doFilter(request, response);
                 } else {
                     response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-                    response.getWriter().write("Rate limit exceeded");
+                    response.setContentType("application/json;charset=UTF-8");
+
+                    Map<String, String> map = new HashMap<>();
+                    map.put("rate.limit.exceeded", messageSource.getMessage("rate.limit.exceeded", null, locale));
+
+                    ErrorResponse errorResponse = new ErrorResponse();
+                    errorResponse.setStatus(HttpStatus.TOO_MANY_REQUESTS);
+                    errorResponse.setErrors(map);
+                    response.getWriter().write(errorResponse.toString());
                 }
             }
 
             private org.application.spring.configuration.security.RateLimitingProperties.Policy matchPolicy(String path) {
                 return rateLimitingProperties.policies.stream()
-                        .filter(p -> path.matches(p.path().replace("**", ".*")))
+                        .filter(p -> {
+                            return path.matches(p.path().replace("**", ".*"));
+                        })
                         .findFirst()
                         .orElse(rateLimitingProperties.defaultPolicy);
             }
