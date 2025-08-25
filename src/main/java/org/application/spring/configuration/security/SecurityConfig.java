@@ -222,14 +222,14 @@ rate-limiting:
 
             private org.application.spring.configuration.security.RateLimitingProperties.Policy matchPolicy(String path) {
                 return rateLimitingProperties.policies.stream()
-                        .filter(p -> path.matches(p.path.replace("**", ".*")))
+                        .filter(p -> path.matches(p.path().replace("**", ".*")))
                         .findFirst()
                         .orElse(rateLimitingProperties.defaultPolicy);
             }
 
             private Bucket createBucket(org.application.spring.configuration.security.RateLimitingProperties.Policy policy) {
-                Refill refill = Refill.intervally(policy.refillTokens, policy.refillDuration);
-                Bandwidth limit = Bandwidth.classic(policy.capacity, refill);
+                Refill refill = Refill.intervally(policy.refillTokens(), policy.refillDuration());
+                Bandwidth limit = Bandwidth.classic(policy.capacity(), refill);
                 return Bucket.builder().addLimit(limit).build();
             }
 

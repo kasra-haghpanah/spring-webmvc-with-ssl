@@ -27,20 +27,7 @@ public class RateLimitingProperties {
         }
     }
 
-    public static class Policy {
-        public final String path;
-        public final int capacity;
-        public final int refillTokens;
-        public final Duration refillDuration;
-
-        public Policy(String path, int capacity, int refillTokens, Duration refillDuration) {
-            this.path = path;
-            this.capacity = capacity;
-            this.refillTokens = refillTokens;
-            this.refillDuration = refillDuration;
-        }
-
-
+    public static record Policy(String path, int capacity, int refillTokens, Duration refillDuration) {
     }
 
 }
