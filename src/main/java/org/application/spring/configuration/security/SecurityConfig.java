@@ -400,14 +400,16 @@ rate-limiting:
                 .cors(corsSpec -> {
                     corsSpec.configurationSource(corsConfigurationSource);
                 })
-/*                .headers(headers -> headers
-                        .httpStrictTransportSecurity(hsts -> hsts
+                .headers(headers -> headers
+                        /*.httpStrictTransportSecurity(hsts -> hsts
                                 .includeSubDomains(true)
                                 .preload(true)
                                 .maxAgeInSeconds(31536000) // یک سال
-                        )
-                )*/
-                .headers(headers -> headers
+                        )*/
+                        .contentTypeOptions(contentType -> contentType.disable()) // غیرفعال کردن پیش‌فرض
+                        .addHeaderWriter((request, response) -> {
+                            response.setHeader("X-Content-Type-Options", "nosniff");
+                        })
                         // XSS (Cross-Site Scripting) to avoid injecting javascript code on a browser
                         // فیلتر ضد XSS با Jsoup در Spring Boot
                         .xssProtection(xss -> {

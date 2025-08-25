@@ -3,6 +3,7 @@ package org.application.spring.configuration.server;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.security.SecurityConfig;
 import org.springframework.context.annotation.Configuration;
@@ -25,12 +26,18 @@ public class ContextPathAndXssFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
+
+
         String path = "";
         if (httpRequest.getRequestURI().startsWith(contextPath + "/")) {
             path = contextPath;
         }
 
         HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res = (HttpServletResponse) response;
+
+        //res.setHeader("Permissions-Policy", "geolocation=(), camera=(), microphone=()");
+
         HttpServletRequest wrappedRequest = new ContextPathAndXssRequestWrapper(req, path);
         chain.doFilter(wrappedRequest, response);
     }
