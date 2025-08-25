@@ -194,7 +194,11 @@ rate-limiting:
 
         final RateLimitingProperties rateLimitingProperties = new RateLimitingProperties(
                 true,
-                new RateLimitingProperties.Policy("/spring/**", 10, 10, Duration.ofSeconds(60))
+                new RateLimitingProperties.Policy(
+                        "/spring/**",
+                        Properties.getLimitRatingCapacity(),
+                        Properties.getLimitRatingRefillTokens(),
+                        Duration.ofSeconds(Properties.getLimitRatingRefillDurationInSecond()))
         );
 
         //rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/**", 20, 20, Duration.ofSeconds(60)));
@@ -214,7 +218,7 @@ rate-limiting:
                 }
 
                 String path = request.getRequestURI();
-                org.application.spring.configuration.security.RateLimitingProperties.Policy policy = matchPolicy(path);
+                RateLimitingProperties.Policy policy = matchPolicy(path);
                 Bucket bucket = RateLimitingProperties.buckets.computeIfAbsent(path, p -> createBucket(policy));
 
                 if (bucket.tryConsume(1)) {
@@ -233,7 +237,7 @@ rate-limiting:
                 }
             }
 
-            private org.application.spring.configuration.security.RateLimitingProperties.Policy matchPolicy(String path) {
+            private RateLimitingProperties.Policy matchPolicy(String path) {
                 return rateLimitingProperties.policies.stream()
                         .filter(p -> {
                             return path.matches(p.path().replace("**", ".*"));
@@ -242,7 +246,7 @@ rate-limiting:
                         .orElse(rateLimitingProperties.defaultPolicy);
             }
 
-            private Bucket createBucket(org.application.spring.configuration.security.RateLimitingProperties.Policy policy) {
+            private Bucket createBucket(RateLimitingProperties.Policy policy) {
                 Refill refill = Refill.intervally(policy.refillTokens(), policy.refillDuration());
                 Bandwidth limit = Bandwidth.classic(policy.capacity(), refill);
                 return Bucket.builder().addLimit(limit).build();

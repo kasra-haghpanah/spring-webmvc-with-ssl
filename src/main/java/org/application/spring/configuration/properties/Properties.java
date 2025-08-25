@@ -43,6 +43,11 @@ public class Properties {
         config.put("log.path", environment.getProperty("log.path"));
         config.put("log.console.active", environment.getProperty("log.console.active"));
 
+        config.put("limit-rating.capacity", environment.getProperty("limit-rating.capacity"));
+        config.put("limit-rating.refill-tokens", environment.getProperty("limit-rating.refill-tokens"));
+        config.put("limit-rating.refill-duration-in-second", environment.getProperty("limit-rating.refill-duration-in-second"));
+
+
     }
 
     private static <T> T get(String key, Class<T> T) {
@@ -164,6 +169,18 @@ public class Properties {
 
     public static Boolean getLogConsoleActive() {
         return Boolean.valueOf(get("log.console.active", String.class));
+    }
+
+    public static int getLimitRatingCapacity() {
+        return Integer.valueOf(get("limit-rating.capacity", String.class));
+    }
+
+    public static int getLimitRatingRefillTokens() {
+        return Integer.valueOf(get("limit-rating.refill-tokens", String.class));
+    }
+
+    public static int getLimitRatingRefillDurationInSecond() {
+        return Integer.valueOf(get("limit-rating.refill-duration-in-second", String.class));
     }
 
 }
