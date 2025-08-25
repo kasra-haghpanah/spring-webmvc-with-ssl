@@ -201,7 +201,7 @@ rate-limiting:
                         Duration.ofSeconds(Properties.getLimitRatingRefillDurationInSecond()))
         );
 
-        //rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/**", 20, 20, Duration.ofSeconds(60)));
+        rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/login", 5, 5, Duration.ofSeconds(60)));
         //rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/**", 5, 5, Duration.ofSeconds(60)));
 
         return new OncePerRequestFilter() {
