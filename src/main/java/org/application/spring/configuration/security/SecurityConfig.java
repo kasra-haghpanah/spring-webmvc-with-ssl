@@ -1,5 +1,8 @@
 package org.application.spring.configuration.security;
 
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Refill;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -8,15 +11,20 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.exception.ErrorResponse;
 import org.application.spring.configuration.properties.Properties;
+import org.application.spring.configuration.server.ContextPathAndXssFilter;
 import org.application.spring.configuration.server.ServerUtil;
 import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.service.UserService;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -45,6 +53,7 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 
 @Configuration
@@ -69,8 +78,21 @@ public class SecurityConfig {
             "/spring/validate/signup"
     };
 
+    @Bean
+    public FilterRegistrationBean<ContextPathAndXssFilter> xssFilterRegistration() {
+        FilterRegistrationBean<ContextPathAndXssFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new ContextPathAndXssFilter());
+        registration.addUrlPatterns("/spring/*");
+        registration.setOrder(1);
+        return registration;
+    }
 
-    private static boolean isPublicPath(String path) {
+    public static String sanitize(String input) {
+        return input == null ? null : Jsoup.clean(input, Safelist.none());
+    }
+
+
+    public static boolean isPublicPath(String path) {
         return Arrays.stream(PUBLIC_PATHS).anyMatch(path::startsWith);
     }
 
@@ -142,8 +164,82 @@ public class SecurityConfig {
         };
     }
 
-    @Bean("jwtAuthFilter")
-    public OncePerRequestFilter jwtAuthFilter(UserDetailsService userDetailsService) {
+
+    @Bean("rateLimitingFilter")
+    public OncePerRequestFilter rateLimitingFilter() {
+
+         /*
+rate-limiting:
+  enabled: true
+  default-policy:
+    capacity: 10
+    refill-tokens: 10
+    refill-duration: 1s
+  policies:
+
+    - path: /api/public/**
+      capacity: 20
+      refill-tokens: 20
+      refill-duration: 1s
+
+    - path: /api/private/**
+      capacity: 5
+      refill-tokens: 5
+      refill-duration: 1s
+    * */
+
+        final RateLimitingProperties rateLimitingProperties = new RateLimitingProperties(
+                true,
+                new RateLimitingProperties.Policy("/spring/**", 10, 10, Duration.ofSeconds(1))
+        );
+
+        //rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/**", 20, 20, Duration.ofSeconds(1)));
+        //rateLimitingProperties.add(new RateLimitingProperties.Policy("/spring/**", 5, 5, Duration.ofSeconds(1)));
+
+
+        return new OncePerRequestFilter() {
+
+
+            @Override
+            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+                if (!rateLimitingProperties.enabled) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
+                String path = request.getRequestURI();
+                org.application.spring.configuration.security.RateLimitingProperties.Policy policy = matchPolicy(path);
+                Bucket bucket = RateLimitingProperties.buckets.computeIfAbsent(path, p -> createBucket(policy));
+
+                if (bucket.tryConsume(1)) {
+                    filterChain.doFilter(request, response);
+                } else {
+                    response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+                    response.getWriter().write("Rate limit exceeded");
+                }
+            }
+
+            private org.application.spring.configuration.security.RateLimitingProperties.Policy matchPolicy(String path) {
+                return rateLimitingProperties.policies.stream()
+                        .filter(p -> path.matches(p.path.replace("**", ".*")))
+                        .findFirst()
+                        .orElse(rateLimitingProperties.defaultPolicy);
+            }
+
+            private Bucket createBucket(org.application.spring.configuration.security.RateLimitingProperties.Policy policy) {
+                Refill refill = Refill.intervally(policy.refillTokens, policy.refillDuration);
+                Bandwidth limit = Bandwidth.classic(policy.capacity, refill);
+                return Bucket.builder().addLimit(limit).build();
+            }
+
+
+        };
+
+    }
+
+    @Bean("jwtAuthenticationFilter")
+    public OncePerRequestFilter JwtAuthenticationFilter(UserDetailsService userDetailsService) {
         return new OncePerRequestFilter() {
             @Override
             protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -207,6 +303,7 @@ public class SecurityConfig {
             }
         };
     }
+
 
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint(
@@ -273,8 +370,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            @Qualifier("jwtAuthFilter") OncePerRequestFilter jwtAuthFilter,
-            RateLimitingFilter rateLimitingFilter,
+            @Qualifier("rateLimitingFilter") OncePerRequestFilter rateLimitingFilter,
+            @Qualifier("jwtAuthenticationFilter") OncePerRequestFilter jwtAuthenticationFilter,
             CorsConfigurationSource corsConfigurationSource,
             AuthenticationEntryPoint authenticationEntryPoint,
             AccessDeniedHandler accessDeniedHandler
@@ -347,8 +444,8 @@ public class SecurityConfig {
                         })
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class) // اجرای قبل از JWT
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }

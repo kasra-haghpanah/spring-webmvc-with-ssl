@@ -2,7 +2,7 @@ package org.application.spring.ddd.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import org.application.spring.configuration.security.XssFilterConfig;
+import org.application.spring.configuration.security.SecurityConfig;
 
 public class PersonDTO {
 
@@ -24,7 +24,7 @@ public class PersonDTO {
     }
 
     public void setEmail(String email) {
-        this.email = XssFilterConfig.sanitize(email);
+        this.email = SecurityConfig.sanitize(email);
     }
 
     public String getFirstName() {
@@ -32,7 +32,7 @@ public class PersonDTO {
     }
 
     public void setFirstName(String firstName) {
-        this.firstName = XssFilterConfig.sanitize(firstName);
+        this.firstName = SecurityConfig.sanitize(firstName);
     }
 
     public String getLastName() {
@@ -40,6 +40,6 @@ public class PersonDTO {
     }
 
     public void setLastName(String lastName) {
-        this.lastName = XssFilterConfig.sanitize(lastName);
+        this.lastName = SecurityConfig.sanitize(lastName);
     }
 }

@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
-import org.application.spring.configuration.security.AuthRequest;
-import org.application.spring.configuration.security.AuthResponse;
+import org.application.spring.configuration.security.AuthenticationRequest;
+import org.application.spring.configuration.security.AuthenticationResponse;
 import org.application.spring.configuration.security.JwtUtil;
 import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.service.MailService;
@@ -50,12 +50,12 @@ public class AuthController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public AuthResponse login(@RequestBody AuthRequest authRequest, HttpServletRequest request) {
+    public AuthenticationResponse login(@RequestBody AuthenticationRequest authRequest, HttpServletRequest request) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
         final UserDetails user = userDetailsService.loadUserByUsername(authRequest.username());
         ((User) user).setIp(request.getRemoteAddr());
         final String jwt = JwtUtil.generateToken(user, request.getRemoteAddr());
-        return new AuthResponse(jwt);
+        return new AuthenticationResponse(jwt);
     }
 
     @RequestMapping(value = "/unauthorized", method = RequestMethod.GET)

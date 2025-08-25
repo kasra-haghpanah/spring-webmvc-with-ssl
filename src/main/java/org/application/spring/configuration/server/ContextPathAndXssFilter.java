@@ -4,7 +4,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import org.application.spring.configuration.properties.Properties;
-import org.application.spring.configuration.security.XssFilterConfig;
+import org.application.spring.configuration.security.SecurityConfig;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class ContextPathAndXssFilter implements Filter {
         @Override
         public String getParameter(String name) {
             String value = super.getParameter(name);
-            return XssFilterConfig.sanitize(value);
+            return SecurityConfig.sanitize(value);
         }
 
         @Override
@@ -65,14 +65,14 @@ public class ContextPathAndXssFilter implements Filter {
             if (values == null) return null;
             String[] sanitized = new String[values.length];
             for (int i = 0; i < values.length; i++) {
-                sanitized[i] = XssFilterConfig.sanitize(values[i]);
+                sanitized[i] = SecurityConfig.sanitize(values[i]);
             }
             return sanitized;
         }
 
         @Override
         public String getHeader(String name) {
-            return XssFilterConfig.sanitize(super.getHeader(name));
+            return SecurityConfig.sanitize(super.getHeader(name));
         }
 
 

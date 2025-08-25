@@ -2,7 +2,7 @@ package org.application.spring.ddd.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
-import org.application.spring.configuration.security.XssFilterConfig;
+import org.application.spring.configuration.security.SecurityConfig;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class StoreDTO {
     }
 
     public void setName(String name) {
-        this.name = XssFilterConfig.sanitize(name);
+        this.name = SecurityConfig.sanitize(name);
     }
 
     public List<PersonDTO> getPersonDTOS() {
