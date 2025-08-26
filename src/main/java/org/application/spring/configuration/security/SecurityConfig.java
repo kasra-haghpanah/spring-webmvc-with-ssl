@@ -76,7 +76,9 @@ public class SecurityConfig {
             "/spring/v3/api-docs/**",
             "/spring/api-docs/**",
             "/spring/webjars/**",
-            "/spring/validate/signup"
+            "/spring/validate/signup",
+            "/spring/actuator/**"
+           // "/spring/actuator/prometheus/**"
     };
 
     @Bean

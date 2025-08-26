@@ -4,11 +4,16 @@ package org.application.spring.configuration.monitoring;
 
 
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.micrometer.metrics.autoconfigure.export.prometheus.PrometheusProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+@ConditionalOnProperty(
+        name = "monitoring.active",
+        havingValue = "true"
+)
 @Configuration
 public class ActuatorPrometheusConfig {
 
