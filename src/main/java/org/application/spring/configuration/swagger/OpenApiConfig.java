@@ -20,6 +20,7 @@ import org.springframework.web.method.HandlerMethod;
 import java.text.MessageFormat;
 import java.util.List;
 
+// https://localhost:8443/spring/swagger-ui/index.html
 @Configuration
 public class OpenApiConfig {
 

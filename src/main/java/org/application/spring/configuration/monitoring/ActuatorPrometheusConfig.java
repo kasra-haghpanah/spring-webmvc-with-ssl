@@ -21,9 +21,9 @@ public class ActuatorPrometheusConfig {
     @Primary
     public WebEndpointProperties webEndpointProperties() {
         WebEndpointProperties properties = new WebEndpointProperties();
-        properties.getExposure().getInclude().add("health");
-        properties.getExposure().getInclude().add("info");
-        properties.getExposure().getInclude().add("prometheus");
+        properties.getExposure().getInclude().add("health");     //https://localhost:8443/spring/actuator/health
+        properties.getExposure().getInclude().add("info");       // https://localhost:8443/spring/actuator/info
+        properties.getExposure().getInclude().add("prometheus"); // https://localhost:8443/spring/actuator/prometheus
         return properties;
     }
 
