@@ -7,6 +7,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
+import org.springframework.http.converter.AbstractHttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -17,6 +19,8 @@ import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -57,6 +61,23 @@ public class ThymeleafConfig implements WebMvcConfigurer {
         this.interceptor = interceptor;
     }
 
+    // for UTF-8
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        for (HttpMessageConverter<?> converter : converters) {
+            if (converter instanceof AbstractHttpMessageConverter<?> abstractHttpMessageConverter) {
+                abstractHttpMessageConverter.setDefaultCharset(StandardCharsets.UTF_8);
+            }
+        }
+    }
+
+    // for logging
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(interceptor);
+    }
+
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // https://www.baeldung.com/cachable-static-assets-with-spring-mvc
@@ -72,15 +93,8 @@ public class ThymeleafConfig implements WebMvcConfigurer {
 
     }
 
-
-    // for logging
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(interceptor);
-    }
-
     @Bean
-    public ITemplateResolver thymeleafTemplateResolver(ApplicationContext applicationContext){
+    public ITemplateResolver thymeleafTemplateResolver(ApplicationContext applicationContext) {
         final SpringResourceTemplateResolver resolver = new SpringResourceTemplateResolver();
         resolver.setApplicationContext(applicationContext);
         resolver.setPrefix("classpath:/templates/");

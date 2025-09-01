@@ -7,6 +7,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.exception.ErrorResponse;
@@ -19,7 +20,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -78,14 +78,15 @@ public class SecurityConfig {
             "/spring/webjars/**",
             "/spring/validate/signup",
             "/spring/actuator/**"
-           // "/spring/actuator/prometheus/**"
+            // "/spring/actuator/prometheus/**"
     };
+
 
     @Bean
     public FilterRegistrationBean<ContextPathAndXssFilter> xssFilterRegistration() {
         FilterRegistrationBean<ContextPathAndXssFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new ContextPathAndXssFilter());
-        registration.addUrlPatterns("/spring/*");
+        registration.addUrlPatterns("/*");
         registration.setOrder(1);
         return registration;
     }
@@ -273,10 +274,27 @@ rate-limiting:
         return new OncePerRequestFilter() {
             @Override
             protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-                final String authHeader = request.getHeader("Authorization");
+                String authHeader = request.getHeader("Authorization");
                 final String jwt;
                 final String username;
                 final String ip;
+
+                if (authHeader == null || authHeader.trim().equals("")) {
+                    Cookie[] cookies = request.getCookies();
+
+                    Optional<Cookie> cookieValue = Arrays
+                            .stream(cookies)
+                            .filter(cookie -> {
+                                return cookie.getName().toLowerCase().equals("access_token");
+                            })
+                            .reduce((cookie1, cookie2) -> {
+                                return cookie2;
+                            });
+                    if (cookieValue.isPresent()) {
+                        authHeader = "Bearer " + cookieValue.get().getValue();
+                    }
+
+                }
                 // for logging
                 request.setAttribute("start-time", System.nanoTime());
                 ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 4_096);
@@ -440,7 +458,11 @@ rate-limiting:
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_PATHS)
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/spring/xml/bean/sample", "/spring/make/mybean")
+                        .requestMatchers(HttpMethod.GET,
+                                "/spring/xml/bean/sample",
+                                "/spring/make/mybean",
+                                "/spring/files/**"
+                        )
                         .access((authentication, context) -> {
 
                             if (!(authentication.get().getPrincipal() instanceof User)) {
@@ -457,7 +479,11 @@ rate-limiting:
                                     }) ?
                                     new AuthorizationDecision(true) : new AuthorizationDecision(false);
                         })
-                        .requestMatchers(HttpMethod.POST, "/spring/validate/store", "/refresh/token")
+                        .requestMatchers(HttpMethod.POST,
+                                "/spring/validate/store",
+                                "/spring/refresh/token",
+                                "/spring/upload"
+                        )
                         .access((authentication, context) -> {
 
                             if (!(authentication.get().getPrincipal() instanceof User)) {

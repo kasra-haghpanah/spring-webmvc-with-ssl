@@ -1,6 +1,8 @@
 package org.application.spring.ddd.controller;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
@@ -50,12 +52,24 @@ public class AuthController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public AuthenticationResponse login(@RequestBody AuthenticationRequest authRequest, HttpServletRequest request) {
+    public AuthenticationResponse login(
+            @RequestBody AuthenticationRequest authRequest,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
         final UserDetails user = userDetailsService.loadUserByUsername(authRequest.username());
         ((User) user).setIp(request.getRemoteAddr());
-        final String jwt = JwtUtil.generateToken(user, request.getRemoteAddr());
-        return new AuthenticationResponse(jwt);
+        final String jwtToken = JwtUtil.generateToken(user, request.getRemoteAddr());
+
+        Cookie cookie = new Cookie("access_token", jwtToken);
+        cookie.setHttpOnly(true); // جلوگیری از دسترسی جاوااسکریپت
+        cookie.setSecure(true);   // فقط در HTTPS
+        cookie.setPath("/");      // در کل دامنه معتبر باشه
+        cookie.setMaxAge(60 * 60); // اعتبار ۱ ساعت
+
+        response.addCookie(cookie);
+        return new AuthenticationResponse(jwtToken);
     }
 
     @RequestMapping(value = "/refresh/token", method = RequestMethod.POST)
