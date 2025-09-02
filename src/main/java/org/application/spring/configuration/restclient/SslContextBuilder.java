@@ -1,10 +1,15 @@
 package org.application.spring.configuration.restclient;
 
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
+
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.FileInputStream;
+import java.net.http.HttpClient;
 import java.security.KeyStore;
+import java.time.Duration;
 
 public class SslContextBuilder {
 
@@ -52,6 +57,34 @@ public class SslContextBuilder {
         sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
         return sslContext;
+    }
+
+    public static RestClient createSecureRestClient(SSLContext sslContext) {
+        HttpClient httpClient = HttpClient.newBuilder()
+                .sslContext(sslContext)
+                .connectTimeout(Duration.ofSeconds(10))
+                .build();
+
+        return RestClient.builder()
+                .requestFactory(new JdkClientHttpRequestFactory(httpClient))
+                .build();
+    }
+
+    public static RestClient createSecureRestClient(
+            String keyStoreType,
+            String keyStorePath,
+            String keyStorePassword,
+            String trustStorePath,
+            String trustStorePassword
+    ) throws Exception {
+        SSLContext sslContext = buildSslContext(
+                    "PKCS12",
+                    "classpath:p12/client.p12",
+                    "client123",
+                    "classpath:p12/client-truststore.p12",
+                    "trust123"
+            );
+        return createSecureRestClient(sslContext);
     }
 }
 
