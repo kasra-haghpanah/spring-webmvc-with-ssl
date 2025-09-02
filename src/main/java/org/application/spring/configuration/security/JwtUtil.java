@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.Map;
 import java.util.function.Function;
 
 public class JwtUtil {
@@ -40,6 +41,18 @@ public class JwtUtil {
                 .setSubject(user.getUsername())
                 .claim("roles", user.getAuthorities())
                 .claim("ip", ip)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000 * Properties.getAppJwtExpirationHours()))
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public static String generateToken(UserDetails user, Map<String, Object> map) {
+
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("roles", user.getAuthorities())
+                .addClaims(map)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 3600000 * Properties.getAppJwtExpirationHours()))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)

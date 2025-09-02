@@ -15,6 +15,7 @@ import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.server.ContextPathAndXssFilter;
 import org.application.spring.configuration.server.ServerUtil;
 import org.application.spring.ddd.model.entity.User;
+import org.application.spring.ddd.model.json.type.Authority;
 import org.application.spring.ddd.service.UserService;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
@@ -279,6 +280,10 @@ rate-limiting:
                 final String jwt;
                 final String username;
                 final String ip;
+                final String firstName;
+                final String lastName;
+                final String phoneNumber;
+                final String[] roles;
 
                 if (authHeader == null || authHeader.trim().equals("")) {
                     Cookie[] cookies = request.getCookies();
@@ -326,6 +331,18 @@ rate-limiting:
                     Claims claims = JwtUtil.extractAllClaims(jwt);
                     username = (String) claims.get("sub");
                     ip = (String) claims.get("ip");
+                    firstName = (String) claims.get("firstName");
+                    lastName = (String) claims.get("lastName");
+                    phoneNumber = (String) claims.get("phoneNumber");
+                    List<Map<String, String>> list = ((List<Map<String, String>>) claims.get("roles"));
+                    roles = new String[list.size()];
+                    int i = 0;
+                    for (Map<String, String> map : list) {
+                        for (Map.Entry<String, String> entry : map.entrySet()) {
+                            roles[i++] = entry.getValue();
+                        }
+                    }
+
                 } catch (JwtException e) {
                     // اگر JWT نامعتبر بود، ادامه نده
                     filterChain.doFilter(wrappedRequest, wrappedResponse);
@@ -336,11 +353,19 @@ rate-limiting:
                 }
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                    ((User) userDetails).setIp(ip);
-                    if (JwtUtil.isTokenValid(jwt, userDetails)) {
+                    //UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                    //((User) userDetails).setIp(ip);
+                    User user = new User();
+                    user.setIp(ip);
+                    user.setFirstName(firstName);
+                    user.setLastName(lastName);
+                    user.setPhoneNumber(phoneNumber);
+                    user.setAuthority(new Authority(roles));
+                    user.setUserName(username);
+
+                    if (JwtUtil.isTokenValid(jwt, user)) {
                         UsernamePasswordAuthenticationToken authToken =
-                                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }

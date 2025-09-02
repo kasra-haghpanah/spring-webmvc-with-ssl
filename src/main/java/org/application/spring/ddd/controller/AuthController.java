@@ -26,7 +26,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.LocaleResolver;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -58,9 +60,17 @@ public class AuthController {
             HttpServletResponse response
     ) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
-        final UserDetails user = userDetailsService.loadUserByUsername(authRequest.username());
-        ((User) user).setIp(request.getRemoteAddr());
-        final String jwtToken = JwtUtil.generateToken(user, request.getRemoteAddr());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.username());
+        User user = (User) userDetails;
+        user.setIp(request.getRemoteAddr());
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("ip", request.getRemoteAddr());
+        map.put("firstName", user.getFirstName());
+        map.put("lastName", user.getLastName());
+        map.put("phoneNumber", user.getPhoneNumber());
+
+        final String jwtToken = JwtUtil.generateToken(user, map);
 
         Cookie cookie = new Cookie("access_token", jwtToken);
         cookie.setHttpOnly(true); // جلوگیری از دسترسی جاوااسکریپت
