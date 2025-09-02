@@ -1,0 +1,75 @@
+ for server: دستور کامل برای ساخت keystore با فرمت PKCS12
+
+-----------------------------------------------------------------------------------------------------
+keytool -genkeypair ^
+-alias serverAlias ^
+-keyalg RSA ^
+-keysize 2048 ^
+-keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\server.p12" ^
+-storetype PKCS12 ^
+-storepass server123 ^
+-keypass server123 ^
+-validity 3650 ^
+-dname "CN=localhost, OU=Backend, O=Kasra Inc, L=Tehran, ST=Tehran, C=IR"
+-----------------------------------------------------------------------------------------------------
+
+-alias serverAlias: نام کلید داخل keystore
+-keyalg RSA: الگوریتم کلید (RSA امن و رایج هست)
+-keysize 2048: اندازه کلید (برای امنیت مناسب)
+-keystore sample.p12: نام فایل keystore خروجی
+-storetype PKCS12: فرمت استاندارد keystore
+-storepass: پسورد keystore و کلید خصوصی
+-keypass: پسورد keystore و کلید خصوصی
+-validity 3650: اعتبار گواهی به روز (اینجا ۱۰ سال)
+-dname: 	اطلاعات گواهی (CN, OU, O, ...)
+-----------------------------------------------------------------------------------------------------
+  correction test:
+-----------------------------------------------------------------------------------------------------
+keytool -list -keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\server.p12" -storepass server123
+-----------------------------------------------------------------------------------------------------
+ export server.cer
+-----------------------------------------------------------------------------------------------------
+keytool -export ^
+ -alias serverAlias ^
+ -keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\server.p12" ^
+ -storetype PKCS12 ^
+ -storepass server123 ^
+ -file "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\server.cer"
+-----------------------------------------------------------------------------------------------------
+
+
+for client: دستور کامل برای ساخت keystore با فرمت PKCS12
+
+-----------------------------------------------------------------------------------------------------
+ 1. ساخت keystore کلاینت با فرمت PKCS12
+-----------------------------------------------------------------------------------------------------
+keytool -genkeypair ^
+-alias clientAlias ^
+-keyalg RSA ^
+-keysize 2048 ^
+-keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\client.p12" ^
+-storetype PKCS12 ^
+-storepass client123 ^
+-keypass client123 ^
+-validity 3650 ^
+-dname "CN=client, OU=Backend, O=Kasra Inc, L=Tehran, ST=Tehran, C=IR"
+-----------------------------------------------------------------------------------------------------
+ 2. استخراج گواهی عمومی کلاینت
+-----------------------------------------------------------------------------------------------------
+keytool -export ^
+-alias clientAlias ^
+-keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\client.p12" ^
+-storetype PKCS12 ^
+-storepass client123 ^
+-file "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\client.cer"
+-----------------------------------------------------------------------------------------------------
+3. ساخت truststore کلاینت با فرمت PKCS12 (برای اعتماد به سرور)
+ -----------------------------------------------------------------------------------------------------
+ keytool -import ^
+  -alias serverAlias ^
+  -file "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\server.cer" ^
+  -keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\client-truststore.p12" ^
+  -storetype PKCS12 ^
+  -storepass trust123 ^
+  -noprompt
+ -----------------------------------------------------------------------------------------------------

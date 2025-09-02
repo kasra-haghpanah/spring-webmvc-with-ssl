@@ -9,14 +9,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.application.spring.configuration.exception.ErrorResponse;
+import org.application.spring.configuration.security.AuthenticationRequest;
+import org.application.spring.configuration.security.AuthenticationResponse;
 import org.application.spring.ddd.service.MailService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,22 +24,10 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.LocaleResolver;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.security.KeyStore;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
-
-
 import java.io.*;
-import java.net.http.HttpClient;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.*;
-import java.security.cert.CertificateException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -190,8 +178,19 @@ public class RestController {
             @Valid @PathVariable("version") @Pattern(regexp = "(\\/)*((\\d){1,2})\\.((\\d){1,2})\\.((\\d){1,2})(.)*") String version,
             HttpServletResponse response
     ) {
+
+        AuthenticationRequest request = new AuthenticationRequest("kasra_khpk1985@yahoo.com", "123");
+
+        AuthenticationResponse response1 = restClient.post()
+                .uri("https://localhost:8443/spring/login")
+                .header("Accept-Language", "fa")
+                .body(request)
+                .retrieve()
+                .body(AuthenticationResponse.class);
+
         restClient.get()
                 .uri("https://localhost:8443/spring/favicon.ico")
+                .header("Authorization", "Bearer " + response1.token())
                 .retrieve()
                 .body(byte[].class);
     }

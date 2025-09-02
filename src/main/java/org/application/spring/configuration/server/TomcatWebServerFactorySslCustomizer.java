@@ -19,17 +19,13 @@ public class TomcatWebServerFactorySslCustomizer implements WebServerFactoryCust
     @Override
     public void customize(TomcatServletWebServerFactory serverFactory) {
 
-        //java_path/bin/keytool.exe
-        // keytool -genkeypair -alias myAlias -keyalg RSA -keysize 2048 -storetype JKS -keystore sample.jks -validity 3650
-
-        // keytool -list -v -keystore C:\Users\98911\Desktop\Technical-inistitue-of-Tehran\project\spring\target\classes\jks\sample.jks
         Ssl ssl = new Ssl();
         ssl.setEnabled(true);
-        ssl.setKeyStore("classpath:jks/sample.jks");
-        ssl.setKeyAlias("myAlias");
-        ssl.setKeyStoreType("JKS");
-        ssl.setKeyPassword("kasra123");
-        ssl.setKeyStorePassword("kasra123");
+        ssl.setKeyStore("classpath:jks/server.p12");
+        ssl.setKeyAlias("serverAlias");
+        ssl.setKeyStoreType("PKCS12"); // "JKS"
+        ssl.setKeyPassword("server123");
+        ssl.setKeyStorePassword("server123");
         serverFactory.setSsl(ssl);
         serverFactory.setPort(getPort()); // یا از Properties بخوانید
 

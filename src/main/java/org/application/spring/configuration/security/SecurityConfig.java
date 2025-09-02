@@ -77,7 +77,8 @@ public class SecurityConfig {
             "/spring/api-docs/**",
             "/spring/webjars/**",
             "/spring/validate/signup",
-            "/spring/actuator/**"
+            "/spring/actuator/**",
+            "/spring/resource/**"
             // "/spring/actuator/prometheus/**"
     };
 
@@ -282,16 +283,18 @@ rate-limiting:
                 if (authHeader == null || authHeader.trim().equals("")) {
                     Cookie[] cookies = request.getCookies();
 
-                    Optional<Cookie> cookieValue = Arrays
-                            .stream(cookies)
-                            .filter(cookie -> {
-                                return cookie.getName().toLowerCase().equals("access_token");
-                            })
-                            .reduce((cookie1, cookie2) -> {
-                                return cookie2;
-                            });
-                    if (cookieValue.isPresent()) {
-                        authHeader = "Bearer " + cookieValue.get().getValue();
+                    if (cookies != null) {
+                        Optional<Cookie> cookieValue = Arrays
+                                .stream(cookies)
+                                .filter(cookie -> {
+                                    return cookie.getName().toLowerCase().equals("access_token");
+                                })
+                                .reduce((cookie1, cookie2) -> {
+                                    return cookie2;
+                                });
+                        if (cookieValue.isPresent()) {
+                            authHeader = "Bearer " + cookieValue.get().getValue();
+                        }
                     }
 
                 }

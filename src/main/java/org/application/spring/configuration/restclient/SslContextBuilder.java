@@ -8,17 +8,22 @@ import javax.net.ssl.TrustManagerFactory;
 
 public class SslContextBuilder {
 
-    public static SSLContext buildSslContext(String keyStorePath, String keyStorePassword,
-                                             String trustStorePath, String trustStorePassword) throws Exception {
+    public static SSLContext buildSslContext(
+            String keyStoreType,
+            String keyStorePath,
+            String keyStorePassword,
+            String trustStorePath,
+            String trustStorePassword
+    ) throws Exception {
 
         // Load client keystore
-        KeyStore keyStore = KeyStore.getInstance("JKS");
+        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
         try (FileInputStream keyStoreStream = new FileInputStream(keyStorePath)) {
             keyStore.load(keyStoreStream, keyStorePassword.toCharArray());
         }
 
         // Load truststore
-        KeyStore trustStore = KeyStore.getInstance("JKS");
+        KeyStore trustStore = KeyStore.getInstance(keyStoreType);
         try (FileInputStream trustStoreStream = new FileInputStream(trustStorePath)) {
             trustStore.load(trustStoreStream, trustStorePassword.toCharArray());
         }
