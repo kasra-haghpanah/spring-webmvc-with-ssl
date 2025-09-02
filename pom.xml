@@ -261,9 +261,9 @@
 
     <profiles>
 
-        <profile>
-            <id>casual</id>
-            <activation> <!-- for create war package -->
+        <profile><!--  mvn clean install -Pmake-certificate-server -->
+            <id>make-certificate-server</id>
+            <activation>
                 <activeByDefault>false</activeByDefault>
                 <property>
                     <name>develop</name>
@@ -271,10 +271,60 @@
                 </property>
             </activation>
 
+            <build>
+                <plugins>
+
+                    <plugin>
+
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.5.1</version>
+                        <executions>
+
+                        <execution>
+                            <id>generate-server-keystore</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <executable>keytool</executable>
+                                <arguments>
+                                    <argument>-genkeypair</argument>
+                                    <argument>-alias</argument>
+                                    <argument>serverAlias</argument>
+                                    <argument>-keyalg</argument>
+                                    <argument>RSA</argument>
+                                    <argument>-keysize</argument>
+                                    <argument>2048</argument>
+                                    <argument>-keystore</argument>
+                                    <argument>${project.basedir}/src/main/resources/p12/server.p12</argument>
+                                    <argument>-storetype</argument>
+                                    <argument>PKCS12</argument>
+                                    <argument>-storepass</argument>
+                                    <argument>server123</argument>
+                                    <argument>-keypass</argument>
+                                    <argument>server123</argument>
+                                    <argument>-validity</argument>
+                                    <argument>3650</argument>
+                                    <argument>-dname</argument>
+                                    <argument>CN=localhost, OU=Backend, O=Kasra Inc, L=Tehran, ST=Tehran, C=IR
+                                    </argument>
+                                </arguments>
+                            </configuration>
+                        </execution>
+
+                        </executions>
+
+                    </plugin>
+
+                </plugins>
+            </build>
+
         </profile>
 
-        <profile> <!--  mvn clean install -Pmake-certificate -->
-            <id>make-certificate</id>
+        <profile> <!--  mvn clean install -Pmake-certificate-client -->
+            <id>make-certificate-client</id>
             <activation>
                 <activeByDefault>false</activeByDefault>
                 <property>
@@ -291,39 +341,6 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>3.5.1</version>
                         <executions>
-
-                            <execution>
-                                <id>generate-server-keystore</id>
-                                <phase>generate-resources</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>keytool</executable>
-                                    <arguments>
-                                        <argument>-genkeypair</argument>
-                                        <argument>-alias</argument>
-                                        <argument>serverAlias</argument>
-                                        <argument>-keyalg</argument>
-                                        <argument>RSA</argument>
-                                        <argument>-keysize</argument>
-                                        <argument>2048</argument>
-                                        <argument>-keystore</argument>
-                                        <argument>${project.basedir}/src/main/resources/p12/server.p12</argument>
-                                        <argument>-storetype</argument>
-                                        <argument>PKCS12</argument>
-                                        <argument>-storepass</argument>
-                                        <argument>server123</argument>
-                                        <argument>-keypass</argument>
-                                        <argument>server123</argument>
-                                        <argument>-validity</argument>
-                                        <argument>3650</argument>
-                                        <argument>-dname</argument>
-                                        <argument>CN=localhost, OU=Backend, O=Kasra Inc, L=Tehran, ST=Tehran, C=IR
-                                        </argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
 
                             <execution>
                                 <id>export-server-cert</id>
