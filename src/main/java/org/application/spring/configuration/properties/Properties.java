@@ -3,6 +3,7 @@ package org.application.spring.configuration.properties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.application.spring.configuration.restclient.RestClientConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
@@ -18,6 +19,10 @@ public class Properties {
 
     public Properties(Environment environment) {
 
+        String classPath = RestClientConfig.class.getResource("").getPath();
+        classPath = classPath.substring(0, classPath.indexOf("/classes") + 8);
+
+        config.put("classpath", classPath);
         config.put("version", environment.getProperty("version"));
         config.put("server.port", environment.getProperty("server.port"));
         config.put("spring.application.name", environment.getProperty("spring.application.name"));
@@ -56,6 +61,10 @@ public class Properties {
 
     private static <T> T get(String key, Class<T> T) {
         return (T) config.get(key);
+    }
+
+    public static String getClassPath() {
+        return get("classpath", String.class);
     }
 
     public static Integer getServerPort() {
@@ -188,10 +197,10 @@ public class Properties {
     }
 
 
-    public static List<Map<String,Object>> getLimitRatingList() {
+    public static List<Map<String, Object>> getLimitRatingList() {
         String value = get("limit-rating.list", String.class);
         try {
-            return new ObjectMapper().readValue(value, new TypeReference<List<Map<String,Object>>>() {
+            return new ObjectMapper().readValue(value, new TypeReference<List<Map<String, Object>>>() {
             });
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

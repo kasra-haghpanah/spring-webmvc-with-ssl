@@ -1,12 +1,20 @@
 package org.application.spring.configuration.restclient;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.FileInputStream;
 import java.security.KeyStore;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.TrustManagerFactory;
 
 public class SslContextBuilder {
+
+    static final String classpath;
+
+    static {
+        String classPath = RestClientConfig.class.getResource("").getPath();
+        classPath = classPath.substring(0, classPath.indexOf("/classes") + 8);
+        classpath = classPath;
+    }
 
     public static SSLContext buildSslContext(
             String keyStoreType,
@@ -15,6 +23,9 @@ public class SslContextBuilder {
             String trustStorePath,
             String trustStorePassword
     ) throws Exception {
+
+        keyStorePath = keyStorePath.replace("classpath:", classpath + "/");
+        trustStorePath = trustStorePath.replace("classpath:", classpath + "/");
 
         // Load client keystore
         KeyStore keyStore = KeyStore.getInstance(keyStoreType);
