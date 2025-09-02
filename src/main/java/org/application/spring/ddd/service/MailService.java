@@ -9,6 +9,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -16,7 +17,8 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @Service
 @DependsOn({"properties"})
@@ -26,12 +28,10 @@ public class MailService {
 
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
-    private final ExecutorService virtualThreadExecutor;
 
-    public MailService(JavaMailSender javaMailSender, SpringTemplateEngine templateEngine, ExecutorService virtualThreadExecutor) {
+    public MailService(JavaMailSender javaMailSender, SpringTemplateEngine templateEngine) {
         this.javaMailSender = javaMailSender;
         this.templateEngine = templateEngine;
-        this.virtualThreadExecutor = virtualThreadExecutor;
     }
 
     public void sendSimpleMail(String to, String subject, String text) {
@@ -79,12 +79,10 @@ public class MailService {
         return "ok";
     }
 
-    public void sendActivationMail(User user) {
-
-        virtualThreadExecutor.submit(() -> {
-            return sendMailFromTemplate(user, "email/activation", "User Activation");
-        });
-
+    @Async
+    public Future<String> sendActivationMail(User user) {
+        String result = sendMailFromTemplate(user, "email/activation", "User Activation");
+        return CompletableFuture.completedFuture(result);
     }
 
 }
