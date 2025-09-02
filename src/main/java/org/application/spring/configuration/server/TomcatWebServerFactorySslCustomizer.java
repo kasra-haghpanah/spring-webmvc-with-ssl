@@ -21,7 +21,7 @@ public class TomcatWebServerFactorySslCustomizer implements WebServerFactoryCust
 
         Ssl ssl = new Ssl();
         ssl.setEnabled(true);
-        ssl.setKeyStore("classpath:jks/server.p12");
+        ssl.setKeyStore("classpath:p12/server.p12");
         ssl.setKeyAlias("serverAlias");
         ssl.setKeyStoreType("PKCS12"); // "JKS"
         ssl.setKeyPassword("server123");
