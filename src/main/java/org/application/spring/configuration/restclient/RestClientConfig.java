@@ -2,11 +2,9 @@ package org.application.spring.configuration.restclient;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.web.client.RestClient;
 
 @Configuration
-@DependsOn({"properties"})
 public class RestClientConfig {
 
     @Bean("secureRestClient")
