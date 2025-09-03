@@ -1,3 +1,29 @@
+-----------------------------------------------------------------------------------------------------
+The correction test for server.p12
+-----------------------------------------------------------------------------------------------------
+ keytool -list ^
+ -keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\server.p12" ^
+ -storetype PKCS12 ^
+ -storepass server123 ^
+ -v
+-----------------------------------------------------------------------------------------------------
+The correction test for client.p12
+-----------------------------------------------------------------------------------------------------
+keytool -list ^
+-keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\client.p12" ^
+-storetype PKCS12 ^
+-storepass client123 ^
+-v
+-----------------------------------------------------------------------------------------------------
+The correction test for client-truststore.p12
+-----------------------------------------------------------------------------------------------------
+keytool -list ^
+-keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\client-truststore.p12" ^
+-storetype PKCS12 ^
+-storepass trust123 ^
+-v
+-----------------------------------------------------------------------------------------------------
+
  🔐 ۱. server.p12 — Keystore سرور
  ✅ چی هست؟
  فایلی با فرمت PKCS12 که شامل:
@@ -87,7 +113,7 @@ keytool -genkeypair ^
 -alias serverAlias ^
 -keyalg RSA ^
 -keysize 2048 ^
--keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\server.p12" ^
+-keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\server.p12" ^
 -storetype PKCS12 ^
 -storepass server123 ^
 -keypass server123 ^
@@ -107,16 +133,16 @@ keytool -genkeypair ^
 -----------------------------------------------------------------------------------------------------
   correction test:
 -----------------------------------------------------------------------------------------------------
-keytool -list -keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\server.p12" -storepass server123
+keytool -list -keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\server.p12" -storepass server123
 -----------------------------------------------------------------------------------------------------
  export server.cer
 -----------------------------------------------------------------------------------------------------
 keytool -export ^
  -alias serverAlias ^
- -keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\server.p12" ^
+ -keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\server.p12" ^
  -storetype PKCS12 ^
  -storepass server123 ^
- -file "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\server.cer"
+ -file "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\server.cer"
 -----------------------------------------------------------------------------------------------------
 
 
@@ -129,7 +155,7 @@ keytool -genkeypair ^
 -alias clientAlias ^
 -keyalg RSA ^
 -keysize 2048 ^
--keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\client.p12" ^
+-keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\client.p12" ^
 -storetype PKCS12 ^
 -storepass client123 ^
 -keypass client123 ^
@@ -140,17 +166,17 @@ keytool -genkeypair ^
 -----------------------------------------------------------------------------------------------------
 keytool -export ^
 -alias clientAlias ^
--keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\client.p12" ^
+-keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\client.p12" ^
 -storetype PKCS12 ^
 -storepass client123 ^
--file "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\client.cer"
+-file "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\client.cer"
 -----------------------------------------------------------------------------------------------------
 3. ساخت truststore کلاینت با فرمت PKCS12 (برای اعتماد به سرور)
  -----------------------------------------------------------------------------------------------------
  keytool -import ^
   -alias serverAlias ^
-  -file "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\server.cer" ^
-  -keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\jks\\client-truststore.p12" ^
+  -file "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\server.cer" ^
+  -keystore "C:\\Users\\98911\\Desktop\\Technical-inistitue-of-Tehran\\project\\spring\\src\\main\\resources\\p12\\client-truststore.p12" ^
   -storetype PKCS12 ^
   -storepass trust123 ^
   -noprompt
