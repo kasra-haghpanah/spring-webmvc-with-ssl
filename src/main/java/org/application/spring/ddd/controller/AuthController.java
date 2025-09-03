@@ -14,6 +14,7 @@ import org.application.spring.ddd.service.MailService;
 import org.application.spring.ddd.service.UserService;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -79,6 +80,9 @@ public class AuthController {
         cookie.setMaxAge(60 * 60); // اعتبار ۱ ساعت
 
         response.addCookie(cookie);
+
+        response.setHeader("Location", "/spring/"); // redirect url
+        response.setStatus(HttpStatus.MOVED_PERMANENTLY.value()); // redirect url
         return new AuthenticationResponse(jwtToken);
     }
 

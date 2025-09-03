@@ -177,7 +177,7 @@ public class RestController {
     public void resource(
             @Valid @PathVariable("version") @Pattern(regexp = "(\\/)*((\\d){1,2})\\.((\\d){1,2})\\.((\\d){1,2})(.)*") String version,
             HttpServletResponse response
-    ) {
+    ) throws IOException {
 
         AuthenticationRequest request = new AuthenticationRequest("kasra_khpk1985@yahoo.com", "123");
 
@@ -188,11 +188,30 @@ public class RestController {
                 .retrieve()
                 .body(AuthenticationResponse.class);
 
-        restClient.get()
+
+        byte[] buffer = restClient.get()
                 .uri("https://localhost:8443/spring/favicon.ico")
                 .header("Authorization", "Bearer " + response1.token())
-                .retrieve()
-                .body(byte[].class);
+                .exchange((clientRequest, clientResponse) -> {
+
+                    clientResponse.getHeaders()
+                            .forEach((key, values) -> {
+
+                                if (values != null && values.size() > 0) {
+                                    response.setHeader(key, values.get(0));
+                                }
+
+                            });
+                    return clientResponse.bodyTo(byte[].class);
+
+
+                });
+
+        OutputStream out = response.getOutputStream();
+        out.write(buffer);
+        out.flush();
+
+
     }
 
 }
