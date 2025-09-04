@@ -173,17 +173,18 @@ public class RestController {
     }
 
 
-    @RequestMapping(value = "/resource/{version}/**", method = RequestMethod.GET)
+    @RequestMapping(value = "/resource/{version}", method = RequestMethod.GET)
     @ResponseBody
     public void resource(
             @Valid @PathVariable("version") @Pattern(regexp = "(\\/)*((\\d){1,2})\\.((\\d){1,2})\\.((\\d){1,2})(.)*") String version,
+            @RequestParam("path") String path,
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
 
-        String fullPath = request.getRequestURI(); // /spring/resource/0.0.1/images/favicon.ico
-        String basePath = "/spring/resource/" + version + "/";
-        String filename = fullPath.substring(fullPath.indexOf(basePath) + basePath.length()).replaceAll("[//]{2,}", "/");
+        //String fullPath = request.getRequestURI(); // /spring/resource/0.0.1/images/favicon.ico
+        //String basePath = "/spring/resource/" + version + "/" + path;
+        //String filename = fullPath.substring(fullPath.indexOf(basePath) + basePath.length()).replaceAll("[//]{2,}", "/");
 
 /*
         AuthenticationRequest authenticationRequest = new AuthenticationRequest("kasra_khpk1985@yahoo.com", "123");
@@ -197,8 +198,8 @@ public class RestController {
 */
 
         byte[] buffer = restClient.get()
-                .uri("https://localhost:8443/spring/" + filename)
-               .header("Authorization",
+                .uri("https://localhost:8443/spring/" + path)
+                .header("Authorization",
                         Optional.ofNullable(request.getHeader("Authorization"))
                                 .map(String::trim)
                                 .orElse("")
