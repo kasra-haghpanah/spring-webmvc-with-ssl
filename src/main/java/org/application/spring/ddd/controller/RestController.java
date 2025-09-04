@@ -4,13 +4,16 @@ package org.application.spring.ddd.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import org.application.spring.configuration.exception.ApplicationException;
 import org.application.spring.configuration.exception.ErrorResponse;
 import org.application.spring.configuration.security.AuthenticationRequest;
 import org.application.spring.configuration.security.AuthenticationResponse;
+import org.application.spring.configuration.server.ServerUtil;
 import org.application.spring.ddd.service.MailService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -29,10 +32,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Controller
 @Validated
@@ -176,31 +177,54 @@ public class RestController {
     @ResponseBody
     public void resource(
             @Valid @PathVariable("version") @Pattern(regexp = "(\\/)*((\\d){1,2})\\.((\\d){1,2})\\.((\\d){1,2})(.)*") String version,
+            HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
 
-        AuthenticationRequest request = new AuthenticationRequest("kasra_khpk1985@yahoo.com", "123");
+        String fullPath = request.getRequestURI(); // /spring/resource/0.0.1/images/favicon.ico
+        String basePath = "/spring/resource/" + version + "/";
+        String filename = fullPath.substring(fullPath.indexOf(basePath) + basePath.length()).replaceAll("[//]{2,}", "/");
+
+/*
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest("kasra_khpk1985@yahoo.com", "123");
 
         AuthenticationResponse response1 = restClient.post()
                 .uri("https://localhost:8443/spring/login")
                 .header("Accept-Language", "fa")
-                .body(request)
+                .body(authenticationRequest)
                 .retrieve()
                 .body(AuthenticationResponse.class);
-
+*/
 
         byte[] buffer = restClient.get()
-                .uri("https://localhost:8443/spring/favicon.ico")
-                .header("Authorization", "Bearer " + response1.token())
+                .uri("https://localhost:8443/spring/" + filename)
+               .header("Authorization",
+                        Optional.ofNullable(request.getHeader("Authorization"))
+                                .map(String::trim)
+                                .orElse("")
+                )
+                .cookie("access_token",
+                        Optional.ofNullable(request.getCookies())
+                                .map(Arrays::stream)
+                                .orElseGet(Stream::empty)
+                                .filter(cookie -> "access_token".equals(cookie.getName()))
+                                .findFirst()
+                                .map(Cookie::getValue)
+                                .orElse("")
+                )
                 .exchange((clientRequest, clientResponse) -> {
 
+
+                    if (clientResponse.getStatusCode().isError()) {
+                        throw new ApplicationException("url.invalid", HttpStatus.resolve(HttpStatus.BAD_REQUEST.value()), null);
+                    }
                     clientResponse.getHeaders()
                             .forEach((key, values) -> {
-
-                                if (values != null && values.size() > 0) {
-                                    response.setHeader(key, values.get(0));
+                                if (values != null) {
+                                    for (String value : values) {
+                                        response.addHeader(key, value);
+                                    }
                                 }
-
                             });
                     return clientResponse.bodyTo(byte[].class);
 
@@ -210,6 +234,8 @@ public class RestController {
         OutputStream out = response.getOutputStream();
         out.write(buffer);
         out.flush();
+
+        //ServerUtil.setCacheForBrowser(response, 7 * 24);
 
 
     }

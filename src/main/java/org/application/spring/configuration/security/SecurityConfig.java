@@ -57,6 +57,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Configuration
 @EnableWebSecurity
@@ -79,7 +80,9 @@ public class SecurityConfig {
             "/spring/webjars/**",
             "/spring/validate/signup",
             "/spring/actuator/**",
-            "/spring/resource/**"
+            "/spring/resource/**",
+            "/spring/js/**",
+            "/spring/images/**"
             // "/spring/actuator/prometheus/**"
     };
 
@@ -156,7 +159,6 @@ public class SecurityConfig {
     @Bean("authenticationManager")
     public AuthenticationManager authenticationManager(
             UserDetailsService userDetailsService,
-            HttpServletRequest request,
             PasswordEncoder passwordEncoder
     ) {
         return authentication -> {
@@ -286,21 +288,15 @@ rate-limiting:
                 final String[] roles;
 
                 if (authHeader == null || authHeader.trim().equals("")) {
-                    Cookie[] cookies = request.getCookies();
 
-                    if (cookies != null) {
-                        Optional<Cookie> cookieValue = Arrays
-                                .stream(cookies)
-                                .filter(cookie -> {
-                                    return cookie.getName().toLowerCase().equals("access_token");
-                                })
-                                .reduce((cookie1, cookie2) -> {
-                                    return cookie2;
-                                });
-                        if (cookieValue.isPresent()) {
-                            authHeader = "Bearer " + cookieValue.get().getValue();
-                        }
-                    }
+                    authHeader = Optional.ofNullable(request.getCookies())
+                            .map(Arrays::stream)
+                            .orElseGet(Stream::empty)
+                            .filter(cookie -> cookie.getName().equals("access_token") && !cookie.getValue().equals(""))
+                            .findFirst()
+                            .map(Cookie::getValue)
+                            .map((token -> "Bearer " + token))
+                            .orElse("");
 
                 }
                 // for logging
