@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Pattern;
 import org.application.spring.configuration.security.AuthenticationRequest;
 import org.application.spring.configuration.security.AuthenticationResponse;
 import org.application.spring.configuration.security.JwtUtil;
+import org.application.spring.configuration.server.ServerUtil;
 import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.service.MailService;
 import org.application.spring.ddd.service.UserService;
@@ -53,6 +54,18 @@ public class AuthController {
         this.mailService = mailService;
     }
 
+    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    @ResponseBody
+    public AuthenticationResponse logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("access_token", null); // مقدار null یعنی حذف
+        cookie.setPath("/"); // مسیر باید با مسیر اصلی کوکی یکی باشه
+        cookie.setMaxAge(0); // صفر یعنی حذف فوری
+        cookie.setHttpOnly(true); // اگر قبلاً HttpOnly بوده، حفظ کن
+        cookie.setSecure(true);   // اگر روی HTTPS بوده، حفظ کن
+        response.addCookie(cookie);
+        return new AuthenticationResponse("");
+    }
+
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
     public AuthenticationResponse login(
@@ -66,7 +79,11 @@ public class AuthController {
         user.setIp(request.getRemoteAddr());
 
         Map<String, Object> map = new HashMap<>();
-        map.put("ip", request.getRemoteAddr());
+        String ip = ServerUtil.getClientIp(request);
+        if (ip.equals("0:0:0:0:0:0:0:1")) {
+            ip = "127.0.0.1";
+        }
+        map.put("ip", ip);
         map.put("firstName", user.getFirstName());
         map.put("lastName", user.getLastName());
         map.put("phoneNumber", user.getPhoneNumber());
@@ -81,8 +98,8 @@ public class AuthController {
 
         response.addCookie(cookie);
 
-        response.setHeader("Location", "/spring/"); // redirect url
-        response.setStatus(HttpStatus.MOVED_PERMANENTLY.value()); // redirect url
+        //response.setHeader("Location", "/spring/"); // redirect url
+        //response.setStatus(HttpStatus.MOVED_PERMANENTLY.value()); // redirect url
         return new AuthenticationResponse(jwtToken);
     }
 

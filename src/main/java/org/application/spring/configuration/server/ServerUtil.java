@@ -16,6 +16,23 @@ import java.util.stream.Stream;
 
 public class ServerUtil {
 
+    public static String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+            // ممکنه چند IP وجود داشته باشه، اولی IP واقعی کاربره
+            return ip.split(",")[0].trim();
+        }
+        ip = request.getHeader("Proxy-Client-IP");
+        if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+            return ip;
+        }
+        ip = request.getHeader("WL-Proxy-Client-IP");
+        if (ip != null && ip.length() != 0 && !"unknown".equalsIgnoreCase(ip)) {
+            return ip;
+        }
+        return request.getRemoteAddr(); // fallback: IP مستقیم از request
+    }
+
     public static String getAuthorization(HttpServletRequest request) {
        return Optional.ofNullable(request.getHeader("Authorization"))
                 .map((authorization)-> authorization.trim())

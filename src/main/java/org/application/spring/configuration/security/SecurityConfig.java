@@ -11,10 +11,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.exception.ErrorResponse;
+import org.application.spring.configuration.log.RequestLoggingInterceptor;
 import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.server.ContextPathAndXssFilter;
-import org.application.spring.configuration.server.ServerUtil;
 import org.application.spring.configuration.server.InvalidTokenType;
+import org.application.spring.configuration.server.ServerUtil;
 import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.model.json.type.Authority;
 import org.application.spring.ddd.service.UserService;
@@ -45,6 +46,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
@@ -83,12 +85,11 @@ public class SecurityConfig {
             "/spring/webjars/**",
             "/spring/validate/signup",
             "/spring/actuator/**",
-            "/spring/resource/**",
+            // "/spring/resource/**",
             //"/spring/js/**"
-            //,"/spring/images/**"
+            "/spring/images/**"
             // "/spring/actuator/prometheus/**"
     };
-
 
     @Bean
     public FilterRegistrationBean<ContextPathAndXssFilter> xssFilterRegistration() {
@@ -304,6 +305,8 @@ rate-limiting:
                 }
                 // for logging
                 request.setAttribute("start-time", System.nanoTime());
+                //request.setAttribute("invalidTokenType", InvalidTokenType.NONE);
+                request.setAttribute("tokenValue", authHeader);
                 ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 4_096);
                 ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
                 // for logging
@@ -388,6 +391,9 @@ rate-limiting:
 
         return (request, response, authException) -> {
 
+            ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 4_096);
+            ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
+
             Locale locale = localeResolver.resolveLocale(request);
             String accept = request.getHeader("Accept-Response");
             if (accept == null) {
@@ -404,9 +410,13 @@ rate-limiting:
                 map.put("error", messageSource.getMessage("error.authentication", new Object[]{}, locale));
                 error.setErrors(map);
 
-                response.getWriter().write(error.toString());
+                wrappedResponse.getWriter().write(error.toString());
+                RequestLoggingInterceptor.setLog(wrappedRequest, wrappedResponse, null, null);
+                wrappedResponse.copyBodyToResponse();
             } else {
                 response.sendRedirect("/spring/unauthorized");
+                RequestLoggingInterceptor.setLog(wrappedRequest, wrappedResponse, null, null);
+                wrappedResponse.copyBodyToResponse();
             }
         };
 
@@ -419,6 +429,8 @@ rate-limiting:
     ) {
 
         return (request, response, accessDeniedException) -> {
+            ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 4_096);
+            ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
 
             Locale locale = localeResolver.resolveLocale(request);
             String accept = request.getHeader("Accept-Response");
@@ -436,8 +448,12 @@ rate-limiting:
                 error.setErrors(map);
 
                 response.getWriter().write(error.toString());
+                RequestLoggingInterceptor.setLog(wrappedRequest, wrappedResponse, null, null);
+                wrappedResponse.copyBodyToResponse();
             } else {
                 response.sendRedirect("/spring/forbidden");
+                RequestLoggingInterceptor.setLog(wrappedRequest, wrappedResponse, null, null);
+                wrappedResponse.copyBodyToResponse();
             }
         };
     }
@@ -494,7 +510,7 @@ rate-limiting:
                         )
                         .access((authentication, context) -> {
 
-                            if (!isValidToken(authentication, context.getRequest())) {
+                            if (!isValidToken(authentication, context)) {
                                 return new AuthorizationDecision(false);
                             }
 
@@ -508,7 +524,6 @@ rate-limiting:
                             }
 
                             context.getRequest().setAttribute("invalidTokenType", InvalidTokenType.INVALIDROLE);
-                            context.getRequest().setAttribute("tokenValue", ServerUtil.getAuthorization(context.getRequest()));
                             return new AuthorizationDecision(false);
                         })
                         .requestMatchers(HttpMethod.POST,
@@ -517,8 +532,7 @@ rate-limiting:
                                 "/spring/upload"
                         )
                         .access((authentication, context) -> {
-
-                            if (!isValidToken(authentication, context.getRequest())) {
+                            if (!isValidToken(authentication, context)) {
                                 return new AuthorizationDecision(false);
                             }
                             // مثال ساده: فقط کاربران با نقش ADMIN اجازه دارند
@@ -531,7 +545,7 @@ rate-limiting:
                             }
 
                             context.getRequest().setAttribute("invalidTokenType", InvalidTokenType.INVALIDROLE);
-                            context.getRequest().setAttribute("tokenValue", ServerUtil.getAuthorization(context.getRequest()));
+                            //context.getRequest().setAttribute("tokenValue", ServerUtil.getAuthorization(context.getRequest()));
                             return new AuthorizationDecision(false);
 
                         })
@@ -543,16 +557,19 @@ rate-limiting:
     }
 
 
-    private static boolean isValidToken(Supplier<Authentication> authentication, HttpServletRequest request) {
+    private static boolean isValidToken(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
+
         if (!(authentication.get().getPrincipal() instanceof User)) {
-            request.setAttribute("invalidTokenType", InvalidTokenType.INVALIDTOKEN);
-            request.setAttribute("tokenValue", ServerUtil.getAuthorization(request));
+            context.getRequest().setAttribute("invalidTokenType", InvalidTokenType.INVALIDTOKEN);
             return false; // log
         }
         User user = (User) authentication.get().getPrincipal();
-        if (!user.getIp().equals(request.getRemoteAddr())) {
-            request.setAttribute("invalidTokenType", InvalidTokenType.INVALIDIP);
-            request.setAttribute("tokenValue", ServerUtil.getAuthorization(request));
+        String currentIp = context.getRequest().getRemoteAddr();
+        if (currentIp.equals("0:0:0:0:0:0:0:1")) {
+            currentIp = "127.0.0.1";
+        }
+        if (!user.getIp().equals(currentIp)) {
+            context.getRequest().setAttribute("invalidTokenType", InvalidTokenType.INVALIDIP);
             return false; // log
         }
         return true;

@@ -233,7 +233,9 @@ public class RestController {
                 });
 
         OutputStream out = response.getOutputStream();
-        out.write(buffer);
+        if (buffer != null) {
+            out.write(buffer);
+        }
         out.flush();
 
         //ServerUtil.setCacheForBrowser(response, 7 * 24);

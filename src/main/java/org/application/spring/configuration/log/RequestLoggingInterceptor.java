@@ -47,7 +47,15 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
             Object handler,
             Exception ex
     ) {
+        setLog(request, response, handler, ex);
+    }
 
+    public static void setLog(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler,
+            Exception ex
+    ) {
         if (ex == null) {
             ex = (Exception) request.getAttribute("loggedException");
             request.removeAttribute("loggedException");
@@ -59,10 +67,9 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
             duration = (System.nanoTime() - duration) / 1_000_000;
         }
 
-        InvalidTokenType tokenType = (InvalidTokenType) request.getAttribute("invalidTokenType");
-        if (tokenType == null) {
-            tokenType = InvalidTokenType.NONE;
-        }
+        InvalidTokenType tokenType = InvalidTokenType.NONE;
+
+        tokenType = (InvalidTokenType) request.getAttribute("invalidTokenType");
         request.removeAttribute("invalidTokenType");
 
 
@@ -86,16 +93,15 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
                 extractRequestBody(request),
                 extractHeaders(response),
                 extractResponseBody(response, request),
-                response.getStatus(),
+                (response != null) ? response.getStatus() : 0,
                 ex != null ? ex.getClass().getSimpleName() : null,
                 ex != null ? getStackTrace(ex) : null
         );
 
         logger.info("Request completed!", StructuredArguments.f(log));
-
     }
 
-    private Map<String, String> extractHeaders(HttpServletRequest request) {
+    public static Map<String, String> extractHeaders(HttpServletRequest request) {
         Map<String, String> headers = new HashMap<>();
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
@@ -105,15 +111,18 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         return headers;
     }
 
-    private Map<String, String> extractHeaders(HttpServletResponse response) {
+    public static Map<String, String> extractHeaders(HttpServletResponse response) {
         Map<String, String> headers = new HashMap<>();
+        if (response == null) {
+            return headers;
+        }
         for (String name : response.getHeaderNames()) {
             headers.put(name, response.getHeader(name));
         }
         return headers;
     }
 
-    private String extractRequestBody(HttpServletRequest request) {
+    public static String extractRequestBody(HttpServletRequest request) {
 
         String requestBody = (String) request.getAttribute("request-body");
 
@@ -134,7 +143,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         return null;
     }
 
-    private String extractResponseBody(HttpServletResponse response, HttpServletRequest request) {
+    public static String extractResponseBody(HttpServletResponse response, HttpServletRequest request) {
 
         String responseBody = (String) request.getAttribute("response-body");
 
@@ -161,7 +170,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         return null;
     }
 
-    private String getStackTrace(Exception ex) {
+    public static String getStackTrace(Exception ex) {
         StringWriter sw = new StringWriter();
         ex.printStackTrace(new PrintWriter(sw));
         return sw.toString();
