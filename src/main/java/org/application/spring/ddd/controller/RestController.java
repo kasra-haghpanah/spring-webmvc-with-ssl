@@ -202,7 +202,7 @@ public class RestController {
                 .header("Authorization",
                         Optional.ofNullable(request.getHeader("Authorization"))
                                 .map(String::trim)
-                                .orElse("")
+                                .orElseGet(() -> "")
                 )
                 .cookie("access_token",
                         Optional.ofNullable(request.getCookies())

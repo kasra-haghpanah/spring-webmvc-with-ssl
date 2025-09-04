@@ -14,6 +14,7 @@ import org.application.spring.configuration.exception.ErrorResponse;
 import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.server.ContextPathAndXssFilter;
 import org.application.spring.configuration.server.ServerUtil;
+import org.application.spring.configuration.server.InvalidTokenType;
 import org.application.spring.ddd.model.entity.User;
 import org.application.spring.ddd.model.json.type.Authority;
 import org.application.spring.ddd.service.UserService;
@@ -34,6 +35,7 @@ import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -57,6 +59,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Configuration
@@ -81,8 +84,8 @@ public class SecurityConfig {
             "/spring/validate/signup",
             "/spring/actuator/**",
             "/spring/resource/**",
-            "/spring/js/**",
-            "/spring/images/**"
+            //"/spring/js/**"
+            //,"/spring/images/**"
             // "/spring/actuator/prometheus/**"
     };
 
@@ -314,7 +317,7 @@ rate-limiting:
                     return;
                 }
                 // **************************************
-                if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                if (authHeader == null || authHeader.trim().equals("") || !authHeader.startsWith("Bearer ")) {
                     filterChain.doFilter(wrappedRequest, wrappedResponse);
                     request.setAttribute("request-body", ServerUtil.getRequestBody(wrappedRequest));
                     request.setAttribute("response-body", ServerUtil.getResponseBody(wrappedResponse));
@@ -485,23 +488,28 @@ rate-limiting:
                         .requestMatchers(HttpMethod.GET,
                                 "/spring/xml/bean/sample",
                                 "/spring/make/mybean",
-                                "/spring/files/**"
+                                "/spring/files/**",
+                                "/spring/js/**",
+                                "/spring/images/**"
                         )
                         .access((authentication, context) -> {
 
-                            if (!(authentication.get().getPrincipal() instanceof User)) {
+                            if (!isValidToken(authentication, context.getRequest())) {
                                 return new AuthorizationDecision(false);
                             }
-                            User user = (User) authentication.get().getPrincipal();
-                            if (!user.getIp().equals(context.getRequest().getRemoteAddr())) {
-                                return new AuthorizationDecision(false);
-                            }
+
                             // مثال ساده: فقط کاربران با نقش ADMIN اجازه دارند
-                            return authentication.get().getAuthorities().stream()
+                            boolean check = authentication.get().getAuthorities().stream()
                                     .anyMatch(granted -> {
-                                        return granted.getAuthority().equals("ADMIN");
-                                    }) ?
-                                    new AuthorizationDecision(true) : new AuthorizationDecision(false);
+                                        return granted.getAuthority().equals("ADMIN") || granted.getAuthority().equals("USER");
+                                    });
+                            if (check) {
+                                return new AuthorizationDecision(true);
+                            }
+
+                            context.getRequest().setAttribute("invalidTokenType", InvalidTokenType.INVALIDROLE);
+                            context.getRequest().setAttribute("tokenValue", ServerUtil.getAuthorization(context.getRequest()));
+                            return new AuthorizationDecision(false);
                         })
                         .requestMatchers(HttpMethod.POST,
                                 "/spring/validate/store",
@@ -510,24 +518,43 @@ rate-limiting:
                         )
                         .access((authentication, context) -> {
 
-                            if (!(authentication.get().getPrincipal() instanceof User)) {
-                                return new AuthorizationDecision(false);
-                            }
-                            User user = (User) authentication.get().getPrincipal();
-                            if (!user.getIp().equals(context.getRequest().getRemoteAddr())) {
+                            if (!isValidToken(authentication, context.getRequest())) {
                                 return new AuthorizationDecision(false);
                             }
                             // مثال ساده: فقط کاربران با نقش ADMIN اجازه دارند
-                            return authentication.get().getAuthorities().stream()
+                            boolean check = authentication.get().getAuthorities().stream()
                                     .anyMatch(granted -> {
-                                        return granted.getAuthority().equals("ADMIN");
-                                    }) ?
-                                    new AuthorizationDecision(true) : new AuthorizationDecision(false);
+                                        return granted.getAuthority().equals("ADMIN") || granted.getAuthority().equals("USER");
+                                    });
+                            if (check) {
+                                return new AuthorizationDecision(true);
+                            }
+
+                            context.getRequest().setAttribute("invalidTokenType", InvalidTokenType.INVALIDROLE);
+                            context.getRequest().setAttribute("tokenValue", ServerUtil.getAuthorization(context.getRequest()));
+                            return new AuthorizationDecision(false);
+
                         })
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class) // اجرای قبل از JWT
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+
+    private static boolean isValidToken(Supplier<Authentication> authentication, HttpServletRequest request) {
+        if (!(authentication.get().getPrincipal() instanceof User)) {
+            request.setAttribute("invalidTokenType", InvalidTokenType.INVALIDTOKEN);
+            request.setAttribute("tokenValue", ServerUtil.getAuthorization(request));
+            return false; // log
+        }
+        User user = (User) authentication.get().getPrincipal();
+        if (!user.getIp().equals(request.getRemoteAddr())) {
+            request.setAttribute("invalidTokenType", InvalidTokenType.INVALIDIP);
+            request.setAttribute("tokenValue", ServerUtil.getAuthorization(request));
+            return false; // log
+        }
+        return true;
     }
 }

@@ -1,5 +1,7 @@
 package org.application.spring.configuration.server;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -8,8 +10,25 @@ import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ServerUtil {
+
+    public static String getAuthorization(HttpServletRequest request) {
+       return Optional.ofNullable(request.getHeader("Authorization"))
+                .map((authorization)-> authorization.trim())
+                .orElseGet(()-> Optional.ofNullable(request.getCookies())
+                        .map(Arrays::stream)
+                        .orElseGet(Stream::empty)
+                        .filter(cookie -> cookie.getName().equals("access_token") && !cookie.getValue().equals(""))
+                        .findFirst()
+                        .map(Cookie::getValue)
+                        .map((token -> "Bearer " + token))
+                        .orElse("")
+                );
+    }
 
     public static void setCacheForBrowser(HttpServletResponse response, int expiresInHour) {
         // تنظیم کش برای 7 روز (به ثانیه)

@@ -3,6 +3,8 @@ package org.application.spring.configuration.log;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import net.logstash.logback.argument.StructuredArguments;
+import org.application.spring.configuration.server.InvalidTokenType;
+import org.application.spring.configuration.server.ServerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -57,7 +59,24 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
             duration = (System.nanoTime() - duration) / 1_000_000;
         }
 
+        InvalidTokenType tokenType = (InvalidTokenType) request.getAttribute("invalidTokenType");
+        if (tokenType == null) {
+            tokenType = InvalidTokenType.NONE;
+        }
+        request.removeAttribute("invalidTokenType");
+
+
+        String tokenValue = (String) request.getAttribute("tokenValue");
+        request.removeAttribute("tokenValue");
+
+        if (tokenValue == null || tokenValue.trim().equals("")) {
+            tokenValue = ServerUtil.getAuthorization(request);
+        }
+
         LogstashHttpLog log = new LogstashHttpLog(
+                request.getRemoteAddr(),
+                tokenType,
+                tokenValue,
                 ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 duration,
                 request.getMethod(),
