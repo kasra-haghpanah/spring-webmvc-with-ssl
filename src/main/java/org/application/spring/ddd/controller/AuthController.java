@@ -15,7 +15,6 @@ import org.application.spring.ddd.service.MailService;
 import org.application.spring.ddd.service.UserService;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.context.MessageSource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -74,8 +73,8 @@ public class AuthController {
             HttpServletResponse response
     ) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.username());
-        User user = (User) userDetails;
+        //final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.username());
+        User user = (User) authentication.getPrincipal();
         user.setIp(request.getRemoteAddr());
 
         Map<String, Object> map = new HashMap<>();

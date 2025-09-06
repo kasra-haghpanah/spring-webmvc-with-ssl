@@ -13,7 +13,6 @@ import org.application.spring.configuration.exception.ApplicationException;
 import org.application.spring.configuration.exception.ErrorResponse;
 import org.application.spring.configuration.security.AuthenticationRequest;
 import org.application.spring.configuration.security.AuthenticationResponse;
-import org.application.spring.configuration.server.ServerUtil;
 import org.application.spring.ddd.service.MailService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -251,6 +250,36 @@ public class RestController {
 
     }
 
+    @RequestMapping(value = "/restclient/login", method = RequestMethod.POST)
+    @ResponseBody
+    public AuthenticationResponse login(
+            @RequestBody AuthenticationRequest authenticationRequest,
+            HttpServletResponse response
+    ) {
+        AuthenticationResponse result = restClient.post()
+                .uri("https://localhost:8443/spring/login")
+                .header("Accept-Language", "fa")
+                .body(authenticationRequest)
+                .exchange((clientRequest, clientResponse) -> {
+
+                    if (clientResponse.getStatusCode().isError()) {
+                        throw new ApplicationException("url.invalid", HttpStatus.resolve(HttpStatus.BAD_REQUEST.value()), null);
+                    }
+                    clientResponse.getHeaders()
+                            .forEach((key, values) -> {
+                                if (values != null) {
+                                    for (String value : values) {
+                                        response.addHeader(key, value);
+                                    }
+                                }
+                            });
+                    return clientResponse.bodyTo(AuthenticationResponse.class);
+                });
+
+        return result;
+
+    }
+
 
     @RequestMapping(value = "/resource/{version}", method = RequestMethod.GET)
     @ResponseBody
@@ -260,21 +289,6 @@ public class RestController {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
-
-        //String fullPath = request.getRequestURI(); // /spring/resource/0.0.1/images/favicon.ico
-        //String basePath = "/spring/resource/" + version + "/" + path;
-        //String filename = fullPath.substring(fullPath.indexOf(basePath) + basePath.length()).replaceAll("[//]{2,}", "/");
-
-/*
-        AuthenticationRequest authenticationRequest = new AuthenticationRequest("kasra_khpk1985@yahoo.com", "123");
-
-        AuthenticationResponse response1 = restClient.post()
-                .uri("https://localhost:8443/spring/login")
-                .header("Accept-Language", "fa")
-                .body(authenticationRequest)
-                .retrieve()
-                .body(AuthenticationResponse.class);
-*/
 
         byte[] buffer = restClient.get()
                 .uri("https://localhost:8443/spring/" + path)
