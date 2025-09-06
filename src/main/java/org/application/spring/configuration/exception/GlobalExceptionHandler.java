@@ -3,7 +3,6 @@ package org.application.spring.configuration.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import org.application.spring.configuration.server.InvalidTokenType;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
@@ -97,19 +96,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex, HttpServletRequest request) {
 
-        InvalidTokenType tokenType = (InvalidTokenType) request.getAttribute("invalidTokenType");
-
         Map<String, String> errors = new HashMap<>();
         Locale locale = localeResolver.resolveLocale(request);
         request.setAttribute("loggedException", ex);
 
-        String message = "";
-        if (tokenType != null) {
-            messageSource.getMessage("invalid.token", null, locale);
-        } else {
-            message = messageSource.getMessage("error.unexpected", null, locale);
-        }
-
+        String message = messageSource.getMessage("error.unexpected", null, locale);
         errors.put("unexpected", message);
 
         ErrorResponse errorResponse = new ErrorResponse();

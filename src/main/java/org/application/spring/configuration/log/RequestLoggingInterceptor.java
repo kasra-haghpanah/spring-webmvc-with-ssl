@@ -66,13 +66,6 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         if (duration != null) {
             duration = (System.nanoTime() - duration) / 1_000_000;
         }
-
-        InvalidTokenType tokenType = InvalidTokenType.NONE;
-
-        tokenType = (InvalidTokenType) request.getAttribute("invalidTokenType");
-        request.removeAttribute("invalidTokenType");
-
-
         String tokenValue = (String) request.getAttribute("tokenValue");
         request.removeAttribute("tokenValue");
 
@@ -82,7 +75,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
 
         LogstashHttpLog log = new LogstashHttpLog(
                 request.getRemoteAddr(),
-                tokenType,
+                InvalidTokenType.NONE,
                 tokenValue,
                 ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 duration,
