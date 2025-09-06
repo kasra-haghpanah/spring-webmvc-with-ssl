@@ -17,10 +17,13 @@ import org.application.spring.configuration.server.ServerUtil;
 import org.application.spring.ddd.service.MailService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
@@ -150,7 +153,7 @@ public class RestController {
             @RequestPart(value = "username", required = true) String username,
             @RequestPart(value = "password", required = true) String password,
             //@RequestParam Map<String, String> formParams, // همه‌ی پارامترهای فرم
-            @RequestPart(required = false) List<MultipartFile> files // لیست فایل‌ها
+            @RequestPart(value = "files", required = false) List<MultipartFile> files // لیست فایل‌ها
     ) {
         // 🔍 نمایش پارامترهای فرم
         /*formParams.forEach((key, value) -> {
@@ -170,6 +173,82 @@ public class RestController {
         }
 
         return "دریافت شد!";
+    }
+
+
+    @RequestMapping(
+            value = "/restclient/upload",
+            method = RequestMethod.POST,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    @ResponseBody
+    public String handleUploadAsRestClient(
+            @RequestPart(value = "username", required = true) String username,
+            @RequestPart(value = "password", required = true) String password,
+            //@RequestParam Map<String, String> formParams, // همه‌ی پارامترهای فرم
+            @RequestPart(required = false) List<MultipartFile> files, // لیست فایل‌ها
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+
+        MultiValueMap<String, Object> multipartBody = new LinkedMultiValueMap<>();
+        multipartBody.add("username", username);
+        multipartBody.add("password", password);
+
+        // افزودن فایل‌ها (در صورت وجود)
+        Path filePath = Paths.get("path/to/file.txt");
+        //Resource fileResource = new FileSystemResource(filePath);
+        //multipartBody.add("files", fileResource); // می‌توانید چند فایل اضافه کنید
+        files.stream().forEach(file -> {
+            try {
+                ByteArrayResource resource = new ByteArrayResource(file.getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return file.getOriginalFilename(); // نام فایل برای ارسال
+                    }
+                };
+                multipartBody.add("files", resource); // کلید باید "files" باشد چون در @RequestPart همین نام استفاده شده
+            } catch (IOException e) {
+                throw new RuntimeException("خطا در خواندن فایل: " + file.getOriginalFilename(), e);
+            }
+        });
+
+
+        String result = restClient.post()
+                .uri("https://localhost:8443/spring" + "/upload")
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .header("Authorization", Optional.ofNullable(request.getHeader("Authorization"))
+                        .map(String::trim)
+                        .orElseGet(() -> Optional.ofNullable(request.getCookies())
+                                .map(Arrays::stream)
+                                .orElseGet(Stream::empty)
+                                .filter(cookie -> cookie.getName().equals("access_token") && !cookie.getValue().equals(""))
+                                .findFirst()
+                                .map(cookie -> "Bearer " + cookie.getValue())
+                                .orElse("")
+
+                        )
+
+                )
+                .body(multipartBody)
+                .exchange((clientRequest, clientResponse) -> {
+
+                    if (clientResponse.getStatusCode().isError()) {
+                        throw new ApplicationException("url.invalid", HttpStatus.resolve(HttpStatus.BAD_REQUEST.value()), null);
+                    }
+                    clientResponse.getHeaders()
+                            .forEach((key, values) -> {
+                                if (values != null) {
+                                    for (String value : values) {
+                                        response.addHeader(key, value);
+                                    }
+                                }
+                            });
+                    return clientResponse.bodyTo(String.class);
+                });
+
+        return result;
+
     }
 
 
