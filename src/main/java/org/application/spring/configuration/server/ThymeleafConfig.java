@@ -1,4 +1,4 @@
-package org.application.spring.configuration.thymeleaf;
+package org.application.spring.configuration.server;
 
 
 import org.application.spring.configuration.log.RequestLoggingInterceptor;

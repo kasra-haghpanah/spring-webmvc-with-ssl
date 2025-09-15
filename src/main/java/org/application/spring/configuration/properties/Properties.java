@@ -26,6 +26,7 @@ public class Properties {
         config.put("version", environment.getProperty("version"));
         config.put("server.port", environment.getProperty("server.port"));
         config.put("spring.application.name", environment.getProperty("spring.application.name"));
+        config.put("application.upload_file_size_in_mb", environment.getProperty("application.upload_file_size_in_mb"));
         config.put("springdoc.api-docs.version", environment.getProperty("springdoc.api-docs.version"));
         config.put("springdoc.packagesToScan", environment.getProperty("springdoc.packagesToScan"));
         config.put("app.jwt-secret", environment.getProperty("app.jwt-secret"));
@@ -73,6 +74,10 @@ public class Properties {
 
     public static String getApplicationName() {
         return get("spring.application.name", String.class);
+    }
+
+    public static Integer getApplicationUploadFileSizeInMB() {
+        return Integer.valueOf(get("application.upload_file_size_in_mb", String.class));
     }
 
     public static String getSpringdocApidocsVersion() {
