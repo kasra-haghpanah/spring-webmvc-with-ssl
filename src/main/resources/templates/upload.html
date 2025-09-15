@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">title</title>
+</head>
+
+<link media="all"  th:href="@{'/resource/'+${version}+'?path=css/upload-download.css'}" rel="stylesheet"/>
+<script type="text/javascript" th:src="@{'/resource/'+${version}+'?path=js/upload-download.js'}"></script>
+
+
+
+
+
+<body>
+
+
+<div id="uploadForm">
+    <input type="text" name="username" placeholder="Username" required/>
+    <input type="password" name="password" placeholder="Password" required/>
+
+    <div id="dropZone">Drop files here or click to select</div>
+    <input type="file" id="fileInput" multiple hidden/>
+
+    <div id="fileList"></div>
+    <button id="send" type="button">Upload</button>
+</div>
+
+
+</body>
+</html>

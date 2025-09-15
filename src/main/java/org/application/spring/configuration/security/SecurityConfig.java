@@ -487,10 +487,10 @@ rate-limiting:
                         .xssProtection(xss -> {
                             xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK);
                         })
-                        .contentSecurityPolicy(csp -> {
+                        /*.contentSecurityPolicy(csp -> {
                             // CSP => each client send or upload data just from their domain
                             csp.policyDirectives("default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'");
-                        })
+                        })*/
                 )
                 .exceptionHandling(exceptionHandlingConfigurer -> {
                     exceptionHandlingConfigurer

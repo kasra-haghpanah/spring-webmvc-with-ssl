@@ -19,6 +19,12 @@ public class TomcatWebServerFactorySslCustomizer implements WebServerFactoryCust
     @Override
     public void customize(TomcatServletWebServerFactory serverFactory) {
 
+        serverFactory.addConnectorCustomizers(connector -> {
+            connector.setMaxPostSize(600 * 1024 * 1024); // 600MB  => for maximum upload size
+            //connector.setMaxSavePostSize(-1); // disable buffering limit
+            connector.setProperty("maxSwallowSize", String.valueOf(600 * 1024 * 1024)); // برای جلوگیری از drop شدن
+        });
+
         Ssl ssl = new Ssl();
         ssl.setEnabled(true);
         ssl.setKeyStore("classpath:p12/server.p12");

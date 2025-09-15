@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import org.application.spring.configuration.exception.ApplicationException;
 import org.application.spring.configuration.exception.ErrorResponse;
+import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.security.AuthenticationRequest;
 import org.application.spring.configuration.security.AuthenticationResponse;
 import org.application.spring.ddd.service.MailService;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
@@ -172,6 +174,17 @@ public class RestController {
         }
 
         return "دریافت شد!";
+    }
+
+
+    @RequestMapping(value = "/upload", method = RequestMethod.GET)
+    public String unauthorized(Model model, HttpServletRequest request) {
+        Locale locale = localeResolver.resolveLocale(request);
+
+        model.addAttribute("title", messageSource.getMessage("upload.title", new Object[]{}, locale));
+
+        model.addAttribute("version", Properties.getVersion());
+        return "upload"; // فایل unauthorized.html در مسیر templates
     }
 
 
