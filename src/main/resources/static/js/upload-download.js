@@ -38,8 +38,41 @@ window.onload = function () {
             fileItem.innerHTML = `<strong>${file.name}</strong>
 <div class="progress-bar">
     <div class="progress-fill"></div>
-</div>`;
+</div>
+<div class="content"></div>`;
+
+
+            var contentType = file.type;
+            var videoOrAudioElement = null;
+            //var rsocketMessage = document.getElementById(item.id);
+
+            var type = contentType.toLowerCase().indexOf("video") > -1 ? "video" : contentType;
+            if (type != "video") {
+                type = contentType.toLowerCase().indexOf("audio") > -1 ? "audio" : contentType;
+            }
+            // code
+
+            var element = html5.createFileElement({
+                filename: file.name,
+                contentType: contentType,
+                content: file,
+                class: 'col-7',
+                height: "400px",
+                videoOrAudioElement: null,//videoOrAudioElement,
+                isDecodeHTMLCode: true
+            });
+
+
+            var divTags = fileItem.getElementsByTagName("div");
+            var lastDiv = divTags[divTags.length - 1];
+
+            if (typeof element !== "undefined") {
+                lastDiv.appendChild(element);
+            }
+
             fileList.appendChild(fileItem);
+
+
         }
     }
 
@@ -67,7 +100,6 @@ window.onload = function () {
             });
 
         });
-
 
 
         xhr.onload = () => {
