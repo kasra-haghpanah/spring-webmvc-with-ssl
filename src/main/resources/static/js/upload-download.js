@@ -78,11 +78,15 @@ window.onload = function () {
 
     button.addEventListener('click', e => {
         e.preventDefault();
-        const username = uploadForm.getElementsByTagName("input")[0].value;
-        const password = uploadForm.getElementsByTagName("input")[1].value;
+        const firstName = uploadForm.getElementsByTagName("input")[0];
+        const lastName = uploadForm.getElementsByTagName("input")[1];
+        const phoneNumber = uploadForm.getElementsByTagName("input")[2];
+
+
         const formData = new FormData();
-        formData.append('username', username);
-        formData.append('password', password);
+        formData.append(firstName.name, firstName.value);
+        formData.append(lastName.name, lastName.value);
+        formData.append(phoneNumber.name, phoneNumber.value);
 
 
         const xhr = new XMLHttpRequest();
@@ -103,7 +107,7 @@ window.onload = function () {
 
 
         xhr.onload = () => {
-            if (xhr.status === 200) {
+            if (xhr.status === 200) {//xhr.responseText
                 console.log(`File ${file.name} uploaded successfully`);
             } else {
                 console.error(`Upload failed for ${file.name}`);

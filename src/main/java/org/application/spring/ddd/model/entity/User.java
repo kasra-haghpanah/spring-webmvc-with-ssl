@@ -12,12 +12,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-@Entity(name = "User")
+@Entity(name = User.TABLE_NAME)
 @Table(name = User.TABLE_NAME)
-public class User extends AppEntity implements UserDetails {
+public class User extends AuthorizationEntity implements UserDetails {
 
     @Transient
-    public static final String TABLE_NAME = "user";
+    public static final String TABLE_NAME = "User";
 
     @Column(name = "userName", length = 30)
     private String userName;
@@ -32,7 +32,7 @@ public class User extends AppEntity implements UserDetails {
     private String firstName;
     @Column(name = "lastName", length = 100)
     private String lastName;
-    @Column(name = "phoneNumber", length = 13)
+    @Column(name = "phoneNumber", length = 15)
     private String phoneNumber;
     @Column(name = "activationCode")
     private String activationCode;

@@ -1,4 +1,4 @@
-package org.application.spring.configuration.jpa;
+package org.application.spring.ddd.model.json.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

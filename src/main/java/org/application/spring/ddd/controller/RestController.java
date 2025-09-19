@@ -14,6 +14,10 @@ import org.application.spring.configuration.exception.ErrorResponse;
 import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.security.AuthenticationRequest;
 import org.application.spring.configuration.security.AuthenticationResponse;
+import org.application.spring.ddd.model.entity.Customer;
+import org.application.spring.ddd.model.entity.File;
+import org.application.spring.ddd.service.CustomerService;
+import org.application.spring.ddd.service.FileService;
 import org.application.spring.ddd.service.MailService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -31,10 +35,10 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.LocaleResolver;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Stream;
@@ -47,22 +51,22 @@ public class RestController {
     private final MessageSource messageSource;
     private final LocaleResolver localeResolver;
     private final RestClient restClient;
+    private final CustomerService customerService;
+    private final FileService fileService;
 
     public RestController(
             MessageSource messageSource,
             LocaleResolver localeResolver,
-            @Qualifier("secureRestClient") RestClient restClient
+            @Qualifier("secureRestClient") RestClient restClient,
+            CustomerService customerService,
+            FileService fileService
     ) {
         this.messageSource = messageSource;
         this.localeResolver = localeResolver;
         this.restClient = restClient;
+        this.customerService = customerService;
+        this.fileService = fileService;
     }
-
-
-    //keytool -genkeypair -alias client -keyalg RSA -keysize 2048 -keystore client.jks -storepass changeit -validity 365 -dname "CN=Kasra, OU=Dev, O=MyCompany, L=Tehran, ST=Tehran, C=IR"
-
-    //keytool -exportcert -alias client -keystore client.jks -file client.crt -storepass changeit
-
 
     @RequestMapping(value = "/download/{filename:.+}", method = RequestMethod.GET)
     @Operation(summary = "دانلود فایل", description = "دانلود فایل با نام مشخص‌شده")
@@ -71,28 +75,29 @@ public class RestController {
             @ApiResponse(responseCode = "404", description = "فایل یافت نشد")
     })
     public void download(
-            @PathVariable String filename,
+            @PathVariable String fileId,
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
 
         Locale locale = localeResolver.resolveLocale(request);
         // برای امنیت بیشتر، حتماً مسیر فایل رو normalize کن تا از حملات path traversal جلوگیری بشه.
-        Path filePath = Paths.get("files").resolve(filename).normalize();
+        //Path filePath = Paths.get("files").resolve(filename).normalize();
 
         String path = MailService.class.getResource("").getPath();// favicon.ico
-        path = MessageFormat.format("{0}/static/images/{1}", path.substring(0, path.indexOf("/classes") + 8), filePath.getFileName());
-        File file = new File(path);
+        //path = MessageFormat.format("{0}/static/images/{1}", path.substring(0, path.indexOf("/classes") + 8), filePath.getFileName());
+        //File file = new File(path);
 
 
+        File file = fileService.getById(fileId);
         //
-        if (!file.exists()) {
+        if (file == null) {
 
             response.setStatus(HttpStatus.NOT_FOUND.value());
             response.setContentType("application/json;charset=UTF-8");
 
             Map<String, String> map = new HashMap<>();
-            map.put("", messageSource.getMessage("address.file.invalid", new Object[]{filename}, locale));
+            map.put("", messageSource.getMessage("address.file.invalid", new Object[]{fileId}, locale));
 
             ErrorResponse errorResponse = new ErrorResponse();
             errorResponse.setStatus(HttpStatus.NOT_FOUND);
@@ -105,7 +110,7 @@ public class RestController {
 
         // تعیین MIME type
         // Files.probeContentType() از سیستم‌عامل برای تشخیص MIME استفاده می‌کنه. اگه دقیق نبود، می‌تونی از کتابخونه‌هایی مثل Apache Tika استفاده کنی.
-        String mimeType = Files.probeContentType(file.toPath());
+        String mimeType = file.getType(); //Files.probeContentType(file.toPath());
         if (mimeType == null) {
             mimeType = "application/octet-stream"; // پیش‌فرض
         }
@@ -122,15 +127,15 @@ public class RestController {
             headers.setContentType(MediaType.parseMediaType(mimeType + "; charset=UTF-8"));
         }
 
-        Long sizeFile = file.length(); // برحسب بایت
+        Long sizeFile = Long.valueOf(file.getContent().length); // برحسب بایت
 
         response.setContentType(mimeType); // یا نوع MIME مناسب مثل "application/pdf"
-        response.setHeader("Content-Disposition", MessageFormat.format("attachment; filename=\"{0}\"", filename));
+        response.setHeader("Content-Disposition", MessageFormat.format("attachment; filename=\"{0}\"", file.getName()));
         response.setContentLength(sizeFile.intValue());
 
         // خواندن فایل به صورت بایت
 
-        InputStream in = new FileInputStream(file);
+        InputStream in = new ByteArrayInputStream(file.getContent());
         OutputStream out = response.getOutputStream();
 
         byte[] buffer = new byte[sizeFile.intValue()];
@@ -151,26 +156,39 @@ public class RestController {
     )
     @ResponseBody
     public String handleUpload(
-            @RequestPart(value = "username", required = true) String username,
-            @RequestPart(value = "password", required = true) String password,
+            @RequestPart(value = "firstName", required = true) String firstName,
+            @RequestPart(value = "lastName", required = true) String lastName,
+            @RequestPart(value = "phoneNumber", required = true) String phoneNumber,
             //@RequestParam Map<String, String> formParams, // همه‌ی پارامترهای فرم
             @RequestPart(value = "files", required = false) List<MultipartFile> files // لیست فایل‌ها
-    ) {
+    ) throws IOException {
         // 🔍 نمایش پارامترهای فرم
         /*formParams.forEach((key, value) -> {
             System.out.println("Form Param: " + key + " = " + value);
         });*/
 
-        System.out.println("username: = " + username);
-        System.out.println("password: = " + password);
+//        System.out.println("firstName: = " + firstName);
+//        System.out.println("lastName: = " + lastName);
+//        System.out.println("phoneNumber: = " + phoneNumber);
 
-        // 📦 نمایش اطلاعات فایل‌ها
+        Customer customer = new Customer();
+        customer.setFirstName(firstName);
+        customer.setLastName(lastName);
+        customer.setPhoneNumber(phoneNumber);
+
+        customer = customerService.save(customer);
+
         if (files != null) {
-            for (MultipartFile file : files) {
-                System.out.println("File: " + file.getOriginalFilename() +
-                        " (" + file.getSize() + " bytes)");
-                // می‌تونی فایل رو ذخیره کنی یا پردازش کنی
+            List<File> fileList = new ArrayList<>();
+            for (MultipartFile f : files) {
+                File file = new File();
+                file.setName(f.getOriginalFilename());
+                file.setType(f.getContentType());
+                file.setOwnerId(customer.getId());
+                file.setContent(f.getBytes());
+                fileList.add(file);
             }
+            fileService.saveAll(fileList);
         }
 
         return "دریافت شد!";
@@ -195,8 +213,9 @@ public class RestController {
     )
     @ResponseBody
     public String handleUploadAsRestClient(
-            @RequestPart(value = "username", required = true) String username,
-            @RequestPart(value = "password", required = true) String password,
+            @RequestPart(value = "firstName", required = true) String firstName,
+            @RequestPart(value = "lastName", required = true) String lastName,
+            @RequestPart(value = "phoneNumber", required = true) String phoneNumber,
             //@RequestParam Map<String, String> formParams, // همه‌ی پارامترهای فرم
             @RequestPart(required = false) List<MultipartFile> files, // لیست فایل‌ها
             HttpServletRequest request,
@@ -204,11 +223,12 @@ public class RestController {
     ) {
 
         MultiValueMap<String, Object> multipartBody = new LinkedMultiValueMap<>();
-        multipartBody.add("username", username);
-        multipartBody.add("password", password);
+        multipartBody.add("firstName", firstName);
+        multipartBody.add("lastName", lastName);
+        multipartBody.add("phoneNumber", phoneNumber);
 
         // افزودن فایل‌ها (در صورت وجود)
-        Path filePath = Paths.get("path/to/file.txt");
+        //Path filePath = Paths.get("path/to/file.txt");
         //Resource fileResource = new FileSystemResource(filePath);
         //multipartBody.add("files", fileResource); // می‌توانید چند فایل اضافه کنید
         files.stream().forEach(file -> {
@@ -238,9 +258,7 @@ public class RestController {
                                 .findFirst()
                                 .map(cookie -> "Bearer " + cookie.getValue())
                                 .orElse("")
-
                         )
-
                 )
                 .body(multipartBody)
                 .exchange((clientRequest, clientResponse) -> {
