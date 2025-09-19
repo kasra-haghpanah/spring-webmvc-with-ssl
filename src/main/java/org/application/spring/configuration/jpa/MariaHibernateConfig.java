@@ -28,7 +28,8 @@ import java.text.MessageFormat;
 @DependsOn({"properties"})
 @EnableJpaRepositories(
         basePackages = {"org.application.spring.ddd.repository"},
-        transactionManagerRef = "appTM"
+        transactionManagerRef = "appTM",
+        entityManagerFactoryRef = "mariaDBEntityManagerFactory"
 )
 public class MariaHibernateConfig {
 
