@@ -27,13 +27,16 @@ public abstract class AppService<E extends AppEntity, ID, R extends JpaRepositor
 
     @Transactional(transactionManager = "appTM")
     public <S extends E> S save(S entity) {
-        return this.repository.save(entity);
+        S s = this.repository.save(entity);
+        this.repository.flush();
+        return s;
     }
 
     @Transactional(transactionManager = "appTM")
     public <S extends E> List<S> saveAll(Iterable<S> entities) {
-
-        return this.repository.saveAll(entities);
+        List<S> list = this.repository.saveAll(entities);
+        this.repository.flush();
+        return list;
     }
 
     public Optional<E> findById(ID id) {
