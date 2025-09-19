@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.application.spring.configuration.properties.Properties;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -50,7 +51,7 @@ public class MariaHibernateConfig {
         }
     }
 
-    @Bean
+    @Bean("mariaDB")
     public DataSource dataSource() {
 
         createDbIfNotExists(
@@ -75,12 +76,12 @@ public class MariaHibernateConfig {
     }
 
     @Bean
-    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+    public JdbcTemplate jdbcTemplate(@Qualifier("mariaDB") DataSource dataSource) {
         return new JdbcTemplate(dataSource);
     }
 
-    @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
+    @Bean("mariaDBEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(@Qualifier("mariaDB") DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
         emf.setDataSource(dataSource);
         emf.setPackagesToScan("org.application.spring.ddd.model"); // مسیر entityها
@@ -97,8 +98,8 @@ public class MariaHibernateConfig {
         return emf;
     }
 
-    @Bean("appTM")
-    public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
+    @Bean(name = {"appTM", "transactionManager"})
+    public PlatformTransactionManager transactionManager(@Qualifier("mariaDBEntityManagerFactory") EntityManagerFactory emf) {
         return new JpaTransactionManager(emf);
     }
 

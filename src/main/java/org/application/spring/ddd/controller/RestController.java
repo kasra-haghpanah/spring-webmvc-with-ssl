@@ -188,7 +188,8 @@ public class RestController {
                 file.setContent(f.getBytes());
                 fileList.add(file);
             }
-            fileService.saveAll(fileList);
+            List<File> saveAll = fileService.saveAll(fileList);
+            System.out.println("saveAll = " + saveAll.size());
         }
 
         return "دریافت شد!";

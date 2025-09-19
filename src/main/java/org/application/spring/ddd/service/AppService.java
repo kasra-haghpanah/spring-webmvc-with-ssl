@@ -25,12 +25,12 @@ public abstract class AppService<E extends AppEntity, ID, R extends JpaRepositor
         return repository;
     }*/
 
-    @Transactional("appTM")
+    @Transactional(transactionManager = "appTM")
     public <S extends E> S save(S entity) {
         return this.repository.save(entity);
     }
 
-    @Transactional("appTM")
+    @Transactional(transactionManager = "appTM")
     public <S extends E> List<S> saveAll(Iterable<S> entities) {
 
         return this.repository.saveAll(entities);
@@ -56,22 +56,22 @@ public abstract class AppService<E extends AppEntity, ID, R extends JpaRepositor
         return repository.count();
     }
 
-    @Transactional("appTM")
+    @Transactional(transactionManager = "appTM")
     public void deleteById(ID id) {
         repository.deleteById(id);
     }
 
-    @Transactional("appTM")
+    @Transactional(transactionManager = "appTM")
     public void delete(E entity) {
         repository.delete(entity);
     }
 
-    @Transactional("appTM")
+    @Transactional(transactionManager = "appTM")
     public void deleteAll(Iterable<? extends E> entities) {
         repository.deleteAll(entities);
     }
 
-    @Transactional("appTM")
+    @Transactional(transactionManager = "appTM")
     public void deleteAll() {
         repository.deleteAll();
     }
@@ -125,22 +125,22 @@ public abstract class AppService<E extends AppEntity, ID, R extends JpaRepositor
     }
 
     @Deprecated
-    @Transactional("appTM")
+    @Transactional(transactionManager = "appTM")
     public void deleteInBatch(Iterable<E> entities) {
         repository.deleteInBatch(entities);
     }
 
-    @Transactional("appTM")
+    @Transactional(transactionManager = "appTM")
     public void deleteAllInBatch() {
         repository.deleteAllInBatch();
     }
 
-    @Transactional("appTM")
+    @Transactional(transactionManager = "appTM")
     public void deleteAllByIdInBatch(Iterable<ID> ids) {
         repository.deleteAllByIdInBatch(ids);
     }
 
-    @Transactional("appTM")
+    @Transactional(transactionManager = "appTM")
     public void deleteAllInBatch(Iterable<E> entities) {
         repository.deleteAllInBatch(entities);
     }
