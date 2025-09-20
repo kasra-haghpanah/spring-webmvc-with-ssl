@@ -139,6 +139,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
     public static String extractResponseBody(HttpServletResponse response, HttpServletRequest request) {
 
         String responseBody = (String) request.getAttribute("response-body");
+        String requestURI = request.getRequestURI();
 
         if (responseBody != null && !responseBody.equals("")) {
             request.removeAttribute("response-body");
@@ -151,7 +152,9 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
             String body = null;
             try {
                 body = new String(buf, wrapper.getCharacterEncoding());
-                wrapper.copyBodyToResponse(); // مهم: برای ارسال پاسخ واقعی
+                if (requestURI.indexOf("/download/") < 0) {
+                    wrapper.copyBodyToResponse(); // مهم: برای ارسال پاسخ واقعی
+                }
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             } catch (IOException e) {
