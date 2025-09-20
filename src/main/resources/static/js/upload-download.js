@@ -1,5 +1,147 @@
 window.onload = function () {
 
+    function download(fileId, fileName, parent) {
+
+        html5.ajax({
+            url: `/download/${fileId}`,
+            method: 'GET',
+            headers: {
+                'Accept-Language': 'fa'
+                // 'Content-Type': 'application/json',
+                //'Authorization': 'Bearer your-token'
+            },
+            body: null,// {name: 'Ali', age: 30},
+            responseType: 'blob' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+        }).then(response => {
+            //console.log('Status:', response.status);
+            //console.log('Headers:', response.headers);
+            //console.log('Body:', response.body);
+
+            // responseType: 'blob'
+            const url = URL.createObjectURL(response.body);
+            /* <source src="video.mp4" type="video/mp4">*/
+            var source = document.createElement("source");
+            source.setAttribute("src", url);
+            source.setAttribute("type", response.body.type);
+
+            //document.getElementById('myVideo').appendChild(source);
+
+            var element = html5.createFileElement({
+                filename: fileName,
+                contentType: response.body.type,
+                content: response.body,
+                class: 'col-7',
+                height: "400px",
+                videoOrAudioElement: null,
+                isDecodeHTMLCode: true
+            });
+
+            parent.appendChild(element);
+
+        }).catch(error => {
+            console.error(error);
+        });
+
+    }
+
+    function getFileByOwnerId(ownerId) {
+        html5.ajax({
+            url: `/files?file=${ownerId}`,
+            method: 'GET',
+            headers: {
+                'Accept-Language': 'fa'
+                // 'Content-Type': 'application/json',
+                //'Authorization': 'Bearer your-token'
+            },
+            body: null,// {name: 'Ali', age: 30},
+            responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+        }).then(response => {
+            //console.log('Status:', response.status);
+            //console.log('Headers:', response.headers);
+            //console.log('Body:', response.body);
+
+            var fileBox = document.getElementById("fileBox");
+
+            while (fileBox.firstChild) {
+                fileBox.removeChild(fileBox.firstChild);
+            }
+
+            for (var i = 0; i < response.body.length; i++) {
+                var file = response.body[i];
+                var child = document.createElement("div");
+                child.innerText = file.name;
+                child.setAttribute("type", file.type);
+                child.setAttribute("fileId", file.id);
+                child.className = 'child';
+                fileBox.appendChild(child);
+
+                child.addEventListener("click", e => {
+                    var node = e.target;
+                    if (node.innerText == "") {
+                        return;
+                    }
+                    var fileId = node.getAttribute("fileId");
+                    var name = node.innerText;
+                    node.innerText = "";
+                    download(fileId, name, node);
+                    //alert(fileId);
+                });
+
+
+            }
+
+        }).catch(error => {
+            console.error(error);
+        });
+    }
+
+    function getCustomers(page, size) {
+        html5.ajax({
+            url: `/customers?page=${page}&size=${size}`,
+            method: 'GET',
+            headers: {
+                'Accept-Language': 'fa'
+                // 'Content-Type': 'application/json',
+                //'Authorization': 'Bearer your-token'
+            },
+            body: null,// {name: 'Ali', age: 30},
+            responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+        }).then(response => {
+            //console.log('Status:', response.status);
+            //console.log('Headers:', response.headers);
+            //console.log('Body:', response.body);
+
+
+            var table = document.getElementsByTagName("table")[0];
+
+            var trList = table.getElementsByTagName("tr");
+            while (trList.length > 1) {
+                var trList = table.getElementsByTagName("tr");
+                table.removeChild(trList[trList.length - 1]);
+            }
+
+            for (var i = 0; i < response.body.length; i++) {
+                var customer = response.body[i];
+                var tr = document.createElement("tr");
+                tr.style.cursor = "pointer";
+                tr.addEventListener("click", e => {
+                    var element = e.target;
+                    if (e.target.tagName == 'TD') {
+                        element = element.parentNode;
+                    }
+                    var id = element.getElementsByTagName("td")[0].innerText;
+                    getFileByOwnerId(id);
+                })
+                tr.innerHTML = `<td>${customer.id}</td><td>${customer.firstName}</td><td>${customer.lastName}</td><td>${customer.phoneNumber}</td>`;
+                table.appendChild(tr);
+            }
+
+        }).catch(error => {
+            console.error(error);
+        });
+
+    }
+
     html5.ajax({
         url: '/login',
         method: 'POST',
@@ -18,59 +160,12 @@ window.onload = function () {
         console.log('Headers:', response.headers);
         console.log('Body:', response.body);
 
-    }).catch(err => {
-        console.error(err);
+    }).catch(error => {
+        console.error(error);
     });
 
 
-    html5.ajax({
-        url: '/download/01K5K82CPCPEPMMDY2MR3VJXGZ',
-        method: 'GET',
-        headers: {
-            'Accept-Language': 'fa'
-            // 'Content-Type': 'application/json',
-            //'Authorization': 'Bearer your-token'
-        },
-        body: null,// {name: 'Ali', age: 30},
-        responseType: 'blob' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
-    }).then(response => {
-        console.log('Status:', response.status);
-        console.log('Headers:', response.headers);
-        //console.log('Body:', response.body);
-
-        // responseType: 'blob'
-        const url = URL.createObjectURL(response.body);
-        /* <source src="video.mp4" type="video/mp4">*/
-        var source = document.createElement("source");
-        source.setAttribute("src", url);
-        source.setAttribute("type", response.body.type);
-
-        document.getElementById('myVideo').appendChild(source);
-
-    }).catch(err => {
-        console.error(err);
-    });
-
-
-    html5.ajax({
-        url: '/customers?page=0&size=10',
-        method: 'GET',
-        headers: {
-            'Accept-Language': 'fa'
-            // 'Content-Type': 'application/json',
-            //'Authorization': 'Bearer your-token'
-        },
-        body: null,// {name: 'Ali', age: 30},
-        responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
-    }).then(response => {
-        console.log('Status:', response.status);
-        console.log('Headers:', response.headers);
-        console.log('Body:', response.body);
-
-    }).catch(err => {
-        console.error(err);
-    });
-
+    getCustomers(0, 10);
 
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
@@ -106,13 +201,9 @@ window.onload = function () {
             filesToUpload.push(file);
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
-            fileItem.innerHTML = `<strong>${file.name}</strong>
-<div class="content"></div>`;
-
+            fileItem.innerHTML = `<strong>${file.name}</strong><div class="content"></div>`;
 
             var contentType = file.type;
-            var videoOrAudioElement = null;
-            //var rsocketMessage = document.getElementById(item.id);
 
             var type = contentType.toLowerCase().indexOf("video") > -1 ? "video" : contentType;
             if (type != "video") {
@@ -126,7 +217,7 @@ window.onload = function () {
                 content: file,
                 class: 'col-7',
                 height: "400px",
-                videoOrAudioElement: null,//videoOrAudioElement,
+                videoOrAudioElement: null,
                 isDecodeHTMLCode: true
             });
 
@@ -156,7 +247,6 @@ window.onload = function () {
         formData.append(lastName.name, lastName.value);
         formData.append(phoneNumber.name, phoneNumber.value);
 
-
         const xhr = new XMLHttpRequest();
         xhr.open('POST', '/spring/restclient/upload');
 
@@ -175,9 +265,13 @@ window.onload = function () {
 
 
         xhr.onload = () => {
-            if (xhr.status === 200) {//xhr.responseText
+            var response = xhr.responseText;
+            if (xhr.status === 200) {
+                alert(response);
                 console.log(`File ${file.name} uploaded successfully`);
             } else {
+                var x = JSON.parse(response);
+                console.log(x);
                 console.error(`Upload failed for ${file.name}`);
             }
         };

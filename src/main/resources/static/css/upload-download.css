@@ -1,3 +1,17 @@
+.parent {
+    display: flex; /* فرزندانش به صورت افقی کنار هم قرار می‌گیرن (به طور پیش‌فرض). */
+    flex-wrap: wrap; /* این خط باعث میشه اگر جا کم بود، آیتم‌ها به خط بعدی برن */
+    gap: 10px; /* فاصله بین divها */
+}
+
+.child {
+    width: 500px;
+    min-height: 200px;
+    background-color: lightblue;
+    cursor: pointer;
+}
+
+
 #dropZone {
     border: 2px dashed #aaa;
     padding: 20px;
