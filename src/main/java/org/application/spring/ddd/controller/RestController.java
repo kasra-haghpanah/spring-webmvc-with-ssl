@@ -14,15 +14,16 @@ import org.application.spring.configuration.exception.ErrorResponse;
 import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.security.AuthenticationRequest;
 import org.application.spring.configuration.security.AuthenticationResponse;
+import org.application.spring.ddd.dto.FileDto;
 import org.application.spring.ddd.model.entity.Customer;
 import org.application.spring.ddd.model.entity.File;
 import org.application.spring.ddd.service.CustomerService;
 import org.application.spring.ddd.service.FileService;
-import org.application.spring.ddd.service.MailService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -41,8 +42,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Controller
@@ -68,6 +69,25 @@ public class RestController {
         this.restClient = restClient;
         this.customerService = customerService;
         this.fileService = fileService;
+    }
+
+    @RequestMapping(value = "/customers", method = RequestMethod.GET)
+    @ResponseBody
+    public List<Customer> customers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return customerService.findAll(pageable)
+                .stream()
+                .collect(Collectors.toList());
+    }
+
+    @RequestMapping(value = "/files", method = RequestMethod.GET)
+    @ResponseBody
+    public List<FileDto> files(@RequestParam("file") List<String> files) {
+        // /files?file=A,B,C,D
+        return fileService.findByOwnerList(files);
     }
 
     @RequestMapping(value = "/download/{fileId}", method = RequestMethod.GET)

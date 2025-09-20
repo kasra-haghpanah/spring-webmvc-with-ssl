@@ -16,16 +16,26 @@
 <body>
 
 
+<video id="myVideo" width="640" height="360" controls>
+   <!-- <source src="video.mp4" type="video/mp4">-->
+    مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
+</video>
+
+
 <div id="uploadForm">
     <input type="text" name="firstName" placeholder="FirstName" required/>
     <input type="text" name="lastName" placeholder="LastName" required/>
     <input type="text" name="phoneNumber" placeholder="PhoneNumber" required/>
 
     <div id="dropZone">Drop files here or click to select</div>
+    <div class="progress-bar">
+        <div class="progress-fill"></div>
+    </div>
+    <button id="send" type="button">Upload</button>
     <input type="file" id="fileInput" multiple hidden/>
 
     <div id="fileList"></div>
-    <button id="send" type="button">Upload</button>
+
 </div>
 
 

@@ -1,5 +1,6 @@
 package org.application.spring.ddd.service;
 
+import org.application.spring.ddd.dto.FileDto;
 import org.application.spring.ddd.model.entity.File;
 import org.application.spring.ddd.repository.FileRepository;
 import org.springframework.stereotype.Service;
@@ -15,11 +16,11 @@ public class FileService extends AppService<File, String, FileRepository> implem
 
 
     @Override
-    public List<File> findByOwnerList(List<String> owners) {
+    public List<FileDto> findByOwnerList(List<String> owners) {
         return repository.findByOwnerList(owners);
     }
 
-    public List<File> findByOwnerList(String... owners) {
+    public List<FileDto> findByOwnerList(String... owners) {
         if (owners.length > 0) {
             return repository.findByOwnerList(List.of(owners));
         }

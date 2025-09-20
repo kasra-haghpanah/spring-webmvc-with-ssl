@@ -1,6 +1,57 @@
 window.onload = function () {
 
 
+    html5.ajax({
+        url: '/download/01K5K82CPCPEPMMDY2MR3VJXGZ',
+        method: 'GET',
+        headers: {
+            // 'Content-Type': 'application/json',
+            //'Authorization': 'Bearer your-token'
+        },
+        body: null,// {name: 'Ali', age: 30},
+        responseType: 'blob' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+    }).then(response => {
+        console.log('Status:', response.status);
+        console.log('Headers:', response.headers);
+        //console.log('Body:', response.body);
+
+        // responseType: 'blob'
+        const url = URL.createObjectURL(response.body);
+        /* <source src="video.mp4" type="video/mp4">*/
+        var source = document.createElement("source");
+        source.setAttribute("src", url);
+        source.setAttribute("type", response.body.type);
+
+        document.getElementById('myVideo').appendChild(source);
+
+    }).catch(err => {
+        console.error(err);
+    });
+
+
+    html5.ajax({
+        url: '/customers?page=0&size=10',
+        method: 'GET',
+        headers: {
+            // 'Content-Type': 'application/json',
+            //'Authorization': 'Bearer your-token'
+        },
+        body: null,// {name: 'Ali', age: 30},
+        responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+    }).then(res => {
+        console.log('Status:', res.status);
+        console.log('Headers:', res.headers);
+        console.log('Body:', res.body);
+
+        // responseType: 'blob'
+        //const url = URL.createObjectURL(response.body);
+        //document.getElementById('myImage').src = url;
+
+    }).catch(err => {
+        console.error(err);
+    });
+
+
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const fileList = document.getElementById('fileList');
@@ -36,9 +87,6 @@ window.onload = function () {
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
             fileItem.innerHTML = `<strong>${file.name}</strong>
-<div class="progress-bar">
-    <div class="progress-fill"></div>
-</div>
 <div class="content"></div>`;
 
 
@@ -95,14 +143,14 @@ window.onload = function () {
         filesToUpload.forEach((file, index) => {
             formData.append('files', file);
 
-            xhr.upload.addEventListener('progress', e => {
-                if (e.lengthComputable) {
-                    const percent = (e.loaded / e.total) * 100;
-                    const progressFill = fileList.children[index].querySelector('.progress-fill');
-                    progressFill.style.width = percent + '%';
-                }
-            });
+        });
 
+        xhr.upload.addEventListener('progress', e => {
+            if (e.lengthComputable) {
+                const percent = (e.loaded / e.total) * 100;
+                const progressFill = uploadForm.querySelector('.progress-fill');
+                progressFill.style.width = percent + '%';
+            }
         });
 
 

@@ -3,6 +3,63 @@
     if (typeof window.html5 === 'undefined') {
         window.html5 = {
 
+            ajax: async function ({url, method = 'GET', headers = {}, body = null, responseType = 'text'}) {
+                try {
+                    const options = {
+                        method,
+                        headers,
+                        body: body && typeof body === 'object' && !(body instanceof FormData)
+                            ? JSON.stringify(body)
+                            : body
+                    };
+
+                    const response = await fetch(url, options);
+
+                    // دریافت هدرهای پاسخ
+                    const responseHeaders = {};
+                    response.headers.forEach((value, key) => {
+                        responseHeaders[key.toLowerCase()] = value;
+                    });
+
+                    // دریافت بدنه پاسخ بر اساس نوع
+                    let responseBody;
+                    switch (responseType) {
+                        case 'json':
+                            responseBody = await response.json();
+                            break;
+                        case 'text':
+                            responseBody = await response.text();
+                            break;
+                        case 'blob':
+                            responseBody = await response.blob();
+                            break;
+                        case 'arraybuffer':
+                            responseBody = await response.arrayBuffer();
+                            break;
+                        case 'base64':
+                            const buffer = await response.arrayBuffer();
+                            responseBody = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+                            break;
+                        case 'xml':
+                            const text = await response.text();
+                            const parser = new DOMParser();
+                            responseBody = parser.parseFromString(text, 'application/xml');
+                            break;
+                        default:
+                            responseBody = await response.text();
+                    }
+
+                    return {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: responseHeaders,
+                        body: responseBody
+                    };
+                } catch (error) {
+                    throw new Error('AJAX error: ' + error.message);
+                }
+            },
+
             toBlob: function (buffer, contentType) {
                 if (buffer.constructor === Blob) {
                     return buffer;
