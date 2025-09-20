@@ -1,10 +1,33 @@
 window.onload = function () {
 
+    html5.ajax({
+        url: '/login',
+        method: 'POST',
+        headers: {
+            'Accept-Language': 'fa',
+            'Content-Type': 'application/json'//,
+            //'Authorization': 'Bearer your-token'
+        },
+        body: {
+            "username": "kasra_khpk1985@yahoo.com",
+            "password": "123"
+        },
+        responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+    }).then(response => {
+        console.log('Status:', response.status);
+        console.log('Headers:', response.headers);
+        console.log('Body:', response.body);
+
+    }).catch(err => {
+        console.error(err);
+    });
+
 
     html5.ajax({
         url: '/download/01K5K82CPCPEPMMDY2MR3VJXGZ',
         method: 'GET',
         headers: {
+            'Accept-Language': 'fa'
             // 'Content-Type': 'application/json',
             //'Authorization': 'Bearer your-token'
         },
@@ -33,19 +56,16 @@ window.onload = function () {
         url: '/customers?page=0&size=10',
         method: 'GET',
         headers: {
+            'Accept-Language': 'fa'
             // 'Content-Type': 'application/json',
             //'Authorization': 'Bearer your-token'
         },
         body: null,// {name: 'Ali', age: 30},
         responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
-    }).then(res => {
-        console.log('Status:', res.status);
-        console.log('Headers:', res.headers);
-        console.log('Body:', res.body);
-
-        // responseType: 'blob'
-        //const url = URL.createObjectURL(response.body);
-        //document.getElementById('myImage').src = url;
+    }).then(response => {
+        console.log('Status:', response.status);
+        console.log('Headers:', response.headers);
+        console.log('Body:', response.body);
 
     }).catch(err => {
         console.error(err);
