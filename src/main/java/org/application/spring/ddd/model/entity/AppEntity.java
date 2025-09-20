@@ -27,7 +27,7 @@ public abstract class AppEntity implements Serializable {
     }
 
     @Id
-    @Column(name = "id", length = 26)
+    @Column(name = "id", length = 26, nullable = false, updatable = false)
     private String id;
 
     public String getId() {

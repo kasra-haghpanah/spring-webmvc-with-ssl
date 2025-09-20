@@ -9,7 +9,7 @@ public class File extends AppEntity {
     @Transient
     public static final String TABLE_NAME = "File";
 
-    @Column(name = "type", length = 15)
+    @Column(name = "type", length = 100)
     private String type;
 
     @Column(name = "name", length = 100)
@@ -19,7 +19,7 @@ public class File extends AppEntity {
     @Column(name = "content", columnDefinition = "LONGBLOB")
     private byte[] content;
 
-    @Column(name = "owner_id", length = 26)
+    @Column(name = "owner_id", length = 26, nullable = false, updatable = false)
     private String ownerId;
 
     public String getType() {

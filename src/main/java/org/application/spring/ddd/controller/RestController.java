@@ -39,6 +39,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Stream;
@@ -68,36 +70,28 @@ public class RestController {
         this.fileService = fileService;
     }
 
-    @RequestMapping(value = "/download/{filename:.+}", method = RequestMethod.GET)
+    @RequestMapping(value = "/download/{fileId}", method = RequestMethod.GET)
     @Operation(summary = "دانلود فایل", description = "دانلود فایل با نام مشخص‌شده")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "فایل با موفقیت ارسال شد"),
             @ApiResponse(responseCode = "404", description = "فایل یافت نشد")
     })
     public void download(
-            @PathVariable String fileId,
+            @PathVariable(value = "fileId") String fileId,
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
 
         Locale locale = localeResolver.resolveLocale(request);
-        // برای امنیت بیشتر، حتماً مسیر فایل رو normalize کن تا از حملات path traversal جلوگیری بشه.
-        //Path filePath = Paths.get("files").resolve(filename).normalize();
-
-        String path = MailService.class.getResource("").getPath();// favicon.ico
-        //path = MessageFormat.format("{0}/static/images/{1}", path.substring(0, path.indexOf("/classes") + 8), filePath.getFileName());
-        //File file = new File(path);
-
-
         File file = fileService.getById(fileId);
-        //
+
         if (file == null) {
 
             response.setStatus(HttpStatus.NOT_FOUND.value());
             response.setContentType("application/json;charset=UTF-8");
 
             Map<String, String> map = new HashMap<>();
-            map.put("", messageSource.getMessage("address.file.invalid", new Object[]{fileId}, locale));
+            map.put("error", messageSource.getMessage("address.file.invalid", new Object[]{fileId}, locale));
 
             ErrorResponse errorResponse = new ErrorResponse();
             errorResponse.setStatus(HttpStatus.NOT_FOUND);
@@ -108,6 +102,7 @@ public class RestController {
             return;
         }
 
+        Long sizeFile = Long.valueOf(file.getContent().length); // برحسب بایت
         // تعیین MIME type
         // Files.probeContentType() از سیستم‌عامل برای تشخیص MIME استفاده می‌کنه. اگه دقیق نبود، می‌تونی از کتابخونه‌هایی مثل Apache Tika استفاده کنی.
         String mimeType = file.getType(); //Files.probeContentType(file.toPath());
@@ -115,35 +110,46 @@ public class RestController {
             mimeType = "application/octet-stream"; // پیش‌فرض
         }
 
-
-        //byte[] fileBytes = Files.readAllBytes(file.toPath());
-
-        // تنظیم هدرها
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(mimeType));
-
         // اگر HTML بود، charset رو روی UTF-8 ست کن
-        if (mimeType.indexOf("text") > -1 || mimeType.equals("application/json")) {
-            headers.setContentType(MediaType.parseMediaType(mimeType + "; charset=UTF-8"));
+        if (mimeType.indexOf("text") > -1 || mimeType.equals("json") || mimeType.equals("xml")) {
+            mimeType = mimeType + "; charset=UTF-8";
         }
 
-        Long sizeFile = Long.valueOf(file.getContent().length); // برحسب بایت
+        boolean inlineTypes = mimeType.startsWith("text/") ||
+                mimeType.startsWith("image/") ||
+                mimeType.startsWith("application/pdf") ||
+                mimeType.startsWith("application/json") ||
+                mimeType.indexOf("video/") > -1 ||
+                mimeType.indexOf("audio/") > -1;
+
+        String dispositionType = inlineTypes ? "inline" : "attachment";
+        dispositionType = "inline";
+
+        // نام فایل با پشتیبانی از UTF-8
+        String encodedFileName = URLEncoder.encode(file.getName(), StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
+
+        String contentDisposition = String.format(
+                "%s; filename=\"%s\"; filename*=UTF-8''%s",
+                dispositionType, file.getName(), encodedFileName
+        );
 
         response.setContentType(mimeType); // یا نوع MIME مناسب مثل "application/pdf"
-        response.setHeader("Content-Disposition", MessageFormat.format("attachment; filename=\"{0}\"", file.getName()));
+        response.setHeader("Content-Disposition", contentDisposition);
         response.setContentLength(sizeFile.intValue());
+
 
         // خواندن فایل به صورت بایت
 
-        InputStream in = new ByteArrayInputStream(file.getContent());
-        OutputStream out = response.getOutputStream();
+        try (InputStream in = new ByteArrayInputStream(file.getContent());
+             OutputStream out = response.getOutputStream()) {
 
-        byte[] buffer = new byte[sizeFile.intValue()];
-        int bytesRead;
-        while ((bytesRead = in.read(buffer)) != -1) {
-            out.write(buffer, 0, bytesRead);
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
+            out.flush();
         }
-        out.flush();
 
 
     }
