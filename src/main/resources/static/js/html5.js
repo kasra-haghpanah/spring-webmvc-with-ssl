@@ -56,7 +56,7 @@
                         body: responseBody
                     };
                 } catch (error) {
-                    throw new Error('AJAX error: ' + error.message);
+                    throw new Error(error.message);
                 }
             },
 
