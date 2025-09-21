@@ -290,58 +290,39 @@ window.onload = function () {
     }
 
     button.addEventListener('click', e => {
-        e.preventDefault();
-        const firstName = uploadForm.getElementsByTagName("input")[0];
-        const lastName = uploadForm.getElementsByTagName("input")[1];
-        const phoneNumber = uploadForm.getElementsByTagName("input")[2];
+            e.preventDefault();
 
+            try {
+                html5.uploadFormData({
+                    method: 'POST',
+                    formElement: uploadForm,
+                    files: filesToUpload,
+                    endpoint: "/spring/restclient/upload",
+                    headers: {"Accept-Language": "fa"},
+                    onProgress: ({percent, loaded, total}) => {
+                        var progressBar = uploadForm.querySelector(".progress-bar");
+                        var progressText = uploadForm.querySelector(".progress-text");
+                        progressText.innerText = `${percent}% (${loaded}/${total})`;
+                        progressBar.style.width = Math.floor(percent) + "%";
+                    },
+                    onSuccess: response => {
+                        getCustomers(0, 60);
+                        alert("✅ آپلود موفق: " + response);
 
-        const formData = new FormData();
-        formData.append(firstName.name, firstName.value);
-        formData.append(lastName.name, lastName.value);
-        formData.append(phoneNumber.name, phoneNumber.value);
+                    },
+                    onError: err => {
 
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/spring/restclient/upload');
-        xhr.setRequestHeader("Accept-Language", "fa");
+                        alert(err['errors']['unexpected']);
+                        //alert("❌ خطا: " + err);
+                    }
+                });
+            } catch (err) {
+                console.error(err);
+                alert(err['errors']['unexpected']);
+                //alert("❌ خطای غیرمنتظره: " + err);
+            };
 
-        filesToUpload.forEach((file, index) => {
-            formData.append('files', file);
 
         });
-
-        xhr.upload.addEventListener('progress', e => {
-            if (e.lengthComputable) {
-                const percent = Math.floor((e.loaded / e.total) * 100);
-                const progressFill = uploadForm.querySelector('.progress-fill');
-
-                var progressBar = uploadForm.querySelector(".progress-bar");
-                var progressText = uploadForm.querySelector(".progress-text");
-
-                progressText.innerText = `${percent}% (${e.loaded}/${e.total})`;
-                progressBar.style.width = percent + "%";
-
-
-                //progressFill.style.width = percent + '%';
-            }
-        });
-
-
-        xhr.onload = () => {
-            var response = xhr.responseText;
-            if (xhr.status === 200) {
-                alert(response);
-                getCustomers(0, 60);
-                //console.log(`File ${file.name} uploaded successfully`);
-            } else {
-                var res = JSON.parse(response);
-                alert(res['errors']['unexpected']);
-                //console.error(`Upload failed for ${file.name}`);
-            }
-        };
-
-        xhr.send(formData);
-
-    });
 
 }

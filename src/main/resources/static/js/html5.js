@@ -3,7 +3,14 @@
     if (typeof window.html5 === 'undefined') {
         window.html5 = {
 
-            ajax: function ({url, method = 'GET', headers = {}, body = null, responseType = 'text', onProgress = null}) {
+            ajax: function ({
+                                url,
+                                method = 'GET',
+                                headers = {},
+                                body = null,
+                                responseType = 'text',
+                                onProgress = null
+                            }) {
                 return new Promise((resolve, reject) => {
                     const xhr = new XMLHttpRequest();
                     xhr.open(method, url, true);
@@ -55,6 +62,74 @@
                     xhr.send(body && typeof body === 'object' && !(body instanceof FormData)
                         ? JSON.stringify(body)
                         : body);
+                });
+            },
+
+            uploadFormData: function ({
+                                          method = 'POST',
+                                          formElement,
+                                          files,
+                                          endpoint,
+                                          headers = {},
+                                          onProgress,
+                                          onSuccess,
+                                          onError
+                                      }) {
+                if (!formElement || !files || !files.length || !endpoint) {
+                    throw new Error("پارامترهای ورودی ناقص هستند.");
+                }
+
+                const inputs = formElement.querySelectorAll("input[name]");
+                const formData = new FormData();
+
+                inputs.forEach(input => {
+                    formData.append(input.name, input.value);
+                });
+
+                files.forEach(file => {
+                    formData.append("files", file);
+                });
+
+                return new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open(method, endpoint, true);
+
+                    // تنظیم هدرها
+                    Object.entries(headers).forEach(([key, value]) => {
+                        xhr.setRequestHeader(key, value);
+                    });
+
+                    // پیشرفت آپلود
+                    xhr.upload.addEventListener("progress", e => {
+                        if (e.lengthComputable && typeof onProgress === "function") {
+                            const percent = Math.floor((e.loaded / e.total) * 100);
+                            onProgress({percent, loaded: e.loaded, total: e.total});
+                        }
+                    });
+
+                    // پاسخ موفق
+                    xhr.onload = () => {
+                        if (xhr.status === 200) {
+                            resolve(xhr.responseText);
+                            if (typeof onSuccess === "function") onSuccess(xhr.responseText);
+                        } else {
+                            try {
+                                const res = JSON.parse(xhr.responseText);
+                                reject(res.errors?.unexpected || "خطای سرور");
+                                if (typeof onError === "function") onError(res);
+                            } catch {
+                                reject("پاسخ نامعتبر از سرور");
+                            }
+                        }
+                    };
+
+                    // خطای شبکه
+                    xhr.onerror = () => {
+                        reject("خطا در ارتباط با سرور");
+                        if (typeof onError === "function") onError("network");
+                    };
+
+                    xhr.send(formData);
                 });
             },
 
