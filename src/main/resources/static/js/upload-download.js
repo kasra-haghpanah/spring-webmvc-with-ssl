@@ -116,11 +116,7 @@ window.onload = function () {
                 var file = response.body[i];
                 var child = document.createElement("div");
                 //child.innerText = file.name;
-                child.innerHTML = `<div class="progress-container">
-    <div class="progress-bar"></div>
-    <p class="progress-text">0%</p>
-</div>
-<div>${file.name}</div>`;
+                child.innerHTML = `<div class="progress-container"><div class="progress-bar"></div><div class="progress-text">0%</div></div><div>${file.name}</div>`;
                 child.setAttribute("type", file.type);
                 child.setAttribute("fileId", file.id);
                 child.className = 'child';
