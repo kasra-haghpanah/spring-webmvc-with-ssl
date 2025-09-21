@@ -1,5 +1,23 @@
 window.onload = function () {
 
+    function lazyLoadForDownload(e) {
+        var node = e.target;
+        while (node.getAttribute("fileId") == null) {
+            node = node.parentNode;
+        }
+        /*        if (node.getAttribute("disable") == "true") {
+                    return;
+                }*/
+        var fileId = node.getAttribute("fileId");
+        var name = node.innerText;
+        //node.innerText = "";
+        //node.setAttribute("disable", "true");
+        download(fileId, name, node);
+
+        node.removeEventListener("click", lazyLoadForDownload);
+        //alert(fileId);
+    }
+
     function download(fileId, fileName, parent) {
 
         html5.ajax({
@@ -11,11 +29,24 @@ window.onload = function () {
                 //'Authorization': 'Bearer your-token'
             },
             body: null,// {name: 'Ali', age: 30},
-            responseType: 'blob' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+            responseType: 'blob', // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+            onProgress: function ({loaded, total, percent}) {
+
+                // var progressFill = parent.querySelector("progress-fill");
+                // if (progressFill == null) {
+                //     parent.innerHTML = `<div class="progress-bar"><div class="progress-fill"></div></div></div>`;
+                // }
+                progressFill = parent.querySelector(".progress-fill");
+
+                progressFill.firstChild.innerText = percent.toFixed(2) + '%';
+                progressFill.style.width = percent.toFixed(2) + '%';
+                //console.log(`دانلود: ${percent.toFixed(2)}% (${loaded}/${total} بایت)`);
+            }
         }).then(response => {
             //console.log('Status:', response.status);
             //console.log('Headers:', response.headers);
             //console.log('Body:', response.body);
+
 
             // responseType: 'blob'
             const url = URL.createObjectURL(response.body);
@@ -38,14 +69,19 @@ window.onload = function () {
             });
 
             var a = html5.createLink(response.body, fileName, fileName);
+            a.style.color = "white";
+            a.style.marginLeft = "10px";
+            a.style.cursor = "pointer";
 
             var divLink = document.createElement("div");
-            divLink.style.background = "white";
+            divLink.style.background = "black";
             divLink.style.width = "100%";
             divLink.style.height = "50px";
 
+
             divLink.appendChild(a);
             parent.appendChild(divLink);
+            parent.style.cursor = "none";
 
             if (typeof element !== 'undefined') {
                 parent.appendChild(element);
@@ -77,29 +113,21 @@ window.onload = function () {
             var fileBox = document.getElementById("fileBox");
 
             while (fileBox.firstChild) {
+                fileBox.firstChild.removeEventListener("click", lazyLoadForDownload);
                 fileBox.removeChild(fileBox.firstChild);
             }
 
             for (var i = 0; i < response.body.length; i++) {
                 var file = response.body[i];
                 var child = document.createElement("div");
-                child.innerText = file.name;
+                //child.innerText = file.name;
+                child.innerHTML = `<div class="progress-bar"><div class="progress-fill centered"><p></p></p></div></div><div>${file.name}</div></div>`;
                 child.setAttribute("type", file.type);
                 child.setAttribute("fileId", file.id);
                 child.className = 'child';
                 fileBox.appendChild(child);
 
-                child.addEventListener("click", e => {
-                    var node = e.target;
-                    if (node.innerText == "") {
-                        return;
-                    }
-                    var fileId = node.getAttribute("fileId");
-                    var name = node.innerText;
-                    node.innerText = "";
-                    download(fileId, name, node);
-                    //alert(fileId);
-                });
+                child.addEventListener("click", lazyLoadForDownload);
 
 
             }
@@ -215,7 +243,7 @@ window.onload = function () {
             filesToUpload.push(file);
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
-            fileItem.innerHTML = `<strong>${file.name}</strong><div class="content"></div>`;
+            fileItem.innerHTML = `<div class="close-button">&nbsp;</div></div><strong>${file.name}</strong><div class="content"></div>`;
 
             var contentType = file.type;
 

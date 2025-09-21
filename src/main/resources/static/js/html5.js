@@ -3,61 +3,59 @@
     if (typeof window.html5 === 'undefined') {
         window.html5 = {
 
-            ajax: async function ({url, method = 'GET', headers = {}, body = null, responseType = 'text'}) {
-                try {
-                    const options = {
-                        method,
-                        headers,
-                        body: body && typeof body === 'object' && !(body instanceof FormData)
-                            ? JSON.stringify(body)
-                            : body
-                    };
+            ajax: function ({url, method = 'GET', headers = {}, body = null, responseType = 'text', onProgress = null}) {
+                return new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open(method, url, true);
 
-                    const response = await fetch(url, options);
-
-                    // دریافت هدرهای پاسخ
-                    const responseHeaders = {};
-                    response.headers.forEach((value, key) => {
-                        responseHeaders[key.toLowerCase()] = value;
-                    });
-
-                    // دریافت بدنه پاسخ بر اساس نوع
-                    let responseBody;
-                    switch (responseType) {
-                        case 'json':
-                            responseBody = await response.json();
-                            break;
-                        case 'text':
-                            responseBody = await response.text();
-                            break;
-                        case 'blob':
-                            responseBody = await response.blob();
-                            break;
-                        case 'arraybuffer':
-                            responseBody = await response.arrayBuffer();
-                            break;
-                        case 'base64':
-                            const buffer = await response.arrayBuffer();
-                            responseBody = btoa(String.fromCharCode(...new Uint8Array(buffer)));
-                            break;
-                        case 'xml':
-                            const text = await response.text();
-                            const parser = new DOMParser();
-                            responseBody = parser.parseFromString(text, 'application/xml');
-                            break;
-                        default:
-                            responseBody = await response.text();
+                    // تنظیم هدرها
+                    for (const key in headers) {
+                        xhr.setRequestHeader(key, headers[key]);
                     }
 
-                    return {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: responseHeaders,
-                        body: responseBody
+                    // نوع پاسخ
+                    xhr.responseType = responseType === 'base64' ? 'arraybuffer' : responseType;
+
+                    // رویداد پیشرفت دانلود
+                    if (typeof onProgress === 'function') {
+                        xhr.onprogress = function (event) {
+                            if (event.lengthComputable) {
+                                const percent = (event.loaded / event.total) * 100;
+                                onProgress({loaded: event.loaded, total: event.total, percent});
+                            }
+                        };
+                    }
+
+                    xhr.onload = function () {
+                        const responseHeaders = {};
+                        const rawHeaders = xhr.getAllResponseHeaders().split('\r\n');
+                        rawHeaders.forEach(line => {
+                            const [key, value] = line.split(': ');
+                            if (key) responseHeaders[key.toLowerCase()] = value;
+                        });
+
+                        let responseBody = xhr.response;
+                        if (responseType === 'base64') {
+                            const binary = String.fromCharCode(...new Uint8Array(xhr.response));
+                            responseBody = btoa(binary);
+                        }
+
+                        resolve({
+                            status: xhr.status,
+                            statusText: xhr.statusText,
+                            headers: responseHeaders,
+                            body: responseBody
+                        });
                     };
-                } catch (error) {
-                    throw new Error(error.message);
-                }
+
+                    xhr.onerror = function () {
+                        reject(new Error('Network error'));
+                    };
+
+                    xhr.send(body && typeof body === 'object' && !(body instanceof FormData)
+                        ? JSON.stringify(body)
+                        : body);
+                });
             },
 
             toBlob: function (buffer, contentType) {

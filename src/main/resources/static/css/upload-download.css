@@ -1,3 +1,13 @@
+.close-button {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
 .parent {
     display: flex; /* فرزندانش به صورت افقی کنار هم قرار می‌گیرن (به طور پیش‌فرض). */
     flex-wrap: wrap; /* این خط باعث میشه اگر جا کم بود، آیتم‌ها به خط بعدی برن */
@@ -37,6 +47,14 @@
 
 .progress-fill {
     height: 100%;
+    color: white;
     background: #4caf50;
     width: 0%;
+}
+
+.centered {
+    display: flex;
+    justify-content: center; /* افقی */
+    align-items: center;     /* عمودی */
+    height: 100%;           /* ارتفاع کامل صفحه */
 }
