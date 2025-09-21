@@ -290,39 +290,40 @@ window.onload = function () {
     }
 
     button.addEventListener('click', e => {
-            e.preventDefault();
+        e.preventDefault();
 
-            try {
-                html5.uploadFormData({
-                    method: 'POST',
-                    formElement: uploadForm,
-                    files: filesToUpload,
-                    endpoint: "/spring/restclient/upload",
-                    headers: {"Accept-Language": "fa"},
-                    onProgress: ({percent, loaded, total}) => {
-                        var progressBar = uploadForm.querySelector(".progress-bar");
-                        var progressText = uploadForm.querySelector(".progress-text");
-                        progressText.innerText = `${percent}% (${loaded}/${total})`;
-                        progressBar.style.width = Math.floor(percent) + "%";
-                    },
-                    onSuccess: response => {
-                        getCustomers(0, 60);
-                        alert("✅ آپلود موفق: " + response);
+        try {
+            html5.uploadFormData({
+                method: 'POST',
+                formElement: uploadForm,
+                files: filesToUpload,
+                endpoint: "/spring/restclient/upload",
+                headers: {"Accept-Language": "fa"},
+                onProgress: ({percent, loaded, total}) => {
+                    var progressBar = uploadForm.querySelector(".progress-bar");
+                    var progressText = uploadForm.querySelector(".progress-text");
+                    progressText.innerText = `${percent}% (${loaded}/${total})`;
+                    progressBar.style.width = Math.floor(percent) + "%";
+                },
+                onSuccess: response => {
+                    getCustomers(0, 60);
+                    alert(response);
 
-                    },
-                    onError: err => {
+                },
+                onError: err => {
 
-                        alert(err['errors']['unexpected']);
-                        //alert("❌ خطا: " + err);
-                    }
-                });
-            } catch (err) {
-                console.error(err);
-                alert(err['errors']['unexpected']);
-                //alert("❌ خطای غیرمنتظره: " + err);
-            };
+                    alert(err['errors']['unexpected']);
+                    //alert("❌ خطا: " + err);
+                }
+            });
+        } catch (err) {
+            console.error(err);
+            alert(err['errors']['unexpected']);
+            //alert("❌ خطای غیرمنتظره: " + err);
+        }
+        ;
 
 
-        });
+    });
 
 }
