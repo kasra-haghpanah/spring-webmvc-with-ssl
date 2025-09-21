@@ -31,16 +31,11 @@ window.onload = function () {
             body: null,// {name: 'Ali', age: 30},
             responseType: 'blob', // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
             onProgress: function ({loaded, total, percent}) {
+                var progressBar = parent.querySelector(".progress-bar");
+                var progressText = parent.querySelector(".progress-text");
 
-                // var progressFill = parent.querySelector("progress-fill");
-                // if (progressFill == null) {
-                //     parent.innerHTML = `<div class="progress-bar"><div class="progress-fill"></div></div></div>`;
-                // }
-                progressFill = parent.querySelector(".progress-fill");
-
-                progressFill.firstChild.innerText = percent.toFixed(2) + '%';
-                progressFill.style.width = percent.toFixed(2) + '%';
-                //console.log(`دانلود: ${percent.toFixed(2)}% (${loaded}/${total} بایت)`);
+                progressText.innerText = `${percent.toFixed(0)}% (${loaded}/${total})`;
+                progressBar.style.width = percent.toFixed(0) + "%";
             }
         }).then(response => {
             //console.log('Status:', response.status);
@@ -121,7 +116,11 @@ window.onload = function () {
                 var file = response.body[i];
                 var child = document.createElement("div");
                 //child.innerText = file.name;
-                child.innerHTML = `<div class="progress-bar"><div class="progress-fill centered"><p></p></p></div></div><div>${file.name}</div></div>`;
+                child.innerHTML = `<div class="progress-container">
+    <div class="progress-bar"></div>
+    <p class="progress-text">0%</p>
+</div>
+<div>${file.name}</div>`;
                 child.setAttribute("type", file.type);
                 child.setAttribute("fileId", file.id);
                 child.className = 'child';
@@ -300,9 +299,17 @@ window.onload = function () {
 
         xhr.upload.addEventListener('progress', e => {
             if (e.lengthComputable) {
-                const percent = (e.loaded / e.total) * 100;
+                const percent = Math.floor((e.loaded / e.total) * 100);
                 const progressFill = uploadForm.querySelector('.progress-fill');
-                progressFill.style.width = percent + '%';
+
+                var progressBar = uploadForm.querySelector(".progress-bar");
+                var progressText = uploadForm.querySelector(".progress-text");
+
+                progressText.innerText = `${percent}% (${e.loaded}/${e.total})`;
+                progressBar.style.width = percent + "%";
+
+
+                //progressFill.style.width = percent + '%';
             }
         });
 
