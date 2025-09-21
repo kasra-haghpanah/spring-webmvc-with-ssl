@@ -24,6 +24,7 @@ public class Properties {
 
         config.put("classpath", classPath);
         config.put("version", environment.getProperty("version"));
+        config.put("cookie.age.minutes", environment.getProperty("cookie.age.minutes"));
         config.put("server.port", environment.getProperty("server.port"));
         config.put("spring.application.name", environment.getProperty("spring.application.name"));
         config.put("application.upload_file_size_in_mb", environment.getProperty("application.upload_file_size_in_mb"));
@@ -183,6 +184,10 @@ public class Properties {
 
     public static String getVersion() {
         return get("version", String.class);
+    }
+
+    public static Integer getCookieAgeMinutes() {
+        return Integer.valueOf(get("cookie.age.minutes", String.class));
     }
 
     public static Boolean getLogConsoleActive() {

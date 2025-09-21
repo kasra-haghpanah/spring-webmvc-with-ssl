@@ -165,188 +165,6 @@
                 }).join(''));
             },
 
-            createFileElement: function (data) {
-
-                /*                data = {
-                                    filename: filename,
-                                    contentType: contentType,
-                                    content: content,
-                                    width: width,
-                                    height: height,
-                                    class: "col-7",
-                                    videoOrAudioElement: video,
-                                    isDecodeHTMLCode: true
-                                }*/
-                // var isBase64 = (data.isBase64 === undefined || data.isBase64 == null) ? false : true;
-
-                var isDecodeHTMLCode = (data.isDecodeHTMLCode === undefined || data.isDecodeHTMLCode == null) ? false : true;
-                var isBase64 = data.content.constructor === String;
-                if (data.content.constructor === Uint8Array) {
-                    data.content = data.content.buffer;
-                }
-                var isArrayBuffer = data.content.constructor === ArrayBuffer;
-                if (isArrayBuffer || data.content.constructor === File) {
-                    data.content = this.toBlob(data.content, data.contentType);
-                    isArrayBuffer = false;
-                }
-
-                var isBlob = data.content.constructor === Blob;
-
-                var isDataUri = isBase64 && data.content.indexOf(";Base64,")
-                if (isArrayBuffer || isBlob) {
-                    isBase64 = false;
-                }
-
-
-                var filename = data.filename;
-                var contentType = data.contentType;
-                var content = data.content;
-
-                if (contentType.indexOf("text") > -1) {
-                    if (isArrayBuffer) {
-                        content = this.arrayBufferToBase64(content);
-                    } else if (isBase64) {
-                        content = this.base64ToUnicode(content);
-                    }
-
-                }
-
-                var width = data.width === undefined ? null : data.width;
-                var height = data.height === undefined ? null : data.height;
-                var className = data.class === undefined ? null : data.class;
-                var video = data.videoOrAudioElement === undefined ? null : data.videoOrAudioElement;
-
-
-                //var td = element.target || element.srcElement || element.currentTarget;
-                if (contentType == null || content == null) {
-                    reject("");
-                }
-                var contentTypeLower = contentType.toLowerCase();
-
-
-                if (contentTypeLower.indexOf("text") == -1) {
-                    if (isDataUri == -1 && isBase64) {
-                        content = "data:" + contentType + ";base64," + content;
-                    }
-                    if (content != "") {
-                        if (isArrayBuffer || isBase64) {
-                            content = window.URL.createObjectURL(this.toBlob(content, contentType));
-                        } else if (isBlob) {
-                            content = window.URL.createObjectURL(content);
-                        }
-
-                    }
-
-                }
-
-                if (contentTypeLower.indexOf("pdf") > -1) {
-                    var embed = document.createElement("iframe");
-                    embed.setAttribute("src", content);//window.URL.createObjectURL(item.content)
-                    embed.setAttribute("type", "application/pdf");
-                    embed.setAttribute("alt", "pdf");
-                    if (width != null) {
-                        embed.setAttribute("width", width);
-                    }
-                    if (height != null) {
-                        embed.setAttribute("height", height);
-                    }
-
-                    if (className != null) {
-                        embed.className = className;
-                    }
-                    //embed.setAttribute("pluginspage", "http://www.adobe.com/products/acrobat/readstep2.html");
-                    return embed;
-
-                } else if (contentTypeLower.indexOf("text") > -1) {
-
-                    var div = document.createElement("div");
-                    if (isBlob) {
-                        content.text()
-                            .then(function (text) {
-                                if (contentType.toLowerCase() == "text/html" && isDecodeHTMLCode) {
-                                    text = HTML5.stripHtml(text);
-                                }
-                                div.innerHTML = text;
-                            })
-                    } else {
-                        if (isDecodeHTMLCode) {
-                            content = HTML5.stripHtml(content);
-                        }
-                        div.innerHTML = content;
-                    }
-                    //https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
-                    //atob(item.content);  //ajax.b64DecodeUnicode(item.content); //atob(item.content);     //btoa encode to base64     //atob decode base64 to string
-
-                    if (className != null) {
-                        div.className = className;
-                    }
-
-                    if (width != null || height != null) {
-                        var letWidth = width != null ? "width: " + width + "px" : "";
-                        var letHeight = height != null ? "height: " + height : "";
-                        if (letWidth != "") {
-                            letWidth += ";";
-                        }
-                        div.setAttribute("style", "resize: both;overflow-x: scroll;overflow-y: scroll;" + letWidth + letHeight);
-                    }
-                    return div;
-                } else if (contentTypeLower.indexOf("video") > -1 || contentTypeLower.indexOf("audio") > -1) {
-                    var type = "video";
-                    if (contentTypeLower.indexOf("audio") > -1) {
-                        type = "audio";
-                    }
-
-                    video = video == null ? document.createElement(type) : video;
-                    video.src = null;
-                    video.src = content; //window.URL.createObjectURL(item.content);
-                    //video.play();
-                    video.preload = "metadata";
-                    video.controls = "controls";
-                    video.type = contentType;
-
-                    if (className != null) {
-                        video.className = className;
-                    }
-
-                    if (width != null || height != null) {
-                        var letWidth = width != null ? "width: " + width : "";
-                        var letHeight = height != null ? "height: " + height : "";
-                        if (type = "audio") {
-                            letHeight = "";
-                        }
-                        if (letWidth != "") {
-                            letWidth += ";";
-                        }
-                        video.setAttribute("style", letWidth + letHeight);
-                    }
-                    //video.size = "150";
-                    //video.height = "150";
-                    return video;
-                } else if (contentTypeLower.indexOf("image/") > -1) {
-                    var img = document.createElement("img");
-                    img.src = content;//window.URL.createObjectURL(item.content);
-                    //img.size = "150";
-                    //img.height = "150";
-                    img.alt = filename;
-                    if (className != null) {
-                        img.className = className;
-                    }
-
-                    if (width != null || height != null) {
-                        var letWidth = width != null ? "width: " + width + "px" : "";
-                        var letHeight = height != null ? "height: " + height : "";
-                        if (letWidth != "") {
-                            letWidth += ";";
-                        }
-                        img.setAttribute("style", letWidth + letHeight);
-                    }
-
-                    return img;
-                }
-
-
-            },
-
             createLink: function (blob, fileName, title) {
                 //const blob = new Blob(["سلام دنیا!"], {type: "text/plain"});
                 // ایجاد URL موقت برای Blob
@@ -360,6 +178,150 @@
 
                 // اضافه کردن به صفحه
                 return a;
+            },
+
+            createFileElement({
+                                  filename,
+                                  contentType,
+                                  content: rawContent,
+                                  width = null,
+                                  height = null,
+                                  class: className = null,
+                                  videoOrAudioElement = null,
+                                  isDecodeHTMLCode = true
+                              }) {
+
+                let content = rawContent;
+                let isBase64 = typeof content === "string";
+                let isArrayBuffer = content instanceof ArrayBuffer;
+                let isBlob = content instanceof Blob;
+                let isDataUri = isBase64 && content.includes(";base64,");
+
+                if (content instanceof Uint8Array) {
+                    content = content.buffer;
+                    isArrayBuffer = true;
+                }
+
+                if (isArrayBuffer || content instanceof File) {
+                    content = this.toBlob(content, contentType);
+                    isBlob = true;
+                    isBase64 = false;
+                }
+
+                if (contentType == null || content == null) {
+                    return null;
+                }
+
+                const typeLower = contentType.toLowerCase();
+
+                if (!typeLower.includes("text")) {
+                    if (!isDataUri && isBase64) {
+                        content = `data:${contentType};base64,${content}`;
+                    }
+
+                    if (content !== "") {
+                        if (isBase64 || isArrayBuffer) {
+                            content = URL.createObjectURL(this.toBlob(content, contentType));
+                        } else if (isBlob) {
+                            content = URL.createObjectURL(content);
+                        }
+                    }
+                }
+
+                if (typeLower.includes("pdf")) {
+                    return this.createIframe(content, width, height, className);
+                }
+
+                if (typeLower.includes("text")) {
+                    return this.createTextElement(content, contentType, isBlob, isDecodeHTMLCode, width, height, className);
+                }
+
+                if (typeLower.includes("video") || typeLower.includes("audio")) {
+                    return this.createMediaElement(content, contentType, typeLower.includes("audio") ? "audio" : "video", width, height, className, videoOrAudioElement);
+                }
+
+                if (typeLower.startsWith("image/")) {
+                    return this.createImageElement(content, filename, width, height, className);
+                }
+
+                return null;
+            },
+
+            createIframe(src, width, height, className) {
+                const iframe = document.createElement("iframe");
+                iframe.src = src;
+                iframe.type = "application/pdf";
+                iframe.alt = "pdf";
+                if (width) iframe.width = width;
+                if (height) iframe.height = height;
+                if (className) iframe.className = className;
+                return iframe;
+            },
+
+            createTextElement(content, contentType, isBlob, decodeHTML, width, height, className) {
+                const div = document.createElement("div");
+
+                const applyContent = (text) => {
+                    if (contentType.toLowerCase() === "text/html" && decodeHTML) {
+                        text = HTML5.stripHtml(text);
+                    }
+                    div.innerHTML = text;
+                };
+
+                if (isBlob) {
+                    content.text().then(applyContent);
+                } else {
+                    if (decodeHTML) content = HTML5.stripHtml(content);
+                    div.innerHTML = content;
+                }
+
+                if (className) div.className = className;
+                if (width || height) {
+                    const style = [
+                        "resize: both",
+                        "overflow-x: scroll",
+                        "overflow-y: scroll",
+                        width ? `width: ${width}px` : "",
+                        height ? `height: ${height}` : ""
+                    ].filter(Boolean).join(";");
+                    div.style = style;
+                }
+
+                return div;
+            },
+
+            createMediaElement(src, contentType, tag, width, height, className, existingElement) {
+                const media = existingElement || document.createElement(tag);
+                media.src = src;
+                media.preload = "metadata";
+                media.controls = true;
+                media.type = contentType;
+
+                if (className) media.className = className;
+                if (width || (height && tag === "video")) {
+                    const style = [
+                        width ? `width: ${width}` : "",
+                        tag === "video" && height ? `height: ${height}` : ""
+                    ].filter(Boolean).join(";");
+                    media.style = style;
+                }
+
+                return media;
+            },
+
+            createImageElement(src, alt, width, height, className) {
+                const img = document.createElement("img");
+                img.src = src;
+                img.alt = alt;
+                if (className) img.className = className;
+                if (width || height) {
+                    const style = [
+                        width ? `width: ${width}px` : "",
+                        height ? `height: ${height}` : ""
+                    ].filter(Boolean).join(";");
+                    img.style = style;
+                }
+                return img;
             }
 
 

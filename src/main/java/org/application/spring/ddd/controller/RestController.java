@@ -223,7 +223,7 @@ public class RestController {
 
 
     @RequestMapping(value = "/upload", method = RequestMethod.GET)
-    public String unauthorized(Model model, HttpServletRequest request) {
+    public String upload(Model model, HttpServletRequest request) {
         Locale locale = localeResolver.resolveLocale(request);
 
         model.addAttribute("title", messageSource.getMessage("upload.title", new Object[]{}, locale));

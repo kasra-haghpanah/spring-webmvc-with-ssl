@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">title</title>
+</head>
+
+
+<script type="application/javascript">
+
+    window.onload = function () {
+
+
+        function ajax({
+                          url,
+                          method = 'GET',
+                          headers = {},
+                          body = null,
+                          responseType = 'text',
+                          onProgress = null
+                      }) {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open(method, url, true);
+
+                // تنظیم هدرها
+                for (const key in headers) {
+                    xhr.setRequestHeader(key, headers[key]);
+                }
+
+                // نوع پاسخ
+                xhr.responseType = responseType === 'base64' ? 'arraybuffer' : responseType;
+
+                // رویداد پیشرفت دانلود
+                if (typeof onProgress === 'function') {
+                    xhr.onprogress = function (event) {
+                        if (event.lengthComputable) {
+                            const percent = (event.loaded / event.total) * 100;
+                            onProgress({loaded: event.loaded, total: event.total, percent});
+                        }
+                    };
+                }
+
+                xhr.onload = function () {
+                    const responseHeaders = {};
+                    const rawHeaders = xhr.getAllResponseHeaders().split('\r\n');
+                    rawHeaders.forEach(line => {
+                        const [key, value] = line.split(': ');
+                        if (key) responseHeaders[key.toLowerCase()] = value;
+                    });
+
+                    let responseBody = xhr.response;
+                    if (responseType === 'base64') {
+                        const binary = String.fromCharCode(...new Uint8Array(xhr.response));
+                        responseBody = btoa(binary);
+                    }
+
+                    resolve({
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        headers: responseHeaders,
+                        body: responseBody
+                    });
+                };
+
+                xhr.onerror = function () {
+                    reject(new Error('Network error'));
+                };
+
+                xhr.send(body && typeof body === 'object' && !(body instanceof FormData)
+                    ? JSON.stringify(body)
+                    : body);
+            });
+        }
+
+
+        const login = document.getElementById("login");
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+
+
+
+        login.addEventListener("click", e => {
+
+            ajax({
+                url: '/spring/login',
+                method: 'POST',
+                headers: {
+                    'Accept-Language': 'fa',
+                    'Content-Type': 'application/json'//,
+                    //'Authorization': 'Bearer your-token'
+                },
+                body: {
+                    "username": username.value,
+                    "password": password.value
+                },
+                responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+            }).then(response => {
+                console.log('Status:', response.status);
+                console.log('Headers:', response.headers);
+                console.log('Body:', response.body);
+
+                window.location.href = "/spring/upload";
+
+            }).catch(error => {
+                console.error(error);
+            });
+
+
+        });
+
+    }
+
+</script>
+
+
+<body>
+
+<div>
+    <input id ="username" type="text" placeholder="Username" required>
+    <input id ="password" type="password" placeholder="Username" required>
+    <input id ="login" type="button" value="login">
+</div>
+
+
+</body>
+</html>

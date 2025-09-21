@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
+import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.security.AuthenticationRequest;
 import org.application.spring.configuration.security.AuthenticationResponse;
 import org.application.spring.configuration.security.JwtUtil;
@@ -27,10 +28,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.LocaleResolver;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 @Controller
 //@RequestMapping("/api/auth")
@@ -53,6 +52,16 @@ public class AuthController {
         this.mailService = mailService;
     }
 
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public String login(Model model, HttpServletRequest request) {
+        Locale locale = localeResolver.resolveLocale(request);
+
+        model.addAttribute("title", messageSource.getMessage("login.title", new Object[]{}, locale));
+
+        model.addAttribute("version", Properties.getVersion());
+        return "index"; // فایل unauthorized.html در مسیر templates
+    }
+
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     @ResponseBody
     public AuthenticationResponse logout(HttpServletResponse response) {
@@ -73,7 +82,6 @@ public class AuthController {
             HttpServletResponse response
     ) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
-        //final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.username());
         User user = (User) authentication.getPrincipal();
         user.setIp(request.getRemoteAddr());
 
@@ -93,7 +101,7 @@ public class AuthController {
         cookie.setHttpOnly(true); // جلوگیری از دسترسی جاوااسکریپت
         cookie.setSecure(true);   // فقط در HTTPS
         cookie.setPath("/");      // در کل دامنه معتبر باشه
-        cookie.setMaxAge(60 * 60); // اعتبار ۱ ساعت
+        cookie.setMaxAge(Properties.getCookieAgeMinutes() * 60); // اعتبار 15 دقیقه
 
         response.addCookie(cookie);
 
@@ -104,14 +112,47 @@ public class AuthController {
 
     @RequestMapping(value = "/refresh/token", method = RequestMethod.POST)
     @ResponseBody
-    public AuthenticationResponse refreshToken(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").substring(7);
+    public AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) {
+
+        String token = Optional.ofNullable(request.getCookies())
+                .map(Arrays::stream)
+                .orElseGet(Stream::empty)
+                .filter(cookie -> cookie.getName().toLowerCase().equals("access_token"))
+                .findFirst()
+                .map(cookie -> cookie.getValue())
+                .orElse(request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization").replace("Bearer ", ""));
+
         String username = JwtUtil.extractUsername(token);
 
-        final UserDetails user = userDetailsService.loadUserByUsername(username);
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        User user = (User) userDetails;
         ((User) user).setIp(request.getRemoteAddr());
-        final String jwt = JwtUtil.generateToken(user, request.getRemoteAddr());
-        return new AuthenticationResponse(jwt);
+        //final String jwtToken = JwtUtil.generateToken(user, request.getRemoteAddr());
+
+        user.setIp(request.getRemoteAddr());
+
+        Map<String, Object> map = new HashMap<>();
+        String ip = ServerUtil.getClientIp(request);
+        if (ip.equals("0:0:0:0:0:0:0:1")) {
+            ip = "127.0.0.1";
+        }
+        map.put("ip", ip);
+        map.put("firstName", user.getFirstName());
+        map.put("lastName", user.getLastName());
+        map.put("phoneNumber", user.getPhoneNumber());
+
+        final String jwtToken = JwtUtil.generateToken(user, map);
+
+
+        Cookie cookie = new Cookie("access_token", jwtToken);
+        cookie.setHttpOnly(true); // جلوگیری از دسترسی جاوااسکریپت
+        cookie.setSecure(true);   // فقط در HTTPS
+        cookie.setPath("/");      // در کل دامنه معتبر باشه
+        cookie.setMaxAge(Properties.getCookieAgeMinutes() * 60); // اعتبار 15 دقیقه
+
+        response.addCookie(cookie);
+
+        return new AuthenticationResponse(jwtToken);
     }
 
     @RequestMapping(value = "/unauthorized", method = RequestMethod.GET)

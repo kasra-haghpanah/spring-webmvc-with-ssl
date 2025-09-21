@@ -1,6 +1,28 @@
 window.onload = function () {
 
 
+    function refreshToken() {
+        html5.ajax({
+            url: `/spring/refresh/token`,
+            method: 'POST',
+            headers: {
+                'Accept-Language': 'fa',
+                'Content-Type': 'application/json'//,
+                //'Authorization': 'Bearer your-token'
+            },
+            body: null,
+            responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+        }).then(response => {
+            //console.log('Status:', response.status);
+            //console.log('Headers:', response.headers);
+            console.log('Body:', response.body);
+
+        }).catch(error => {
+            console.error(error);
+        });
+    }
+
+
     function removeUploadPreviewElement(e) {
         var btn = e.target;
         var fileItem = btn;
@@ -40,7 +62,7 @@ window.onload = function () {
     function download(fileId, fileName, parent) {
 
         html5.ajax({
-            url: `/download/${fileId}`,
+            url: `/spring/download/${fileId}`,
             method: 'GET',
             headers: {
                 'Accept-Language': 'fa'
@@ -104,7 +126,7 @@ window.onload = function () {
 
     function getFileByOwnerId(ownerId) {
         html5.ajax({
-            url: `/files?file=${ownerId}`,
+            url: `/spring/files?file=${ownerId}`,
             method: 'GET',
             headers: {
                 'Accept-Language': 'fa'
@@ -147,7 +169,7 @@ window.onload = function () {
 
     function getCustomers(page, size) {
         html5.ajax({
-            url: `/customers?page=${page}&size=${size}`,
+            url: `/spring/customers?page=${page}&size=${size}`,
             method: 'GET',
             headers: {
                 'Accept-Language': 'fa'
@@ -192,30 +214,10 @@ window.onload = function () {
 
     }
 
-    html5.ajax({
-        url: '/login',
-        method: 'POST',
-        headers: {
-            'Accept-Language': 'fa',
-            'Content-Type': 'application/json'//,
-            //'Authorization': 'Bearer your-token'
-        },
-        body: {
-            "username": "kasra_khpk1985@yahoo.com",
-            "password": "123"
-        },
-        responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
-    }).then(response => {
-        console.log('Status:', response.status);
-        console.log('Headers:', response.headers);
-        console.log('Body:', response.body);
-
-    }).catch(error => {
-        console.error(error);
-    });
-
-
     getCustomers(0, 60);
+
+    //setInterval(refreshToken, 5000);
+    setInterval(refreshToken, 14 * 60000);
 
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
@@ -321,7 +323,6 @@ window.onload = function () {
             alert(err['errors']['unexpected']);
             //alert("❌ خطای غیرمنتظره: " + err);
         }
-        ;
 
 
     });

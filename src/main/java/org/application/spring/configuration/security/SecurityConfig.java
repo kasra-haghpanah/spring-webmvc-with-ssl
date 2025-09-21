@@ -414,7 +414,8 @@ rate-limiting:
                 RequestLoggingInterceptor.setLog(wrappedRequest, wrappedResponse, null, null);
                 wrappedResponse.copyBodyToResponse();
             } else {
-                response.sendRedirect("/spring/unauthorized");
+                //response.sendRedirect("/spring/unauthorized");
+                response.sendRedirect("/spring/login");
                 RequestLoggingInterceptor.setLog(wrappedRequest, wrappedResponse, null, null);
                 wrappedResponse.copyBodyToResponse();
             }
