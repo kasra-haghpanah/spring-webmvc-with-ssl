@@ -272,6 +272,21 @@
                 }
 
 
+            },
+
+            createLink: function (blob, fileName, title) {
+                //const blob = new Blob(["سلام دنیا!"], {type: "text/plain"});
+                // ایجاد URL موقت برای Blob
+                const url = URL.createObjectURL(blob);
+
+                // ساختن عنصر <a> برای دانلود
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = fileName; // نام فایل هنگام دانلود
+                a.textContent = title;
+
+                // اضافه کردن به صفحه
+                return a;
             }
 
 

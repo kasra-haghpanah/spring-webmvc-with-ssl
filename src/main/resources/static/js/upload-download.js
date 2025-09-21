@@ -30,13 +30,27 @@ window.onload = function () {
                 filename: fileName,
                 contentType: response.body.type,
                 content: response.body,
-                class: 'col-7',
-                height: "400px",
+                class: 'child',
+                //width: width,
+                //height: "400px",
                 videoOrAudioElement: null,
                 isDecodeHTMLCode: true
             });
 
-            parent.appendChild(element);
+            var a = html5.createLink(response.body, fileName, fileName);
+
+            var divLink = document.createElement("div");
+            divLink.style.background = "white";
+            divLink.style.width = "100%";
+            divLink.style.height = "50px";
+
+            divLink.appendChild(a);
+            parent.appendChild(divLink);
+
+            if (typeof element !== 'undefined') {
+                parent.appendChild(element);
+            }
+
 
         }).catch(error => {
             console.error(error);
@@ -165,7 +179,7 @@ window.onload = function () {
     });
 
 
-    getCustomers(0, 10);
+    getCustomers(0, 60);
 
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
@@ -249,6 +263,7 @@ window.onload = function () {
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', '/spring/restclient/upload');
+        xhr.setRequestHeader("Accept-Language", "fa");
 
         filesToUpload.forEach((file, index) => {
             formData.append('files', file);
@@ -268,11 +283,12 @@ window.onload = function () {
             var response = xhr.responseText;
             if (xhr.status === 200) {
                 alert(response);
-                console.log(`File ${file.name} uploaded successfully`);
+                getCustomers(0, 60);
+                //console.log(`File ${file.name} uploaded successfully`);
             } else {
-                var x = JSON.parse(response);
-                console.log(x);
-                console.error(`Upload failed for ${file.name}`);
+                var res = JSON.parse(response);
+                alert(res['errors']['unexpected']);
+                //console.error(`Upload failed for ${file.name}`);
             }
         };
 

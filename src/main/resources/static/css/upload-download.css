@@ -2,11 +2,15 @@
     display: flex; /* فرزندانش به صورت افقی کنار هم قرار می‌گیرن (به طور پیش‌فرض). */
     flex-wrap: wrap; /* این خط باعث میشه اگر جا کم بود، آیتم‌ها به خط بعدی برن */
     gap: 10px; /* فاصله بین divها */
+    margin-bottom: 20px;
 }
 
 .child {
-    width: 500px;
-    min-height: 200px;
+    width: 400px;
+    min-height: 100px;
+    max-height: 400px;
+    overflow-y: scroll;
+    overflow-x: hidden;
     background-color: lightblue;
     cursor: pointer;
 }
