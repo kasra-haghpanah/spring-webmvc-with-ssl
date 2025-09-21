@@ -5,12 +5,9 @@
     <title th:text="${title}">title</title>
 </head>
 
-<link media="all"  th:href="@{'/resource/'+${version}+'?path=css/upload-download.css'}" rel="stylesheet"/>
+<link media="all" th:href="@{'/resource/'+${version}+'?path=css/upload-download.css'}" rel="stylesheet"/>
 <script type="text/javascript" th:src="@{'/resource/'+${version}+'?path=js/html5.js'}"></script>
 <script type="text/javascript" th:src="@{'/resource/'+${version}+'?path=js/upload-download.js'}"></script>
-
-
-
 
 
 <body>
@@ -24,17 +21,9 @@
     </tr>
 
 
-
 </table>
 
 <div id="fileBox" class="parent"></div>
-
-
-<!--<video id="myVideo" width="640" height="360" controls>
-   &lt;!&ndash; <source src="video.mp4" type="video/mp4">&ndash;&gt;
-    مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
-</video>-->
-
 
 <div id="uploadForm">
     <input type="text" name="firstName" placeholder="FirstName" required/>

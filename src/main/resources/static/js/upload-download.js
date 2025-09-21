@@ -1,5 +1,26 @@
 window.onload = function () {
 
+
+    function removeUploadPreviewElement(e) {
+        var btn = e.target;
+        var fileItem = btn;
+        while (fileItem.className != "file-item") {
+            fileItem = fileItem.parentNode;
+        }
+        var children = fileItem.parentNode.querySelectorAll(".file-item");
+        var index = 0;
+        for (var i = 0; i < children.length; i++) {
+            if (children[i] == fileItem) {
+                index = i;
+                break;
+            }
+        }
+
+        filesToUpload.splice(index, 1);
+        fileItem.parentNode.removeChild(fileItem);
+        btn.removeEventListener("click", removeUploadPreviewElement);
+    }
+
     function lazyLoadForDownload(e) {
         var node = e.target;
         while (node.getAttribute("fileId") == null) {
@@ -9,9 +30,7 @@ window.onload = function () {
                     return;
                 }*/
         var fileId = node.getAttribute("fileId");
-        var name = node.innerText;
-        //node.innerText = "";
-        //node.setAttribute("disable", "true");
+        var name = node.lastChild.innerText;
         download(fileId, name, node);
 
         node.removeEventListener("click", lazyLoadForDownload);
@@ -45,12 +64,6 @@ window.onload = function () {
 
             // responseType: 'blob'
             const url = URL.createObjectURL(response.body);
-            /* <source src="video.mp4" type="video/mp4">*/
-            var source = document.createElement("source");
-            source.setAttribute("src", url);
-            source.setAttribute("type", response.body.type);
-
-            //document.getElementById('myVideo').appendChild(source);
 
             var element = html5.createFileElement({
                 filename: fileName,
@@ -238,7 +251,11 @@ window.onload = function () {
             filesToUpload.push(file);
             const fileItem = document.createElement('div');
             fileItem.className = 'file-item';
-            fileItem.innerHTML = `<div class="close-button">&nbsp;</div></div><strong>${file.name}</strong><div class="content"></div>`;
+            fileItem.innerHTML = `<button class="close-btn">&times;</button></div><strong>${file.name}</strong><div class="content"></div>`;
+
+            var button = fileItem.getElementsByTagName("button")[0];
+
+            button.addEventListener("click", removeUploadPreviewElement);//ggggggggggggggggggggggg
 
             var contentType = file.type;
 
