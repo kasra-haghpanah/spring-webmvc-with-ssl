@@ -79,7 +79,6 @@
         const password = document.getElementById("password");
 
 
-
         login.addEventListener("click", e => {
 
             ajax({
@@ -109,6 +108,41 @@
 
         });
 
+
+        const signup = document.getElementById("signup");
+
+        signup.addEventListener("click", e => {
+
+            var email = document.getElementById("email").value;
+            var pass = document.getElementById("pass").value;
+            var firstName = document.getElementById("firstName").value;
+            var lastName = document.getElementById("lastName").value;
+            var phoneNumber = document.getElementById("phoneNumber").value;
+
+            ajax({
+                url: '/spring/signup',
+                method: 'POST',
+                headers: {
+                    'Accept-Language': 'fa',
+                    'Accept-Response': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `email=${email}&password=${pass}&firstName=${firstName}&lastName=${lastName}&phoneNumber=${phoneNumber}`,
+                responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+            }).then(response => {
+                console.log('Status:', response.status);
+                console.log('Headers:', response.headers);
+                console.log('Body:', response.body);
+
+                window.location.href = "/spring/upload";
+
+            }).catch(error => {
+                console.error(error);
+            });
+
+        });
+
+
     }
 
 </script>
@@ -117,9 +151,41 @@
 <body>
 
 <div>
-    <input id ="username" type="text" placeholder="Username" required>
-    <input id ="password" type="password" placeholder="Username" required>
-    <input id ="login" type="button" value="login">
+    <div>
+        <input id="username" type="text" placeholder="Username" required>
+    </div>
+    <div>
+        <input id="password" type="password" placeholder="Username" required>
+    </div>
+    <div>
+        <input id="login" type="button" value="login">
+    </div>
+</div>
+
+
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+
+<div>
+    <div>
+        <input id="email" type="text" placeholder="email" required>
+    </div>
+    <div>
+        <input id="pass" type="pass" placeholder="password" required>
+    </div>
+    <div>
+        <input id="firstName" type="firstName" placeholder="firstName" required>
+    </div>
+    <div>
+        <input id="lastName" type="lastName" placeholder="lastName" required>
+    </div>
+    <div>
+        <input id="phoneNumber" type="phoneNumber" placeholder="phoneNumber" required>
+    </div>
+    <div>
+        <input id="signup" type="button" value="signup">
+    </div>
 </div>
 
 
