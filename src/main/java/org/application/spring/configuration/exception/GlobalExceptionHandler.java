@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.servlet.LocaleResolver;
 
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -68,6 +69,7 @@ public class GlobalExceptionHandler {
         request.setAttribute("loggedException", ex);
 
         for (ConstraintViolation error : ex.getConstraintViolations()) {
+            Annotation annotation = error.getConstraintDescriptor().getAnnotation();
             String localizedMessage = error.getMessage();
             try {
                 localizedMessage = messageSource.getMessage(error.getMessage(), new Object[]{error.getMessageTemplate()}, locale);
