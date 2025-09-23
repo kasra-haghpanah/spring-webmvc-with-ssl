@@ -91,7 +91,7 @@ public class RestController {
         return fileService.findByOwnerList(files);
     }
 
-    @RequestMapping(value = "/delete/customer", method = RequestMethod.GET)
+    @RequestMapping(value = "/delete/customer", method = RequestMethod.DELETE)
     @Operation(summary = "دانلود فایل", description = "دانلود فایل با نام مشخص‌شده")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "فایل با موفقیت ارسال شد"),

@@ -59,6 +59,15 @@ window.onload = function () {
         //alert(fileId);
     }
 
+    function clearFileBox() {
+        var fileBox = document.getElementById("fileBox");
+
+        while (fileBox.firstChild) {
+            fileBox.firstChild.removeEventListener("click", lazyLoadForDownload);
+            fileBox.removeChild(fileBox.firstChild);
+        }
+    }
+
     function download(fileId, fileName, parent) {
 
         html5.ajax({
@@ -140,12 +149,7 @@ window.onload = function () {
             //console.log('Headers:', response.headers);
             //console.log('Body:', response.body);
 
-            var fileBox = document.getElementById("fileBox");
-
-            while (fileBox.firstChild) {
-                fileBox.firstChild.removeEventListener("click", lazyLoadForDownload);
-                fileBox.removeChild(fileBox.firstChild);
-            }
+            clearFileBox();
 
             for (var i = 0; i < response.body.length; i++) {
                 var file = response.body[i];
@@ -161,6 +165,29 @@ window.onload = function () {
 
 
             }
+
+        }).catch(error => {
+            console.error(error);
+        });
+    }
+
+    function deleteCustomerById(id) {
+        html5.ajax({
+            url: `/spring/delete/customer?id=${id}`,
+            method: 'DELETE',
+            headers: {
+                'Accept-Language': 'fa'
+                // 'Content-Type': 'application/json',
+                //'Authorization': 'Bearer your-token'
+            },
+            body: null,// {name: 'Ali', age: 30},
+            responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+        }).then(response => {
+            //console.log('Status:', response.status);
+            //console.log('Headers:', response.headers);
+            //console.log('Body:', response.body);
+            clearFileBox();
+            getCustomers(0, 10)
 
         }).catch(error => {
             console.error(error);
@@ -204,8 +231,19 @@ window.onload = function () {
                     var id = element.getElementsByTagName("td")[0].innerText;
                     getFileByOwnerId(id);
                 })
-                tr.innerHTML = `<td>${customer.id}</td><td>${customer.firstName}</td><td>${customer.lastName}</td><td>${customer.phoneNumber}</td>`;
+                tr.innerHTML = `<td>${customer.id}</td><td>${customer.firstName}</td><td>${customer.lastName}</td><td>${customer.phoneNumber}</td><button class="close-btn">&times;</button>`;
                 table.appendChild(tr);
+
+                var closeBtn = tr.querySelector(".close-btn");
+                closeBtn.addEventListener("click", e => {
+                    var closeButton = e.target;
+                    var tr = closeButton;
+                    while (tr.tagName != 'TR') {
+                        tr = tr.parentNode;
+                    }
+                    var id = tr.firstChild.innerText;
+                    deleteCustomerById(id);
+                })
             }
 
         }).catch(error => {
