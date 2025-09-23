@@ -27,10 +27,14 @@ public class ContextPathAndXssFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
 
-
         String path = "";
         if (httpRequest.getRequestURI().startsWith(contextPath + "/")) {
             path = contextPath;
+        } else {
+            // هدایت به مسیر با contextPath
+            String correctedURI = contextPath + httpRequest.getRequestURI();
+            ((HttpServletResponse) response).sendRedirect(correctedURI);
+            return;
         }
 
         HttpServletRequest req = (HttpServletRequest) request;
