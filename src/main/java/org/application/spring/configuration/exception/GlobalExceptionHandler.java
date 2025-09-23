@@ -3,6 +3,7 @@ package org.application.spring.configuration.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.servlet.LocaleResolver;
 
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -69,7 +69,9 @@ public class GlobalExceptionHandler {
         request.setAttribute("loggedException", ex);
 
         for (ConstraintViolation error : ex.getConstraintViolations()) {
-            Annotation annotation = error.getConstraintDescriptor().getAnnotation();
+            Map<String, Object> attributes = error.getConstraintDescriptor().getAttributes();
+            Path path = error.getPropertyPath();
+            Object invalidValue = error.getInvalidValue();
             String localizedMessage = error.getMessage();
             try {
                 localizedMessage = messageSource.getMessage(error.getMessage(), new Object[]{error.getMessageTemplate()}, locale);
