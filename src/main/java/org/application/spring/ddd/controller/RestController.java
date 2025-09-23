@@ -8,12 +8,14 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import org.application.spring.configuration.exception.ApplicationException;
 import org.application.spring.configuration.exception.ErrorResponse;
 import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.security.AuthenticationRequest;
 import org.application.spring.configuration.security.AuthenticationResponse;
+import org.application.spring.configuration.validation.api.ListSize;
 import org.application.spring.ddd.dto.FileDto;
 import org.application.spring.ddd.model.entity.Customer;
 import org.application.spring.ddd.model.entity.File;
@@ -182,11 +184,11 @@ public class RestController {
     )
     @ResponseBody
     public String handleUpload(
-            @RequestPart(value = "firstName", required = true) String firstName,
-            @RequestPart(value = "lastName", required = true) String lastName,
-            @RequestPart(value = "phoneNumber", required = true) String phoneNumber,
+            @RequestPart(value = "firstName", required = true) @Valid @Pattern(regexp = "[a-zA-Z]{2,100}", message = "field.name") String firstName,
+            @RequestPart(value = "lastName", required = true) @Valid @Pattern(regexp = "[a-zA-Z]{2,100}", message = "field.name") String lastName,
+            @RequestPart(value = "phoneNumber", required = true) @Valid @Pattern(regexp = "\\d{11}", message = "field.phone") String phoneNumber,
             //@RequestParam Map<String, String> formParams, // همه‌ی پارامترهای فرم
-            @RequestPart(value = "files", required = false) List<MultipartFile> files // لیست فایل‌ها
+            @RequestPart(value = "files", required = false) @ListSize(min = 1, max = 2, message = "file.size") List<MultipartFile> files // لیست فایل‌ها
     ) throws IOException {
         // 🔍 نمایش پارامترهای فرم
         /*formParams.forEach((key, value) -> {
@@ -240,11 +242,11 @@ public class RestController {
     )
     @ResponseBody
     public String handleUploadAsRestClient(
-            @RequestPart(value = "firstName", required = true) String firstName,
-            @RequestPart(value = "lastName", required = true) String lastName,
-            @RequestPart(value = "phoneNumber", required = true) String phoneNumber,
+            @RequestPart(value = "firstName", required = true) @Valid @Pattern(regexp = "[a-zA-Z]{2,100}", message = "field.name") String firstName,
+            @RequestPart(value = "lastName", required = true) @Valid @Pattern(regexp = "[a-zA-Z]{2,100}", message = "field.name") String lastName,
+            @RequestPart(value = "phoneNumber", required = true) @Valid @Pattern(regexp = "\\d{11}", message = "field.phone") String phoneNumber,
             //@RequestParam Map<String, String> formParams, // همه‌ی پارامترهای فرم
-            @RequestPart(required = false) List<MultipartFile> files, // لیست فایل‌ها
+            @RequestPart(required = false) @ListSize(min = 1, max = 2, message = "تعداد فایل ها باید بین ۱ تا 2 باشد.") List<MultipartFile> files, // لیست فایل‌ها
             HttpServletRequest request,
             HttpServletResponse response
     ) {

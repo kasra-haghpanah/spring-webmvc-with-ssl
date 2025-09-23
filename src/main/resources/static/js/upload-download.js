@@ -312,16 +312,17 @@ window.onload = function () {
                     alert(response);
 
                 },
-                onError: err => {
+                onError: errors => {
 
-                    alert(err['errors']['unexpected']);
+                    for (error in errors['errors']) {
+                        alert(errors['errors'][error]);
+                    }
+
                     //alert("❌ خطا: " + err);
                 }
             });
-        } catch (err) {
-            console.error(err);
-            alert(err['errors']['unexpected']);
-            //alert("❌ خطای غیرمنتظره: " + err);
+        } catch (errors) {
+            alert(errors)
         }
 
 

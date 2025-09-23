@@ -68,7 +68,12 @@ public class GlobalExceptionHandler {
         request.setAttribute("loggedException", ex);
 
         for (ConstraintViolation error : ex.getConstraintViolations()) {
-            String localizedMessage = messageSource.getMessage(error.getMessage(), new Object[]{error.getMessageTemplate()}, locale);
+            String localizedMessage = error.getMessage();
+            try {
+                localizedMessage = messageSource.getMessage(error.getMessage(), new Object[]{error.getMessageTemplate()}, locale);
+            } catch (Exception e) {
+
+            }
             errors.put(error.getMessageTemplate(), localizedMessage);
         }
 
