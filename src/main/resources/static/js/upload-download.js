@@ -22,7 +22,6 @@ window.onload = function () {
         });
     }
 
-
     function removeUploadPreviewElement(e) {
         var btn = e.target;
         var fileItem = btn;
@@ -57,15 +56,6 @@ window.onload = function () {
 
         node.removeEventListener("click", lazyLoadForDownload);
         //alert(fileId);
-    }
-
-    function clearFileBox() {
-        var fileBox = document.getElementById("fileBox");
-
-        while (fileBox.firstChild) {
-            fileBox.firstChild.removeEventListener("click", lazyLoadForDownload);
-            fileBox.removeChild(fileBox.firstChild);
-        }
     }
 
     function download(fileId, fileName, parent) {
@@ -171,7 +161,7 @@ window.onload = function () {
         });
     }
 
-    function deleteCustomerById(id) {
+    function deleteCustomerById(id, rowElement) {
         html5.ajax({
             url: `/spring/delete/customer?id=${id}`,
             method: 'DELETE',
@@ -187,7 +177,9 @@ window.onload = function () {
             //console.log('Headers:', response.headers);
             //console.log('Body:', response.body);
             clearFileBox();
-            getCustomers(0, 10)
+            var closeBtn = rowElement.querySelector(".close-btn");
+            closeBtn.removeEventListener("click", deleteCustomerEvent);
+            rowElement.parentNode.removeChild(rowElement);
 
         }).catch(error => {
             console.error(error);
@@ -225,31 +217,45 @@ window.onload = function () {
                 tr.style.cursor = "pointer";
                 tr.addEventListener("click", e => {
                     var element = e.target;
+                    if (e.target.tagName == 'BUTTON') {
+                        return;
+                    }
                     if (e.target.tagName == 'TD') {
                         element = element.parentNode;
                     }
                     var id = element.getElementsByTagName("td")[0].innerText;
                     getFileByOwnerId(id);
                 })
-                tr.innerHTML = `<td>${customer.id}</td><td>${customer.firstName}</td><td>${customer.lastName}</td><td>${customer.phoneNumber}</td><button class="close-btn">&times;</button>`;
+                tr.innerHTML = `<td>${customer.id}</td><td>${customer.firstName}</td><td>${customer.lastName}</td><td>${customer.phoneNumber}</td><button class="close-btn" style="z-index: 1;">&times;</button>`;
                 table.appendChild(tr);
 
                 var closeBtn = tr.querySelector(".close-btn");
-                closeBtn.addEventListener("click", e => {
-                    var closeButton = e.target;
-                    var tr = closeButton;
-                    while (tr.tagName != 'TR') {
-                        tr = tr.parentNode;
-                    }
-                    var id = tr.firstChild.innerText;
-                    deleteCustomerById(id);
-                })
+                closeBtn.addEventListener("click", deleteCustomerEvent);
             }
 
         }).catch(error => {
             console.error(error);
         });
 
+    }
+
+    function clearFileBox() {
+        var fileBox = document.getElementById("fileBox");
+
+        while (fileBox.firstChild) {
+            fileBox.firstChild.removeEventListener("click", lazyLoadForDownload);
+            fileBox.removeChild(fileBox.firstChild);
+        }
+    }
+
+    function deleteCustomerEvent(e) {
+        var closeButton = e.target;
+        var tr = closeButton;
+        while (tr.tagName != 'TR') {
+            tr = tr.parentNode;
+        }
+        var id = tr.firstChild.innerText;
+        deleteCustomerById(id, tr);
     }
 
     getCustomers(0, 60);
