@@ -86,24 +86,20 @@ public class RestController {
 
     @RequestMapping(value = "/files", method = RequestMethod.GET)
     @ResponseBody
-    public List<FileDto> files(@RequestParam("file") List<String> files) {
+    public List<FileDto> files(@RequestParam("file") @Valid @ListSize(min = 1, max = 3, regx = "[0-9|A-Z]{26,26}", message = "file.size") List<String> files) {
         // /files?file=A,B,C,D
         return fileService.findByOwnerList(files);
     }
 
     @RequestMapping(value = "/delete/customer", method = RequestMethod.DELETE)
-    @Operation(summary = "دانلود فایل", description = "دانلود فایل با نام مشخص‌شده")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "فایل با موفقیت ارسال شد"),
-            @ApiResponse(responseCode = "404", description = "فایل یافت نشد")
-    })
-    public void deleteCustomerById( // /delete/customer?id=A,B,C,D
-            //@PathVariable(value = "id") @Valid @Pattern(regexp = "[0-9|A-Z]{26,26}", message = "field.phone") String id,
-            @RequestParam("id") List<String> id,
-            HttpServletRequest request,
-            HttpServletResponse response
+    @ResponseBody
+    public int deleteCustomerById( // /delete/customer?id=A,B,C,D
+                                   //@PathVariable(value = "id") @Valid @Pattern(regexp = "[0-9|A-Z]{26,26}", message = "field.phone") String id,
+                                   @RequestParam("id") @Valid @ListSize(min = 1, max = 3, regx = "[0-9|A-Z]{26,26}", message = "file.size") List<String> id,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response
     ) {
-        customerService.deleteById(id);
+        return customerService.deleteById(id);
     }
 
     @RequestMapping(value = "/download/{fileId}", method = RequestMethod.GET)
@@ -202,7 +198,7 @@ public class RestController {
             @RequestPart(value = "lastName", required = true) @Valid @Pattern(regexp = "[a-zA-Z]{2,100}", message = "field.name") String lastName,
             @RequestPart(value = "phoneNumber", required = true) @Valid @Pattern(regexp = "\\d{11}", message = "field.phone") String phoneNumber,
             //@RequestParam Map<String, String> formParams, // همه‌ی پارامترهای فرم
-            @RequestPart(value = "files", required = false) @ListSize(min = 1, max = 2, message = "file.size") List<MultipartFile> files // لیست فایل‌ها
+            @RequestPart(value = "files", required = false) @ListSize(min = 1, max = 3, message = "file.size") List<MultipartFile> files // لیست فایل‌ها
     ) throws IOException {
         // 🔍 نمایش پارامترهای فرم
         /*formParams.forEach((key, value) -> {
@@ -260,7 +256,7 @@ public class RestController {
             @RequestPart(value = "lastName", required = true) @Valid @Pattern(regexp = "[a-zA-Z]{2,100}", message = "field.name") String lastName,
             @RequestPart(value = "phoneNumber", required = true) @Valid @Pattern(regexp = "\\d{11}", message = "field.phone") String phoneNumber,
             //@RequestParam Map<String, String> formParams, // همه‌ی پارامترهای فرم
-            @RequestPart(required = false) @ListSize(min = 1, max = 2, message = "تعداد فایل ها باید بین ۱ تا 2 باشد.") List<MultipartFile> files, // لیست فایل‌ها
+            @RequestPart(required = false) @ListSize(min = 1, max = 3, message = "file.size") List<MultipartFile> files, // لیست فایل‌ها
             HttpServletRequest request,
             HttpServletResponse response
     ) {

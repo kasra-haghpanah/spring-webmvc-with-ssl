@@ -20,5 +20,7 @@ public @interface ListSize {
     int min();
 
     int max();
+
+    String regx() default "";
 }
 
