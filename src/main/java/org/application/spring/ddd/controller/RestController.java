@@ -8,7 +8,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import org.application.spring.configuration.exception.ApplicationException;
 import org.application.spring.configuration.exception.ErrorResponse;
@@ -92,6 +91,21 @@ public class RestController {
         return fileService.findByOwnerList(files);
     }
 
+    @RequestMapping(value = "/delete/customer", method = RequestMethod.GET)
+    @Operation(summary = "دانلود فایل", description = "دانلود فایل با نام مشخص‌شده")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "فایل با موفقیت ارسال شد"),
+            @ApiResponse(responseCode = "404", description = "فایل یافت نشد")
+    })
+    public void deleteCustomerById( // /delete/customer?id=A,B,C,D
+            //@PathVariable(value = "id") @Valid @Pattern(regexp = "[0-9|A-Z]{26,26}", message = "field.phone") String id,
+            @RequestParam("id") List<String> id,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        customerService.deleteById(id);
+    }
+
     @RequestMapping(value = "/download/{fileId}", method = RequestMethod.GET)
     @Operation(summary = "دانلود فایل", description = "دانلود فایل با نام مشخص‌شده")
     @ApiResponses({
@@ -99,7 +113,7 @@ public class RestController {
             @ApiResponse(responseCode = "404", description = "فایل یافت نشد")
     })
     public void download(
-            @PathVariable(value = "fileId") String fileId,
+            @PathVariable(value = "fileId") @Valid @Pattern(regexp = "[0-9|A-Z]{26,26}", message = "field.phone") String fileId,
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException {
