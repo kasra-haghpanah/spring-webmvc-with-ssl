@@ -52,8 +52,8 @@ public class GlobalExceptionHandler {
         request.setAttribute("loggedException", ex);
 
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            String localizedMessage = messageSource.getMessage(error.getDefaultMessage(), new Object[]{error.getCodes()[0]}, locale);
-            errors.put(error.getField(), localizedMessage);
+            String localizedMessage = messageSource.getMessage(error.getDefaultMessage(), new Object[]{error.getField()}, locale);
+            errors.put(error.getCodes()[0].substring(error.getCodes()[0].indexOf(".") + 1), localizedMessage);
         }
 
         ErrorResponse errorResponse = new ErrorResponse();
