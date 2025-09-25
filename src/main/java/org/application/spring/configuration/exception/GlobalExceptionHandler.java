@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
         request.setAttribute("loggedException", ex);
 
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            String localizedMessage = messageSource.getMessage(error.getDefaultMessage(), new Object[]{error.getField()}, locale);
+            String localizedMessage = messageSource.getMessage(error.getDefaultMessage(), new Object[]{error.getCodes()[0]}, locale);
             errors.put(error.getField(), localizedMessage);
         }
 
@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
             Object invalidValue = error.getInvalidValue();
             String localizedMessage = error.getMessage();
             try {
-                localizedMessage = messageSource.getMessage(error.getMessage(), new Object[]{error.getMessageTemplate()}, locale);
+                localizedMessage = messageSource.getMessage(error.getMessage(), new Object[]{path}, locale);
             } catch (Exception e) {
 
             }
