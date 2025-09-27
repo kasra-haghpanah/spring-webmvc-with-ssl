@@ -558,7 +558,7 @@ rate-limiting:
     }
 
 
-    private static boolean isValidToken(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
+    private static boolean isValidToken(Supplier<? extends Authentication> authentication, RequestAuthorizationContext context) {
 
         if (!(authentication.get().getPrincipal() instanceof User)) {
             context.getRequest().setAttribute("invalidTokenType", InvalidTokenType.INVALIDTOKEN);
