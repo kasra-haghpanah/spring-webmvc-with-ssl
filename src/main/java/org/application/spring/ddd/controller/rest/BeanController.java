@@ -1,4 +1,4 @@
-package org.application.spring.ddd.controller;
+package org.application.spring.ddd.controller.rest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.application.spring.bean.profile.Language;

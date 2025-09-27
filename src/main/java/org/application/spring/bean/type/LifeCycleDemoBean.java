@@ -2,7 +2,7 @@ package org.application.spring.bean.type;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import org.application.spring.ddd.controller.SampleController;
+import org.application.spring.ddd.controller.rest.SampleController;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.*;
 import org.springframework.context.ApplicationContext;

@@ -1,4 +1,4 @@
-package org.application.spring.ddd.controller;
+package org.application.spring.ddd.controller.rest;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;

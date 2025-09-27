@@ -1,4 +1,4 @@
-package org.application.spring.ddd.controller;
+package org.application.spring.ddd.controller.rest;
 
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -241,7 +241,17 @@ public class RestController {
         model.addAttribute("title", messageSource.getMessage("upload.title", new Object[]{}, locale));
 
         model.addAttribute("version", Properties.getVersion());
-        return "upload"; // فایل unauthorized.html در مسیر templates
+        return "upload"; // فایل upload.html در مسیر templates
+    }
+
+    @RequestMapping(value = "/websocket", method = RequestMethod.GET)
+    public String websocket(Model model, HttpServletRequest request) {
+        Locale locale = localeResolver.resolveLocale(request);
+
+        model.addAttribute("title", messageSource.getMessage("websocket.title", new Object[]{}, locale));
+
+        model.addAttribute("version", Properties.getVersion());
+        return "websocket"; // فایل websocket.html در مسیر templates
     }
 
 

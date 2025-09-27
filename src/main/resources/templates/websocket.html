@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${title}">title</title>
+</head>
+
+<!--
+<link media="all" th:href="@{'/resource/'+${version}+'?path=css/upload-download.css'}" rel="stylesheet"/>
+<script type="text/javascript" th:src="@{'/resource/'+${version}+'?path=js/html5.js'}"></script>
+<script type="text/javascript" th:src="@{'/resource/'+${version}+'?path=js/upload-download.js'}"></script>
+-->
+
+<script type="application/javascript">
+
+    const jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // اینو از login API بگیر
+
+    // اتصال با توکن در query string
+    const socket = new WebSocket(`ws://localhost:8080/ws?token=${jwtToken}`);
+
+    socket.onopen = () => {
+        logMessage("✅ اتصال برقرار شد");
+    };
+
+    socket.onmessage = (event) => {
+        logMessage("📩 دریافت: " + event.data);
+    };
+
+    socket.onclose = () => {
+        logMessage("❌ اتصال بسته شد");
+    };
+
+    socket.onerror = (error) => {
+        logMessage("⚠️ خطا: " + error.message);
+    };
+
+    function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const msg = input.value;
+        socket.send(msg);
+        logMessage("📤 ارسال: " + msg);
+        input.value = "";
+    }
+
+    function logMessage(msg) {
+        const messagesDiv = document.getElementById("messages");
+        const p = document.createElement("p");
+        p.textContent = msg;
+        messagesDiv.appendChild(p);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+</script>
+
+
+
+<body>
+<h2>ارتباط WebSocket با JWT</h2>
+<div>
+    <input type="text" id="messageInput" placeholder="پیام خود را بنویسید">
+    <button onclick="sendMessage()">ارسال</button>
+</div>
+<div id="messages"></div>
+
+
+
+</body>
+
+</html>
