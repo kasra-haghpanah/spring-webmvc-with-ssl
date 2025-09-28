@@ -7,9 +7,10 @@
 
 <!--
 <link media="all" th:href="@{'/resource/'+${version}+'?path=css/upload-download.css'}" rel="stylesheet"/>
-<script type="text/javascript" th:src="@{'/resource/'+${version}+'?path=js/html5.js'}"></script>
 <script type="text/javascript" th:src="@{'/resource/'+${version}+'?path=js/upload-download.js'}"></script>
 -->
+
+<script type="text/javascript" th:src="@{'/resource/'+${version}+'?path=js/html5.js'}"></script>
 
 <script type="application/javascript">
 
@@ -57,6 +58,30 @@
             messagesDiv.appendChild(p);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
+
+
+        function refreshToken() {
+            html5.ajax({
+                url: `/spring/refresh/token`,
+                method: 'POST',
+                headers: {
+                    'Accept-Language': 'fa',
+                    'Content-Type': 'application/json'//,
+                    //'Authorization': 'Bearer your-token'
+                },
+                body: null,
+                responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+            }).then(response => {
+                //console.log('Status:', response.status);
+                //console.log('Headers:', response.headers);
+                console.log('Body:', response.body);
+
+            }).catch(error => {
+                console.error(error);
+            });
+        }
+
+        setInterval(refreshToken, 14 * 60000);
 
 
 </script>
