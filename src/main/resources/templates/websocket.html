@@ -20,28 +20,53 @@
 
         // اتصال با توکن در query string
         //const socket = new WebSocket(`wss://localhost:8080/ws?token=${jwtToken}`);
-        const socket = new WebSocket(`wss://localhost:8443/spring/ws`);
+        let socket;
+        let reconnectInterval = 5000; // زمان انتظار برای اتصال مجدد (میلی‌ثانیه)
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 100000;
 
-        socket.onopen = () => {
-            logMessage("✅ اتصال برقرار شد");
-        };
+        function connectWebSocket() {
+            socket = new WebSocket(`wss://localhost:8443/spring/ws`);
 
-        socket.onmessage = (event) => {
-            var response = JSON.parse(event.data);
-            var icon = "📩 دریافت: ";
-            if (response.type == "sender") {
-                icon = "📤 ارسال: ";
+            socket.onopen = () => {
+                logMessage("✅ اتصال برقرار شد");
+                reconnectAttempts = 0; // ریست تلاش‌ها بعد از اتصال موفق
+            };
+
+            socket.onmessage = (event) => {
+                try {
+                    const response = JSON.parse(event.data);
+                    const icon = response.type === "sender" ? "📤 ارسال: " : "📩 دریافت: ";
+                    logMessage(icon + response.email + ": " + response.message);
+                } catch (e) {
+                    logMessage("⚠️ خطا در پردازش پیام: " + e.message);
+                }
+            };
+
+            socket.onclose = () => {
+                logMessage("❌ اتصال بسته شد");
+                attemptReconnect();
+            };
+
+            socket.onerror = (error) => {
+                logMessage("⚠️ خطا: " + error.message);
+                socket.close(); // بستن دستی برای فعال‌سازی onclose
+            };
+        }
+
+        function attemptReconnect() {
+            if (reconnectAttempts < maxReconnectAttempts) {
+                reconnectAttempts++;
+                logMessage(`🔄 تلاش برای اتصال مجدد (${reconnectAttempts})...`);
+                setTimeout(connectWebSocket, reconnectInterval);
+            } else {
+                logMessage("⛔️ تعداد تلاش‌های اتصال مجدد به پایان رسید");
             }
-            logMessage(icon + response.email + ": " + response.message);
-        };
+        }
 
-        socket.onclose = () => {
-            logMessage("❌ اتصال بسته شد");
-        };
+        // شروع اتصال
+        connectWebSocket();
 
-        socket.onerror = (error) => {
-            logMessage("⚠️ خطا: " + error.message);
-        };
 
         function sendMessage() {
             const input = document.getElementById("messageInput");
