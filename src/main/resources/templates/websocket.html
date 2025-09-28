@@ -24,7 +24,12 @@
     };
 
     socket.onmessage = (event) => {
-        logMessage("📩 دریافت: " + event.data);
+        var response = JSON.parse(event.data);
+        var icon = "📩 دریافت: ";
+        if (response.type == "sender") {
+            icon = "📤 ارسال: ";
+        }
+        logMessage(icon + response.email + ": " + response.message);
     };
 
     socket.onclose = () => {
@@ -39,7 +44,7 @@
         const input = document.getElementById("messageInput");
         const msg = input.value;
         socket.send(msg);
-        logMessage("📤 ارسال: " + msg);
+        //logMessage("📤 ارسال: " + msg);
         input.value = "";
     }
 
@@ -54,7 +59,6 @@
 </script>
 
 
-
 <body>
 <h2>ارتباط WebSocket با JWT</h2>
 <div>
@@ -62,7 +66,6 @@
     <button onclick="sendMessage()">ارسال</button>
 </div>
 <div id="messages"></div>
-
 
 
 </body>

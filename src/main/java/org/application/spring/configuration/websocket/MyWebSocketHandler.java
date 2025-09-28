@@ -2,6 +2,7 @@ package org.application.spring.configuration.websocket;
 
 import io.jsonwebtoken.Claims;
 import org.application.spring.configuration.security.JwtUtil;
+import org.application.spring.ddd.dto.ChatMessage;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -57,7 +58,12 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
                 })*/
                 .forEach(wsSession -> {
                     try {
-                        wsSession.getValue().sendMessage(new TextMessage(claims.get("sub") + ": " + payload));
+                        String type = "receiver";
+                        if (session == wsSession.getValue()) {
+                            type = "sender";
+                        }
+                        String chat = new ChatMessage((String) claims.get("sub"), type, payload).toString();
+                        wsSession.getValue().sendMessage(new TextMessage(chat));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
