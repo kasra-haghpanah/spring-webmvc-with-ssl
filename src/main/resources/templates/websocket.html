@@ -13,53 +13,57 @@
 
 <script type="application/javascript">
 
-    const jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // اینو از login API بگیر
 
-    // اتصال با توکن در query string
-    //const socket = new WebSocket(`wss://localhost:8080/ws?token=${jwtToken}`);
-    const socket = new WebSocket(`wss://localhost:8443/spring/ws`);
 
-    socket.onopen = () => {
-        logMessage("✅ اتصال برقرار شد");
-    };
+        const jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // اینو از login API بگیر
 
-    socket.onmessage = (event) => {
-        var response = JSON.parse(event.data);
-        var icon = "📩 دریافت: ";
-        if (response.type == "sender") {
-            icon = "📤 ارسال: ";
+        // اتصال با توکن در query string
+        //const socket = new WebSocket(`wss://localhost:8080/ws?token=${jwtToken}`);
+        const socket = new WebSocket(`wss://localhost:8443/spring/ws`);
+
+        socket.onopen = () => {
+            logMessage("✅ اتصال برقرار شد");
+        };
+
+        socket.onmessage = (event) => {
+            var response = JSON.parse(event.data);
+            var icon = "📩 دریافت: ";
+            if (response.type == "sender") {
+                icon = "📤 ارسال: ";
+            }
+            logMessage(icon + response.email + ": " + response.message);
+        };
+
+        socket.onclose = () => {
+            logMessage("❌ اتصال بسته شد");
+        };
+
+        socket.onerror = (error) => {
+            logMessage("⚠️ خطا: " + error.message);
+        };
+
+        function sendMessage() {
+            const input = document.getElementById("messageInput");
+            const msg = input.value;
+            socket.send(msg);
+            //logMessage("📤 ارسال: " + msg);
+            input.value = "";
         }
-        logMessage(icon + response.email + ": " + response.message);
-    };
 
-    socket.onclose = () => {
-        logMessage("❌ اتصال بسته شد");
-    };
+        function logMessage(msg) {
+            const messagesDiv = document.getElementById("messages");
+            const p = document.createElement("p");
+            p.textContent = msg;
+            messagesDiv.appendChild(p);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
 
-    socket.onerror = (error) => {
-        logMessage("⚠️ خطا: " + error.message);
-    };
-
-    function sendMessage() {
-        const input = document.getElementById("messageInput");
-        const msg = input.value;
-        socket.send(msg);
-        //logMessage("📤 ارسال: " + msg);
-        input.value = "";
-    }
-
-    function logMessage(msg) {
-        const messagesDiv = document.getElementById("messages");
-        const p = document.createElement("p");
-        p.textContent = msg;
-        messagesDiv.appendChild(p);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
 
 </script>
 
 
 <body>
+<a href="/spring/upload">upload</a>
 <h2>ارتباط WebSocket با JWT</h2>
 <div>
     <input type="text" id="messageInput" placeholder="پیام خود را بنویسید">
