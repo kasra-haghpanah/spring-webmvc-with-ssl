@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${title}">title</title>
+    <!--<title th:text="${title}">title</title>-->
 </head>
 
 <!--
@@ -16,7 +16,8 @@
     const jwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."; // اینو از login API بگیر
 
     // اتصال با توکن در query string
-    const socket = new WebSocket(`ws://localhost:8080/ws?token=${jwtToken}`);
+    //const socket = new WebSocket(`wss://localhost:8080/ws?token=${jwtToken}`);
+    const socket = new WebSocket(`wss://localhost:8443/spring/ws`);
 
     socket.onopen = () => {
         logMessage("✅ اتصال برقرار شد");

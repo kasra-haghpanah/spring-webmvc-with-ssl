@@ -248,7 +248,7 @@ public class RestController {
     public String websocket(Model model, HttpServletRequest request) {
         Locale locale = localeResolver.resolveLocale(request);
 
-        model.addAttribute("title", messageSource.getMessage("websocket.title", new Object[]{}, locale));
+        //model.addAttribute("title", messageSource.getMessage("websocket.title", new Object[]{}, locale));
 
         model.addAttribute("version", Properties.getVersion());
         return "websocket"; // فایل websocket.html در مسیر templates

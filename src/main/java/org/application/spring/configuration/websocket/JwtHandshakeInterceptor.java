@@ -1,5 +1,6 @@
 package org.application.spring.configuration.websocket;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.application.spring.configuration.security.JwtUtil;
@@ -32,8 +33,8 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                     if ("access_token".equals(cookie.getName())) {
                         String token = cookie.getValue();
                         try {
-                            JwtUtil.extractAllClaims(token);
-                            attributes.put("jwt", token); // ذخیره در session attributes
+                            Claims claims = JwtUtil.extractAllClaims(token);
+                            attributes.put("identity", claims); // ذخیره در session attributes
                             return true;
                         } catch (Exception e) {
                             //throw new RuntimeException(e);

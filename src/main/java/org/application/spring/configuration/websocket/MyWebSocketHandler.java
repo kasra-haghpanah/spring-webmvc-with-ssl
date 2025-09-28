@@ -9,21 +9,32 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 @Component
 public class MyWebSocketHandler extends TextWebSocketHandler {
+
+    public static final Map<String, WebSocketSession> sessions = new HashMap<>();
 
     // onOpen
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 
-        String token = (String) session.getAttributes().get("jwt");
+        Claims claims = (Claims) session.getAttributes().get("identity");
 
-        if (token == null || token.equals("")) {
-            token = UriComponentsBuilder.fromUri(session.getUri()).build().getQueryParams().getFirst("token");
-        }
 
         try {
-            Claims claims = JwtUtil.extractAllClaims(token);
+            if (claims == null) {
+                String token = UriComponentsBuilder.fromUri(session.getUri()).build().getQueryParams().getFirst("token");
+                claims = JwtUtil.extractAllClaims(token);
+            }
+
+            session.getAttributes().put("identity", claims);
+            sessions.put(session.getId(), session);
+
+
         } catch (Exception e) {
             session.close(CloseStatus.NOT_ACCEPTABLE.withReason("Invalid JWT"));
             return;
@@ -36,13 +47,28 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         // پیام دریافت شد
         String payload = message.getPayload();
-        session.sendMessage(new TextMessage("Echo: " + payload));
+        Claims claims = (Claims) session.getAttributes().get("identity");
+        //session.sendMessage(new TextMessage("Echo: " + payload));
+        sessions
+                .entrySet()
+                .stream()
+/*                .filter(entry -> {
+                    return session != entry.getValue();
+                })*/
+                .forEach(wsSession -> {
+                    try {
+                        wsSession.getValue().sendMessage(new TextMessage(claims.get("sub") + ": " + payload));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     // onClose
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         // اتصال بسته شد
+        sessions.remove(session.getId());
     }
 
     // onError
