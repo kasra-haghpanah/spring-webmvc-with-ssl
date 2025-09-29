@@ -20,7 +20,11 @@ window.onload = function () {
                     }
                 },
                 connectWebSocket: function () {
-                    this.socket = new WebSocket(`wss://localhost:8443/spring/ws`);
+                    try {
+                        ws.socket = new WebSocket(`wss://localhost:8443/spring/ws`);
+                    } catch (e) {
+                        console.log(e);
+                    }
 
                     this.socket.onopen = () => {
                         ws.clearSchedule();
