@@ -71,10 +71,8 @@ window.onload = function () {
                     const input = document.getElementById("messageInput");
                     const msg = input.value;
                     this.socket.send(msg);
-                    //logMessage("📤 ارسال: " + msg);
                     input.value = "";
                 },
-
                 logMessage: function (msg) {
                     let messagesDiv = document.getElementById("messages");
                     const p = document.createElement("p");
