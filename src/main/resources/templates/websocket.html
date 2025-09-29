@@ -14,107 +14,118 @@
 
 <script type="application/javascript">
 
-    // اتصال با توکن در query string
     //const socket = new WebSocket(`wss://localhost:8080/ws?token=${jwtToken}`);
-    let socket;
-    let reconnectInterval = 5000; // زمان انتظار برای اتصال مجدد (میلی‌ثانیه)
-    let reconnectAttempts = 0;
-    const maxReconnectAttempts = 100000;
 
-    function connectWebSocket() {
-        socket = new WebSocket(`wss://localhost:8443/spring/ws`);
+    (function () {
 
-        socket.onopen = () => {
-            logMessage("✅ اتصال برقرار شد");
-            let messagesDiv = document.getElementById("messages");
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            reconnectAttempts = 0; // ریست تلاش‌ها بعد از اتصال موفق
-        };
+        if (window.ws === undefined) {
+            window.ws = {
+                socket: null,
+                reconnectAttempts: 0,
+                reconnectInterval: 5000,
+                intervalId: null,
+                scrollToEnd: function () {
+                    let messagesDiv = document.getElementById("messages");
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                },
+                connectWebSocket: function () {
+                    this.socket = new WebSocket(`wss://localhost:8443/spring/ws`);
 
-        socket.onmessage = (event) => {
-            try {
-                const response = JSON.parse(event.data);
-                const icon = response.type === "sender" ? "📤 ارسال: " : "📩 دریافت: ";
-                logMessage(icon + response.email + ": " + response.message);
-                let messagesDiv = document.getElementById("messages");
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            } catch (e) {
-                logMessage("⚠️ خطا در پردازش پیام: " + e.message);
-                let messagesDiv = document.getElementById("messages");
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                    this.socket.onopen = () => {
+                        clearInterval(ws.intervalId);
+                        ws.intervalId = null;
+                        ws.reconnectAttempts = 0;
+                        ws.logMessage("✅ اتصال برقرار شد");
+                        ws.scrollToEnd();
+                    };
+
+                    this.socket.onmessage = (event) => {
+                        try {
+                            let response = JSON.parse(event.data);
+                            let icon = response.type === "sender" ? "📤 ارسال: " : "📩 دریافت: ";
+                            ws.logMessage(icon + response.email + ": " + response.message);
+                            ws.scrollToEnd();
+                        } catch (e) {
+                            ws.logMessage("⚠️ خطا در پردازش پیام: " + e.message);
+                            ws.scrollToEnd();
+                        }
+                    };
+
+                    this.socket.onclose = () => {
+                        ws.logMessage("❌ اتصال بسته شد");
+                        ws.scrollToEnd();
+                        ws.attemptReconnect();
+                    };
+
+                    this.socket.onerror = (error) => {
+                        ws.logMessage("⚠️ خطا: " + error.message);
+                        ws.scrollToEnd();
+                        ws.socket.close(); // بستن دستی برای فعال‌سازی onclose
+                        ws.socket = null;
+                    };
+                },
+                attemptReconnect: function () {
+                    //if (reconnectAttempts < maxReconnectAttempts) {
+                    if (this.intervalId != null) {
+                        clearInterval(this.intervalId);
+                        this.intervalId = null;
+                    }
+                    this.reconnectAttempts++;
+                    this.logMessage(`🔄 تلاش برای اتصال مجدد (${this.reconnectAttempts})...`);
+                    this.scrollToEnd();
+                    this.intervalId = setInterval(() => {
+                        this.connectWebSocket();
+                    }, this.reconnectInterval);
+                    // } else {
+                    //     this.logMessage("⛔️ تعداد تلاش‌های اتصال مجدد به پایان رسید");
+                    // }
+                },
+                sendMessage: function () {
+                    const input = document.getElementById("messageInput");
+                    const msg = input.value;
+                    this.socket.send(msg);
+                    //logMessage("📤 ارسال: " + msg);
+                    input.value = "";
+                },
+
+                logMessage: function (msg) {
+                    let messagesDiv = document.getElementById("messages");
+                    const p = document.createElement("p");
+                    p.textContent = msg;
+                    messagesDiv.appendChild(p);
+                    this.scrollToEnd();
+                },
+                refreshToken: function () {
+                    html5.ajax({
+                        url: `/spring/refresh/token`,
+                        method: 'POST',
+                        headers: {
+                            'Accept-Language': 'fa',
+                            'Content-Type': 'application/json'//,
+                            //'Authorization': 'Bearer your-token'
+                        },
+                        body: null,
+                        responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
+                    }).then(response => {
+                        //console.log('Status:', response.status);
+                        //console.log('Headers:', response.headers);
+                        //console.log('Body:', response.body);
+
+                    }).catch(error => {
+                        console.error(error);
+                    });
+                }
+
+
             }
-        };
 
-        socket.onclose = () => {
-            logMessage("❌ اتصال بسته شد");
-            let messagesDiv = document.getElementById("messages");
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            attemptReconnect();
-        };
 
-        socket.onerror = (error) => {
-            logMessage("⚠️ خطا: " + error.message);
-            let messagesDiv = document.getElementById("messages");
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            socket.close(); // بستن دستی برای فعال‌سازی onclose
-        };
-    }
-
-    function attemptReconnect() {
-        if (reconnectAttempts < maxReconnectAttempts) {
-            reconnectAttempts++;
-            logMessage(`🔄 تلاش برای اتصال مجدد (${reconnectAttempts})...`);
-            let messagesDiv = document.getElementById("messages");
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            setTimeout(connectWebSocket, reconnectInterval);
-        } else {
-            logMessage("⛔️ تعداد تلاش‌های اتصال مجدد به پایان رسید");
         }
-    }
 
-    // شروع اتصال
-    connectWebSocket();
+    })();
 
-
-    function sendMessage() {
-        const input = document.getElementById("messageInput");
-        const msg = input.value;
-        socket.send(msg);
-        //logMessage("📤 ارسال: " + msg);
-        input.value = "";
-    }
-
-    function logMessage(msg) {
-        let messagesDiv = document.getElementById("messages");
-        const p = document.createElement("p");
-        p.textContent = msg;
-        messagesDiv.appendChild(p);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-
-
-    function refreshToken() {
-        html5.ajax({
-            url: `/spring/refresh/token`,
-            method: 'POST',
-            headers: {
-                'Accept-Language': 'fa',
-                'Content-Type': 'application/json'//,
-                //'Authorization': 'Bearer your-token'
-            },
-            body: null,
-            responseType: 'json' // یا 'text', 'xml', 'base64', 'blob', 'arraybuffer'
-        }).then(response => {
-            //console.log('Status:', response.status);
-            //console.log('Headers:', response.headers);
-            console.log('Body:', response.body);
-
-        }).catch(error => {
-            console.error(error);
-        });
-    }
-
-    setInterval(refreshToken, 14 * 60000);
+    ws.connectWebSocket();// شروع اتصال
+    setInterval(ws.refreshToken, 14 * 60000);
 
 
 </script>
@@ -125,7 +136,7 @@
 <h2>ارتباط WebSocket با JWT</h2>
 <div>
     <input type="text" id="messageInput" placeholder="پیام خود را بنویسید">
-    <button onclick="sendMessage()">ارسال</button>
+    <button onclick="ws.sendMessage()">ارسال</button>
 </div>
 <div id="messages" style="overflow-y: scroll;width: 600px;height: 400px;"></div>
 
