@@ -32,7 +32,7 @@ public class Properties {
         config.put("springdoc.api-docs.version", environment.getProperty("springdoc.api-docs.version"));
         config.put("springdoc.packagesToScan", environment.getProperty("springdoc.packagesToScan"));
         config.put("app.jwt-secret", environment.getProperty("app.jwt-secret"));
-        config.put("app.jwt-expiration-hours", environment.getProperty("app.jwt-expiration-hours"));
+        config.put("app.jwt-expiration-minutes", environment.getProperty("app.jwt-expiration-minutes"));
         config.put("spring.datasource.url", environment.getProperty("spring.datasource.url"));
         config.put("spring.datasource.username", environment.getProperty("spring.datasource.username"));
         config.put("spring.datasource.password", environment.getProperty("spring.datasource.password"));
@@ -95,8 +95,8 @@ public class Properties {
         return get("app.jwt-secret", String.class);
     }
 
-    public static Integer getAppJwtExpirationHours() {
-        return Integer.valueOf(get("app.jwt-expiration-hours", String.class));
+    public static Integer getAppJwtExpirationMinutes() {
+        return Integer.valueOf(get("app.jwt-expiration-minutes", String.class));
     }
 
     public static String getSpringDatasourceUrl() {

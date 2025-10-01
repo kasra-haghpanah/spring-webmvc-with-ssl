@@ -30,7 +30,7 @@ public class JwtUtil {
                 .setSubject(user.getUsername())
                 .claim("roles", user.getAuthorities())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000 * Properties.getAppJwtExpirationHours()))
+                .setExpiration(new Date(System.currentTimeMillis() + 60000 * Properties.getAppJwtExpirationMinutes()))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -42,7 +42,7 @@ public class JwtUtil {
                 .claim("roles", user.getAuthorities())
                 .claim("ip", ip)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000 * Properties.getAppJwtExpirationHours()))
+                .setExpiration(new Date(System.currentTimeMillis() + 60000 * Properties.getAppJwtExpirationMinutes()))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -54,7 +54,7 @@ public class JwtUtil {
                 .claim("roles", user.getAuthorities())
                 .addClaims(map)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000 * Properties.getAppJwtExpirationHours()))
+                .setExpiration(new Date(System.currentTimeMillis() + 60000 * Properties.getAppJwtExpirationMinutes()))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

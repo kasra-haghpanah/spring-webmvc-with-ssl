@@ -1,10 +1,10 @@
 package org.application.spring.configuration.websocket.client;
 
 import org.application.spring.configuration.exception.ApplicationException;
+import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.security.AuthenticationRequest;
 import org.application.spring.configuration.security.AuthenticationResponse;
 import org.application.spring.configuration.ssl.SslContextBuilder;
-import org.application.spring.ddd.dto.ChatMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.socket.TextMessage;
@@ -106,7 +106,7 @@ public class WebSocketClientApp {
             System.out.println("refreshToken: " + response.token());
 
 
-        }, 0, 14, TimeUnit.MINUTES);
+        }, 0, Properties.getCookieAgeMinutes() - 1, TimeUnit.MINUTES);
 
     }
 
