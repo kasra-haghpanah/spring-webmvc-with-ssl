@@ -56,7 +56,7 @@ window.onload = function () {
                         ws.scrollToEnd();
 
                         try {
-                            if (ws.socket) {
+                            if (ws.socket != null || ws.socket !== undefined) {
                                 ws.socket.close();
                                 delete ws.socket;
                             }
