@@ -113,8 +113,7 @@ public class WebSocketClientApp {
     public static void sendMessageSafe(String message) {
         synchronized (currentSession) {
             try {
-                String chat = new ChatMessage("application@gmail.com", "sender", message).toString();
-                currentSession.sendMessage(new TextMessage(chat));
+                currentSession.sendMessage(new TextMessage(message));
             } catch (IOException e) {
                 e.printStackTrace();
             }
