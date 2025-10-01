@@ -16,6 +16,7 @@ public class Properties {
 
     public static String Localhost = "localhost";
     private static final Map<String, Object> config = new HashMap<String, Object>();
+    public static String token;
 
     public Properties(Environment environment) {
 

@@ -1,4 +1,4 @@
-package org.application.spring.configuration.websocket;
+package org.application.spring.configuration.websocket.server;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;

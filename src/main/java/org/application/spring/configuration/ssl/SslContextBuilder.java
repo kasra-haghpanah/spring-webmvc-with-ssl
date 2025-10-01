@@ -1,5 +1,6 @@
-package org.application.spring.configuration.restclient;
+package org.application.spring.configuration.ssl;
 
+import org.application.spring.configuration.restclient.RestClientConfig;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
@@ -9,6 +10,7 @@ import javax.net.ssl.TrustManagerFactory;
 import java.io.FileInputStream;
 import java.net.http.HttpClient;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.time.Duration;
 
 public class SslContextBuilder {
@@ -27,36 +29,43 @@ public class SslContextBuilder {
             String keyStorePassword,
             String trustStorePath,
             String trustStorePassword
-    ) throws Exception {
+    ) {
 
         keyStorePath = keyStorePath.replace("classpath:", classpath + "/");
         trustStorePath = trustStorePath.replace("classpath:", classpath + "/");
 
+        SSLContext sslContext = null;
         // Load client keystore
-        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-        try (FileInputStream keyStoreStream = new FileInputStream(keyStorePath)) {
-            keyStore.load(keyStoreStream, keyStorePassword.toCharArray());
+        KeyStore keyStore = null;
+        try {
+            keyStore = KeyStore.getInstance(keyStoreType);
+            try (FileInputStream keyStoreStream = new FileInputStream(keyStorePath)) {
+                keyStore.load(keyStoreStream, keyStorePassword.toCharArray());
+            }
+
+            // Load truststore
+            KeyStore trustStore = KeyStore.getInstance(keyStoreType);
+            try (FileInputStream trustStoreStream = new FileInputStream(trustStorePath)) {
+                trustStore.load(trustStoreStream, trustStorePassword.toCharArray());
+            }
+
+            // Init KeyManager
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(keyStore, keyStorePassword.toCharArray());
+
+            // Init TrustManager
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(trustStore);
+
+            // Build SSLContext
+            sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            return sslContext;
         }
 
-        // Load truststore
-        KeyStore trustStore = KeyStore.getInstance(keyStoreType);
-        try (FileInputStream trustStoreStream = new FileInputStream(trustStorePath)) {
-            trustStore.load(trustStoreStream, trustStorePassword.toCharArray());
-        }
-
-        // Init KeyManager
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        kmf.init(keyStore, keyStorePassword.toCharArray());
-
-        // Init TrustManager
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        tmf.init(trustStore);
-
-        // Build SSLContext
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-
-        return sslContext;
     }
 
     public static RestClient createSecureRestClient(SSLContext sslContext) {
@@ -76,14 +85,14 @@ public class SslContextBuilder {
             String keyStorePassword,
             String trustStorePath,
             String trustStorePassword
-    ) throws Exception {
+    ) {
         SSLContext sslContext = buildSslContext(
-                    "PKCS12",
-                    "classpath:p12/client.p12",
-                    "client123",
-                    "classpath:p12/client-truststore.p12",
-                    "trust123"
-            );
+                "PKCS12",
+                "classpath:p12/client.p12",
+                "client123",
+                "classpath:p12/client-truststore.p12",
+                "trust123"
+        );
         return createSecureRestClient(sslContext);
     }
 }

@@ -1,4 +1,4 @@
-package org.application.spring.configuration.websocket;
+package org.application.spring.configuration.websocket.server;
 
 import io.jsonwebtoken.Claims;
 import org.application.spring.configuration.security.JwtUtil;
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class MyWebSocketHandler extends TextWebSocketHandler {
+public class ServerWebSocketHandler extends TextWebSocketHandler {
 
     public static final Map<String, WebSocketSession> sessions = new HashMap<>();
 
@@ -48,26 +48,28 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         // پیام دریافت شد
         String payload = message.getPayload();
-        Claims claims = (Claims) session.getAttributes().get("identity");
-        //session.sendMessage(new TextMessage("Echo: " + payload));
+        String userName = getProperty(session, "sub");
         sessions
                 .entrySet()
                 .stream()
-/*                .filter(entry -> {
-                    return session != entry.getValue();
-                })*/
+
                 .forEach(wsSession -> {
                     try {
                         String type = "receiver";
-                        if (session == wsSession.getValue()) {
+                        if (userName.equals(getProperty(wsSession.getValue(), "sub"))) {
                             type = "sender";
                         }
-                        String chat = new ChatMessage((String) claims.get("sub"), type, payload).toString();
+                        String chat = new ChatMessage(userName, type, payload).toString();
                         wsSession.getValue().sendMessage(new TextMessage(chat));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 });
+    }
+
+    public static <T> T getProperty(WebSocketSession session, String key) {
+        Claims claims = (Claims) session.getAttributes().get("identity");
+        return (T) claims.get(key);
     }
 
     // onClose

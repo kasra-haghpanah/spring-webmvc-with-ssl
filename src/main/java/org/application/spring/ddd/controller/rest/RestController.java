@@ -15,6 +15,7 @@ import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.security.AuthenticationRequest;
 import org.application.spring.configuration.security.AuthenticationResponse;
 import org.application.spring.configuration.validation.api.ListSize;
+import org.application.spring.configuration.websocket.client.WebSocketClientApp;
 import org.application.spring.ddd.dto.FileDto;
 import org.application.spring.ddd.model.entity.Customer;
 import org.application.spring.ddd.model.entity.File;
@@ -252,6 +253,22 @@ public class RestController {
 
         model.addAttribute("version", Properties.getVersion());
         return "websocket"; // فایل websocket.html در مسیر templates
+    }
+
+    @RequestMapping(value = "/client/websocket", method = RequestMethod.POST)
+    @ResponseBody
+    public String sendMessage(
+            @RequestParam(value = "message") String message,
+            HttpServletRequest request
+    ) {
+
+        WebSocketClientApp.sendMessageSafe(message);
+        //Locale locale = localeResolver.resolveLocale(request);
+
+        //model.addAttribute("title", messageSource.getMessage("websocket.title", new Object[]{}, locale));
+
+        //model.addAttribute("version", Properties.getVersion());
+        return message; // فایل websocket.html در مسیر templates
     }
 
 
