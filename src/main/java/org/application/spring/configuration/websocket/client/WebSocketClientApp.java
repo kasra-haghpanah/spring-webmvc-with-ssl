@@ -122,47 +122,32 @@ public class WebSocketClientApp {
 
     public static void connect() {
 
-        try {
-            // بررسی وضعیت اتصال
-            if (currentSession == null || !currentSession.isOpen()) {
-                System.out.println("🔄 اتصال قطع شده، در حال تلاش برای ری‌کانکت...");
+        // بررسی وضعیت اتصال
+        if (currentSession == null || !currentSession.isOpen()) {
+            System.out.println("🔄 اتصال قطع شده، در حال تلاش برای ری‌کانکت...");
+            // ساخت هدر جدید
+            WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+            headers.add("Cookie", MessageFormat.format("access_token={0}; from=sever", token));
+            // ساخت کلاینت جدید
+            StandardWebSocketClient client = new StandardWebSocketClient();
+            client.setSslContext(sslContext);
+            // اتصال مجدد
+            CompletableFuture<WebSocketSession> future = client.execute(
+                    new ClientWebSocketHandler(),
+                    headers,
+                    URI.create("wss://localhost:8443/spring/ws")
+            );
 
-                // دریافت کوکی جدید
-                String newCookie = MessageFormat.format("access_token={0}; from=sever", token);
-
-                // ساخت هدر جدید
-                WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-                headers.add("Cookie", newCookie);
-
-                // ساخت کلاینت جدید
-                StandardWebSocketClient client = new StandardWebSocketClient();
-                client.setSslContext(sslContext);
-
-                // اتصال مجدد
-                CompletableFuture<WebSocketSession> future = client.execute(
-                        new ClientWebSocketHandler(),
-                        headers,
-                        URI.create("wss://localhost:8443/spring/ws")
-                );
-
-                future.thenAccept(session -> {
-                    currentSession = session;
-                    System.out.println("✅ اتصال مجدد برقرار شد");
-                    try {
-                        session.sendMessage(new TextMessage("سلام مجدد از کلاینت Spring!"));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }).exceptionally(ex -> {
-                    System.err.println("❌ خطا در اتصال مجدد: " + ex.getMessage());
-                    return null;
-                });
-            } else {
-                System.out.println("✅ اتصال برقرار است، نیازی به ری‌کانکت نیست");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            future.thenAccept(session -> {
+                currentSession = session;
+                System.out.println("✅ اتصال مجدد برقرار شد");
+                sendMessageSafe("سلام مجدد از کلاینت Spring!");
+            }).exceptionally(ex -> {
+                System.err.println("❌ خطا در اتصال مجدد: " + ex.getMessage());
+                return null;
+            });
+        } else {
+            System.out.println("✅ اتصال برقرار است، نیازی به ری‌کانکت نیست");
         }
 
 

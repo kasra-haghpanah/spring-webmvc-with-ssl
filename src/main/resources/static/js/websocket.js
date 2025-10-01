@@ -54,8 +54,16 @@ window.onload = function () {
                     this.socket.onerror = (error) => {
                         ws.logMessage("⚠️ خطا: " + error.message);
                         ws.scrollToEnd();
-                        ws.socket.close(); // بستن دستی برای فعال‌سازی onclose
-                        ws.socket = null;
+
+                        try {
+                            if (ws.socket) {
+                                ws.socket.close();
+                                delete ws.socket;
+                            }
+                        } catch (e) {
+                            console.log(e);
+                        }
+
                     };
                 },
                 attemptReconnect: function () {
