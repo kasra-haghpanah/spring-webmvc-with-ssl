@@ -24,6 +24,7 @@ public class Properties {
 
         config.put("classpath", classPath);
         config.put("version", environment.getProperty("version"));
+        config.put("jackson.time-zone", environment.getProperty("jackson.time-zone"));
         config.put("cookie.age.minutes", environment.getProperty("cookie.age.minutes"));
         config.put("server.port", environment.getProperty("server.port"));
         config.put("spring.application.name", environment.getProperty("spring.application.name"));
@@ -184,6 +185,10 @@ public class Properties {
 
     public static String getVersion() {
         return get("version", String.class);
+    }
+
+    public static String getJacksonTimeZone() {
+        return get("jackson.time-zone", String.class);
     }
 
     public static Integer getCookieAgeMinutes() {
