@@ -1,7 +1,7 @@
 package org.application.spring.configuration.websocket.client;
 
 import org.application.spring.configuration.exception.ApplicationException;
-import org.application.spring.configuration.properties.Properties;
+import org.application.spring.configuration.security.AuthenticationRequest;
 import org.application.spring.configuration.security.AuthenticationResponse;
 import org.application.spring.configuration.ssl.SslContextBuilder;
 import org.application.spring.ddd.dto.ChatMessage;
@@ -28,6 +28,7 @@ public class WebSocketClientApp {
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static volatile WebSocketSession currentSession;
     private static final RestClient restClient;
+    private static String token;
 
     static {
         sslContext = SslContextBuilder.buildSslContext(
@@ -38,8 +39,37 @@ public class WebSocketClientApp {
                 "trust123"
         );
         restClient = SslContextBuilder.createSecureRestClient(sslContext);
-        connect();
-        refreshToken();
+    }
+
+    public static String login(String userName, String password) {
+        AuthenticationRequest authenticationRequest = new AuthenticationRequest(userName, password);
+
+        AuthenticationResponse response = restClient.post()
+                .uri("https://localhost:8443/spring/login")
+                .header("Accept-Language", "fa")
+                .body(authenticationRequest)
+                .exchange((clientRequest, clientResponse) -> {
+
+                    if (clientResponse.getStatusCode().isError()) {
+                        throw new ApplicationException("url.invalid", HttpStatus.resolve(HttpStatus.BAD_REQUEST.value()), null);
+                    }
+                    clientResponse.getHeaders()
+                            .forEach((key, values) -> {
+                                if (values != null) {
+                                    for (String value : values) {
+                                        //response.addHeader(key, value);
+                                    }
+                                }
+                            });
+                    return clientResponse.bodyTo(AuthenticationResponse.class);
+                });
+
+        token = response.token();
+        if (currentSession == null || !currentSession.isOpen()) {
+            connect();
+            refreshToken();
+        }
+        return token;
     }
 
     public static void refreshToken() {
@@ -51,7 +81,7 @@ public class WebSocketClientApp {
             AuthenticationResponse response = restClient.post()
                     .uri("https://localhost:8443/spring/refresh/token")
                     .headers(httpHeaders -> {
-                        String cookie = MessageFormat.format("access_token={0}; from=sever", Properties.token);
+                        String cookie = MessageFormat.format("access_token={0}; from=sever", token);
                         httpHeaders.add("Accept-Language", "fa");
                         httpHeaders.add("Cookie", cookie);
                     })
@@ -72,7 +102,8 @@ public class WebSocketClientApp {
                         return clientResponse.bodyTo(AuthenticationResponse.class);
                     });
 
-            Properties.token = response.token();
+            token = response.token();
+            System.out.println("refreshToken: " + response.token());
 
 
         }, 0, 14, TimeUnit.MINUTES);
@@ -99,7 +130,7 @@ public class WebSocketClientApp {
                 System.out.println("🔄 اتصال قطع شده، در حال تلاش برای ری‌کانکت...");
 
                 // دریافت کوکی جدید
-                String newCookie = MessageFormat.format("access_token={0}; from=sever", Properties.token);
+                String newCookie = MessageFormat.format("access_token={0}; from=sever", token);
 
                 // ساخت هدر جدید
                 WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
