@@ -122,7 +122,6 @@ public class WebSocketClientApp {
 
     public static void connect() {
 
-
         try {
             // بررسی وضعیت اتصال
             if (currentSession == null || !currentSession.isOpen()) {
@@ -168,39 +167,6 @@ public class WebSocketClientApp {
 
 
     }
-
-    public static void main(String[] args) throws Exception {
-
-        // ساخت WebSocketClient با SSL سفارشی
-        StandardWebSocketClient client = new StandardWebSocketClient();
-        client.setSslContext(sslContext);
-        //client.getUserProperties().put("org.apache.tomcat.websocket.SSL_CONTEXT", sslContext);
-
-
-        // ساخت هدرها
-        WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
-        //headers.add("Authorization", "Bearer YOUR_ACCESS_TOKEN");
-        headers.add("Cookie", "access_token=abc123; otherCookie=value");
-
-        CompletableFuture<WebSocketSession> future = client.execute(
-                new ClientWebSocketHandler(),
-                headers,
-                URI.create("wss://localhost:8443/spring/ws")
-        );
-
-        future.thenAccept(session -> {
-            System.out.println("✅ اتصال برقرار شد");
-            try {
-                session.sendMessage(new TextMessage("سلام از کلاینت Spring!"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).exceptionally(ex -> {
-            System.err.println("❌ خطا در اتصال: " + ex.getMessage());
-            return null;
-        });
-    }
-
 
 }
 
