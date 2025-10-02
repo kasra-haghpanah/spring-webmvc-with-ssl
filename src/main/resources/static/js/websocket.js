@@ -19,50 +19,58 @@ window.onload = function () {
                         this.intervalId = null;
                     }
                 },
+                onOpen: function () {
+                    ws.clearSchedule();
+                    ws.reconnectAttempts = 0;
+                    ws.logMessage("✅ اتصال برقرار شد");
+                    ws.scrollToEnd();
+                },
+                onMessage: function (event) {
+                    try {
+                        let response = JSON.parse(event.data);
+                        let icon = response.type === "sender" ? "📤 ارسال: " : "📩 دریافت: ";
+                        ws.logMessage(icon + response.email + ": " + response.message);
+                        ws.scrollToEnd();
+                    } catch (e) {
+                        ws.logMessage("⚠️ خطا در پردازش پیام: " + e.message);
+                        ws.scrollToEnd();
+                    }
+                },
+                onClose: function () {
+
+                    try {
+                        ws.socket.removeEventListener("open", ws.onOpen);
+                        ws.socket.removeEventListener("message", ws.onMessage);
+                        ws.socket.removeEventListener("close", ws.onClose);
+                        ws.socket.removeEventListener("error", ws.onError);
+                        ws.socket = null;
+                    } catch (e) {
+                        console.log(e);
+                    }
+
+                    ws.logMessage("❌ اتصال بسته شد");
+                    ws.scrollToEnd();
+                    ws.attemptReconnect();
+                },
+                onError: function (error) {
+                    ws.logMessage("⚠️ خطا: " + error.message);
+                    ws.scrollToEnd();
+
+                    try {
+                        if (ws.socket != null) {
+                            ws.socket.close();
+                        }
+                    } catch (e) {
+                        console.log(e);
+                    }
+                },
                 connectWebSocket: function () {
                     try {
-                        ws.socket = new WebSocket(`wss://localhost:8443/spring/ws`);
-
-                        ws.socket.onopen = () => {
-                            ws.clearSchedule();
-                            ws.reconnectAttempts = 0;
-                            ws.logMessage("✅ اتصال برقرار شد");
-                            ws.scrollToEnd();
-                        };
-
-                        ws.socket.onmessage = (event) => {
-                            try {
-                                let response = JSON.parse(event.data);
-                                let icon = response.type === "sender" ? "📤 ارسال: " : "📩 دریافت: ";
-                                ws.logMessage(icon + response.email + ": " + response.message);
-                                ws.scrollToEnd();
-                            } catch (e) {
-                                ws.logMessage("⚠️ خطا در پردازش پیام: " + e.message);
-                                ws.scrollToEnd();
-                            }
-                        };
-
-                        ws.socket.onclose = () => {
-                            ws.logMessage("❌ اتصال بسته شد");
-                            ws.scrollToEnd();
-                            ws.attemptReconnect();
-                        };
-
-                        ws.socket.onerror = (error) => {
-                            ws.logMessage("⚠️ خطا: " + error.message);
-                            ws.scrollToEnd();
-
-                            try {
-                                if (ws.socket !== undefined && ws.socket != null) {
-                                    ws.socket.close();
-                                    delete ws.socket;
-                                }
-                            } catch (e) {
-                                console.log(e);
-                            }
-
-                        };
-
+                        this.socket = new WebSocket(`wss://localhost:8443/spring/ws`);
+                        this.socket.addEventListener("open", this.onOpen);
+                        this.socket.addEventListener("message", this.onMessage);
+                        this.socket.addEventListener("close", this.onClose);
+                        this.socket.addEventListener("error", this.onError);
                     } catch (e) {
                         console.log(e);
                     }
