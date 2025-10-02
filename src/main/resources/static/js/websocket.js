@@ -22,49 +22,50 @@ window.onload = function () {
                 connectWebSocket: function () {
                     try {
                         ws.socket = new WebSocket(`wss://localhost:8443/spring/ws`);
+
+                        ws.socket.onopen = () => {
+                            ws.clearSchedule();
+                            ws.reconnectAttempts = 0;
+                            ws.logMessage("✅ اتصال برقرار شد");
+                            ws.scrollToEnd();
+                        };
+
+                        ws.socket.onmessage = (event) => {
+                            try {
+                                let response = JSON.parse(event.data);
+                                let icon = response.type === "sender" ? "📤 ارسال: " : "📩 دریافت: ";
+                                ws.logMessage(icon + response.email + ": " + response.message);
+                                ws.scrollToEnd();
+                            } catch (e) {
+                                ws.logMessage("⚠️ خطا در پردازش پیام: " + e.message);
+                                ws.scrollToEnd();
+                            }
+                        };
+
+                        ws.socket.onclose = () => {
+                            ws.logMessage("❌ اتصال بسته شد");
+                            ws.scrollToEnd();
+                            ws.attemptReconnect();
+                        };
+
+                        ws.socket.onerror = (error) => {
+                            ws.logMessage("⚠️ خطا: " + error.message);
+                            ws.scrollToEnd();
+
+                            try {
+                                if (ws.socket !== undefined && ws.socket != null) {
+                                    ws.socket.close();
+                                    delete ws.socket;
+                                }
+                            } catch (e) {
+                                console.log(e);
+                            }
+
+                        };
+
                     } catch (e) {
                         console.log(e);
                     }
-
-                    this.socket.onopen = () => {
-                        ws.clearSchedule();
-                        ws.reconnectAttempts = 0;
-                        ws.logMessage("✅ اتصال برقرار شد");
-                        ws.scrollToEnd();
-                    };
-
-                    this.socket.onmessage = (event) => {
-                        try {
-                            let response = JSON.parse(event.data);
-                            let icon = response.type === "sender" ? "📤 ارسال: " : "📩 دریافت: ";
-                            ws.logMessage(icon + response.email + ": " + response.message);
-                            ws.scrollToEnd();
-                        } catch (e) {
-                            ws.logMessage("⚠️ خطا در پردازش پیام: " + e.message);
-                            ws.scrollToEnd();
-                        }
-                    };
-
-                    this.socket.onclose = () => {
-                        ws.logMessage("❌ اتصال بسته شد");
-                        ws.scrollToEnd();
-                        ws.attemptReconnect();
-                    };
-
-                    this.socket.onerror = (error) => {
-                        ws.logMessage("⚠️ خطا: " + error.message);
-                        ws.scrollToEnd();
-
-                        try {
-                            if (ws.socket != null || ws.socket !== undefined) {
-                                ws.socket.close();
-                                delete ws.socket;
-                            }
-                        } catch (e) {
-                            console.log(e);
-                        }
-
-                    };
                 },
                 attemptReconnect: function () {
                     this.clearSchedule();
