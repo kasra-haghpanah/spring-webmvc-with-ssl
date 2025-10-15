@@ -9,6 +9,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
 import ch.qos.logback.core.FileAppender;
+import ch.qos.logback.core.rolling.RollingFileAppender;
+import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
+import ch.qos.logback.core.util.FileSize;
 import jakarta.annotation.PostConstruct;
 import net.logstash.logback.encoder.LogstashEncoder;
 import org.application.spring.configuration.properties.Properties;
@@ -49,7 +52,7 @@ public class LoggingConfiguration {
         encoder.setContext(context);
         encoder.start();
         // تعریف فایل لاگ
-        FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+/*        FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
         fileAppender.setFile(path);
         fileAppender.setEncoder(encoder);
         fileAppender.setContext(context);
@@ -61,7 +64,46 @@ public class LoggingConfiguration {
         fileAppender.addFilter(infoFilter);
         fileAppender.start();
         // اتصال به روت لاگر
-        return fileAppender;
+        return fileAppender;*/
+
+        //////////////////////////////////////////////////////////////////////////
+
+
+        RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<>();
+        rollingFileAppender.setContext(context);
+        rollingFileAppender.setEncoder(encoder);
+        rollingFileAppender.setName("ROLLING_JSON_FILE");
+
+        String archivePath = path;
+        int archivePathSlashIndex = archivePath.lastIndexOf("/");
+        if (archivePathSlashIndex > -1) {
+            archivePath = path.substring(0, archivePathSlashIndex) + "/archive/" + path.substring(archivePathSlashIndex + 1);
+        } else {
+            archivePath = "/archive/" + path;
+        }
+
+        // پالیسی رولینگ بر اساس سایز و زمان
+        SizeAndTimeBasedRollingPolicy<ILoggingEvent> rollingPolicy = new SizeAndTimeBasedRollingPolicy<>();
+        rollingPolicy.setContext(context);
+        rollingPolicy.setParent(rollingFileAppender);
+        rollingPolicy.setFileNamePattern(archivePath + ".%d{yyyy-MM-dd}.%i.log");
+        rollingPolicy.setMaxFileSize(FileSize.valueOf("1MB")); // حداکثر سایز هر فایل
+        rollingPolicy.setMaxHistory(30);      // نگهداری ۳۰ فایل آرشیوی
+        rollingPolicy.setTotalSizeCap(FileSize.valueOf("1GB")); // حداکثر حجم کل آرشیو
+        rollingPolicy.setFileNamePattern(archivePath + ".%d{yyyy-MM-dd}.%i.log");
+        rollingPolicy.start();
+
+        rollingFileAppender.setRollingPolicy(rollingPolicy);
+        rollingFileAppender.setFile(path); // فایل اصلی
+        rollingFileAppender.start();
+
+        ThresholdFilter infoFilter = new ThresholdFilter();
+        infoFilter.setLevel("INFO");
+        infoFilter.start();
+        rollingFileAppender.addFilter(infoFilter);
+
+        return rollingFileAppender;
+
     }
 
 

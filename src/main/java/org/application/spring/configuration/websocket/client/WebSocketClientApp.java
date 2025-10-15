@@ -25,7 +25,7 @@ public class WebSocketClientApp {
 
 
     private static final SSLContext sslContext;
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1, Thread.ofVirtual().name("refresh-token-", 0).factory());
     private static volatile WebSocketSession currentSession;
     private static final RestClient restClient;
     private static String token;
@@ -76,6 +76,8 @@ public class WebSocketClientApp {
         // اینجا می‌تونی از WebClient یا RestTemplate برای دریافت کوکی جدید استفاده کنی
         //return "access_token=newToken123; otherCookie=value";
 
+        int period = Properties.getCookieAgeMinutes() - 1;
+
         scheduler.scheduleAtFixedRate(() -> {
 
             AuthenticationResponse response = restClient.post()
@@ -106,7 +108,7 @@ public class WebSocketClientApp {
             System.out.println("refreshToken: " + response.token());
 
 
-        }, 0, Properties.getCookieAgeMinutes() - 1, TimeUnit.MINUTES);
+        }, period, period, TimeUnit.MINUTES);
 
     }
 

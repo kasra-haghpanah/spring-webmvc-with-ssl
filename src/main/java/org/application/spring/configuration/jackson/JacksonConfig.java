@@ -23,7 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 
 @DependsOn({"properties"})
-@Configuration()
+@Configuration
 public class JacksonConfig {
 
     private static final String dateFormat = "yyyy-MM-dd";
