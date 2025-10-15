@@ -52,23 +52,6 @@ public class LoggingConfiguration {
         encoder.setContext(context);
         encoder.start();
         // تعریف فایل لاگ
-/*        FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
-        fileAppender.setFile(path);
-        fileAppender.setEncoder(encoder);
-        fileAppender.setContext(context);
-        fileAppender.setName("JSON_FILE");
-
-        ThresholdFilter infoFilter = new ThresholdFilter();
-        infoFilter.setLevel("INFO");
-        infoFilter.start();
-        fileAppender.addFilter(infoFilter);
-        fileAppender.start();
-        // اتصال به روت لاگر
-        return fileAppender;*/
-
-        //////////////////////////////////////////////////////////////////////////
-
-
         RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<>();
         rollingFileAppender.setContext(context);
         rollingFileAppender.setEncoder(encoder);
