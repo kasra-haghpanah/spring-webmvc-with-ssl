@@ -50,6 +50,7 @@ public class LoggingConfiguration {
         encoder.setIncludeContext(true);
         //encoder.setCustomFields("{\"app\":\"spring-webmvc-with-ssl\",\"env\":\"dev\"}");
         encoder.setContext(context);
+        encoder.setTimeZone(Properties.getLogTimeZone());
         encoder.start();
         // تعریف فایل لاگ
         RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<>();
@@ -57,23 +58,14 @@ public class LoggingConfiguration {
         rollingFileAppender.setEncoder(encoder);
         rollingFileAppender.setName("ROLLING_JSON_FILE");
 
-        String archivePath = path;
-        int archivePathSlashIndex = archivePath.lastIndexOf("/");
-        if (archivePathSlashIndex > -1) {
-            archivePath = path.substring(0, archivePathSlashIndex) + "/archive/" + path.substring(archivePathSlashIndex + 1);
-        } else {
-            archivePath = "/archive/" + path;
-        }
-
         // پالیسی رولینگ بر اساس سایز و زمان
         SizeAndTimeBasedRollingPolicy<ILoggingEvent> rollingPolicy = new SizeAndTimeBasedRollingPolicy<>();
         rollingPolicy.setContext(context);
         rollingPolicy.setParent(rollingFileAppender);
-        rollingPolicy.setFileNamePattern(archivePath + ".%d{yyyy-MM-dd}.%i.log");
-        rollingPolicy.setMaxFileSize(FileSize.valueOf("1MB")); // حداکثر سایز هر فایل
-        rollingPolicy.setMaxHistory(30);      // نگهداری ۳۰ فایل آرشیوی
-        rollingPolicy.setTotalSizeCap(FileSize.valueOf("1GB")); // حداکثر حجم کل آرشیو
-        rollingPolicy.setFileNamePattern(archivePath + ".%d{yyyy-MM-dd}.%i.log");
+        rollingPolicy.setFileNamePattern(Properties.getLogArchiveFileNamePattern());
+        rollingPolicy.setMaxFileSize(FileSize.valueOf(Properties.getLogMaxFileSize())); // حداکثر سایز هر فایل
+        rollingPolicy.setMaxHistory(Properties.getLogArchiveMaxNumberFile());      // نگهداری ۳۰ فایل آرشیوی
+        rollingPolicy.setTotalSizeCap(FileSize.valueOf(Properties.getLogArchiveTotalSizeCap())); // حداکثر حجم کل آرشیو
         rollingPolicy.start();
 
         rollingFileAppender.setRollingPolicy(rollingPolicy);
@@ -95,7 +87,7 @@ public class LoggingConfiguration {
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
         encoder.setCharset(StandardCharsets.UTF_8);
-        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n");
+        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss, " + Properties.getLogTimeZone() + "} %-5level [%thread] %logger{36} - %msg%n");
         encoder.start();
 
         ConsoleAppender<ILoggingEvent> consoleAppender = new ConsoleAppender<>();

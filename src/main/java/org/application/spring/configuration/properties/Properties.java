@@ -53,6 +53,11 @@ public class Properties {
         config.put("database-health-checker.schedule.period-in-second", environment.getProperty("database-health-checker.schedule.period-in-second"));
         config.put("database-health-checker.backoff.period-in-second", environment.getProperty("database-health-checker.backoff.period-in-second"));
         config.put("log.path", environment.getProperty("log.path"));
+        config.put("log.time-zone", environment.getProperty("log.time-zone"));
+        config.put("log.max-file-size", environment.getProperty("log.max-file-size"));
+        config.put("log.archive.file-name-pattern", environment.getProperty("log.archive.file-name-pattern"));
+        config.put("log.archive.max-number-file", environment.getProperty("log.archive.max-number-file"));
+        config.put("log.archive.total-size-cap", environment.getProperty("log.archive.total-size-cap"));
         config.put("log.console.active", environment.getProperty("log.console.active"));
 
         config.put("limit-rating.capacity", environment.getProperty("limit-rating.capacity"));
@@ -183,6 +188,30 @@ public class Properties {
         return get("log.path", String.class);
     }
 
+    public static String getLogTimeZone() {
+        return get("log.time-zone", String.class);
+    }
+
+    public static String getLogMaxFileSize() {
+        return get("log.max-file-size", String.class);
+    }
+
+    public static String getLogArchiveFileNamePattern() {
+        return get("log.archive.file-name-pattern", String.class);
+    }
+
+    public static Integer getLogArchiveMaxNumberFile() {
+        return Integer.valueOf(get("log.archive.max-number-file", String.class));
+    }
+
+    public static String getLogArchiveTotalSizeCap() {
+        return get("log.archive.total-size-cap", String.class);
+    }
+
+    public static Boolean getLogConsoleActive() {
+        return Boolean.valueOf(get("log.console.active", String.class));
+    }
+
     public static String getVersion() {
         return get("version", String.class);
     }
@@ -193,10 +222,6 @@ public class Properties {
 
     public static Integer getCookieAgeMinutes() {
         return Integer.valueOf(get("cookie.age.minutes", String.class));
-    }
-
-    public static Boolean getLogConsoleActive() {
-        return Boolean.valueOf(get("log.console.active", String.class));
     }
 
     public static int getLimitRatingCapacity() {
