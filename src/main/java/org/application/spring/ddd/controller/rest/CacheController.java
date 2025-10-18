@@ -22,8 +22,8 @@ public class CacheController {
             cacheResolver = "productCacheResolver",
             value = "products",
             key = "{#id, #key}",
-            condition = "#result != null and #result.userName() != null"
-            //unless = "#result.content() == null"
+            // condition = "#result != null and #result.userName() != null"و
+            unless = "#result == null || #result.userName() == null"
     )
     public ProductDTO getProductById(
             @PathVariable("id") Long id,
