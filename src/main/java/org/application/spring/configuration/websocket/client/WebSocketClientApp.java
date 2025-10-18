@@ -39,6 +39,17 @@ public class WebSocketClientApp {
                 "trust123"
         );
         restClient = SslContextBuilder.createSecureRestClient(sslContext);
+
+        String userName = "application@gmail.com";
+        String password = "123";
+
+        try {
+            login(userName, password);
+        } catch (Exception e) {
+            //throw new RuntimeException(e);
+        }
+
+
     }
 
     public static String login(String userName, String password) {

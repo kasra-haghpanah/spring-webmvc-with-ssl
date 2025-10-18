@@ -462,6 +462,7 @@ rate-limiting:
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
+            ContextPathAndXssFilter contextPathAndXssFilter,
             @Qualifier("rateLimitingFilter") OncePerRequestFilter rateLimitingFilter,
             @Qualifier("jwtAuthenticationFilter") OncePerRequestFilter jwtAuthenticationFilter,
             CorsConfigurationSource corsConfigurationSource,
@@ -474,20 +475,20 @@ rate-limiting:
                     corsSpec.configurationSource(corsConfigurationSource);
                 })
                 .headers(headers -> headers
-                        /*.httpStrictTransportSecurity(hsts -> hsts
-                                .includeSubDomains(true)
-                                .preload(true)
-                                .maxAgeInSeconds(31536000) // یک سال
-                        )*/
-                        .contentTypeOptions(contentType -> contentType.disable()) // غیرفعال کردن پیش‌فرض
-                        .addHeaderWriter((request, response) -> {
-                            response.setHeader("X-Content-Type-Options", "nosniff");
-                        })
-                        // XSS (Cross-Site Scripting) to avoid injecting javascript code on a browser
-                        // فیلتر ضد XSS با Jsoup در Spring Boot
-                        .xssProtection(xss -> {
-                            xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK);
-                        })
+                                /*.httpStrictTransportSecurity(hsts -> hsts
+                                        .includeSubDomains(true)
+                                        .preload(true)
+                                        .maxAgeInSeconds(31536000) // یک سال
+                                )*/
+                                .contentTypeOptions(contentType -> contentType.disable()) // غیرفعال کردن پیش‌فرض
+                                .addHeaderWriter((request, response) -> {
+                                    response.setHeader("X-Content-Type-Options", "nosniff");
+                                })
+                                // XSS (Cross-Site Scripting) to avoid injecting javascript code on a browser
+                                // فیلتر ضد XSS با Jsoup در Spring Boot
+                                .xssProtection(xss -> {
+                                    xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK);
+                                })
                         /*.contentSecurityPolicy(csp -> {
                             // CSP => each client send or upload data just from their domain
                             csp.policyDirectives("default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'");
@@ -554,6 +555,7 @@ rate-limiting:
                 )
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class) // اجرای قبل از JWT
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(contextPathAndXssFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

@@ -50,7 +50,7 @@ public class Bootstrap {
             // آرگومان‌های غیر named (بدون --)
             System.out.println("Non-option args: " + arg.getNonOptionArgs());
 
-            WebSocketClientApp.login(userName, password);
+            //WebSocketClientApp.login(userName, password);
 
 
         };

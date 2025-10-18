@@ -24,7 +24,7 @@ public class PersonDTO {
     }
 
     public void setEmail(String email) {
-        this.email = SecurityConfig.sanitize(email);
+        this.email = email;
     }
 
     public String getFirstName() {
@@ -32,7 +32,7 @@ public class PersonDTO {
     }
 
     public void setFirstName(String firstName) {
-        this.firstName = SecurityConfig.sanitize(firstName);
+        this.firstName = firstName;
     }
 
     public String getLastName() {
@@ -40,6 +40,6 @@ public class PersonDTO {
     }
 
     public void setLastName(String lastName) {
-        this.lastName = SecurityConfig.sanitize(lastName);
+        this.lastName = lastName;
     }
 }

@@ -18,8 +18,8 @@ public class ValidateController {
 
     @RequestMapping(value = "/validate/store", method = RequestMethod.POST)
     @ResponseBody
-    public String createStore(@RequestBody @Valid StoreDTO storeDTO) {
-        return "Store created successfully";
+    public StoreDTO createStore(@RequestBody @Valid StoreDTO storeDTO) {
+        return storeDTO;
     }
 
 
