@@ -7,7 +7,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.exception.ErrorResponse;
@@ -62,7 +61,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @Configuration
 @EnableWebSecurity
@@ -103,7 +101,6 @@ public class SecurityConfig {
     public static String sanitize(String input) {
         return input == null ? null : Jsoup.clean(input, Safelist.none());
     }
-
 
     public static boolean isPublicPath(String path) {
         return Arrays.stream(PUBLIC_PATHS).anyMatch(path::startsWith);
@@ -175,7 +172,6 @@ public class SecurityConfig {
             return new UsernamePasswordAuthenticationToken(user, password, user.getAuthorities());
         };
     }
-
 
     @Bean("rateLimitingFilter")
     public OncePerRequestFilter rateLimitingFilter(
@@ -369,7 +365,6 @@ rate-limiting:
         };
     }
 
-
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint(
             MessageSource messageSource,
@@ -545,7 +540,6 @@ rate-limiting:
                 .addFilterBefore(contextPathAndXssFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
 
     private static boolean isValidToken(Supplier<? extends Authentication> authentication, RequestAuthorizationContext context) {
 
