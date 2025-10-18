@@ -31,6 +31,7 @@ public class ContextPathAndXssFilter implements Filter {
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(httpRequest, 4_096);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper((HttpServletResponse) response);
 
+        wrappedResponse.setHeader("server", "Kasra-Haghpanah");
         request.setAttribute("request-body", ServerUtil.getRequestBody(wrappedRequest));
         request.setAttribute("response-body", ServerUtil.getResponseBody(wrappedResponse));
 

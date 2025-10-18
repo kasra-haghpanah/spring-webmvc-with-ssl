@@ -21,7 +21,6 @@ import org.application.spring.ddd.service.UserService;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -89,14 +88,14 @@ public class SecurityConfig {
             // "/spring/actuator/prometheus/**"
     };
 
-    @Bean
+/*    @Bean
     public FilterRegistrationBean<ContextPathAndXssFilter> xssFilterRegistration() {
         FilterRegistrationBean<ContextPathAndXssFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new ContextPathAndXssFilter());
         registration.addUrlPatterns("/*");
         registration.setOrder(1);
         return registration;
-    }
+    }*/
 
     public static String sanitize(String input) {
         return input == null ? null : Jsoup.clean(input, Safelist.none());
