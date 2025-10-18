@@ -33,16 +33,17 @@ public class ServerUtil {
         return request.getRemoteAddr(); // fallback: IP مستقیم از request
     }
 
-    public static String getAuthorization(HttpServletRequest request) {
-       return Optional.ofNullable(request.getHeader("Authorization"))
-                .map((authorization)-> authorization.trim())
-                .orElseGet(()-> Optional.ofNullable(request.getCookies())
+    public static String getToken(HttpServletRequest request) {
+        return Optional.ofNullable(request.getHeader("Authorization"))
+                .map((authorization) -> {
+                    return authorization.trim().replace("Bearer ", "");
+                })
+                .orElseGet(() -> Optional.ofNullable(request.getCookies())
                         .map(Arrays::stream)
                         .orElseGet(Stream::empty)
                         .filter(cookie -> cookie.getName().equals("access_token") && !cookie.getValue().equals(""))
                         .findFirst()
                         .map(Cookie::getValue)
-                        .map((token -> "Bearer " + token))
                         .orElse("")
                 );
     }

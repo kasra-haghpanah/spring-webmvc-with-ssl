@@ -1,6 +1,8 @@
 package org.application.spring.ddd.controller.rest;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
+import org.application.spring.configuration.security.JwtUtil;
 import org.application.spring.configuration.server.ServerUtil;
 import org.application.spring.ddd.dto.ProductDTO;
 import org.springframework.cache.annotation.Cacheable;
@@ -10,25 +12,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.lang.reflect.Method;
-
 @Controller
 public class CacheController {
 
-    @RequestMapping(value = "/cache/example/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/cache/example/id/{id}/key/{key}", method = RequestMethod.GET)
     @ResponseBody
     @Cacheable(
             cacheNames = "products",
             cacheResolver = "productCacheResolver",
             value = "products",
-            key = "{#id}",
-            condition = "#result.content() != null"
+            key = "{#id, #key}",
+            condition = "#result != null and #result.userName() != null"
             //unless = "#result.content() == null"
     )
-    public ProductDTO getProductById(@PathVariable Long id, HttpServletRequest request) {
-        String authorization = ServerUtil.getAuthorization(request);
+    public ProductDTO getProductById(
+            @PathVariable("id") Long id,
+            @PathVariable("key") String key,
+            HttpServletRequest request) {
+        String token = ServerUtil.getToken(request);
+        Claims claims = JwtUtil.extractAllClaims(token);
+        String userName = (String) claims.get("sub");
+
         simulateSlowService(); // فرضاً یک عملیات زمان‌بر
-        return new ProductDTO(id, "Product " + id);
+        ProductDTO result = new ProductDTO(id, key, userName);
+        return result;
     }
 
     private void simulateSlowService() {

@@ -70,7 +70,7 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         request.removeAttribute("tokenValue");
 
         if (tokenValue == null || tokenValue.trim().equals("")) {
-            tokenValue = ServerUtil.getAuthorization(request);
+            tokenValue = ServerUtil.getToken(request);
         }
 
         LogstashHttpLog log = new LogstashHttpLog(
