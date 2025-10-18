@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
+import org.application.spring.configuration.security.SecurityConfig;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.servlet.LocaleResolver;
 
+import java.beans.PropertyEditorSupport;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -36,13 +38,23 @@ public class GlobalExceptionHandler {
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
+
         binder.registerCustomEditor(String.class, new StringTrimmerEditor(true) {
             @Override
             public void setAsText(String text) {
+                setValue(SecurityConfig.sanitize(text));
                 String sanitized = Jsoup.clean(text, Safelist.basic());
                 super.setAsText(sanitized);
             }
         });
+
+        binder.registerCustomEditor(String.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) {
+                setValue(SecurityConfig.sanitize(text));
+            }
+        });
+
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
