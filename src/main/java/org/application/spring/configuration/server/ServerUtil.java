@@ -44,6 +44,9 @@ public class ServerUtil {
                         .filter(cookie -> cookie.getName().equals("access_token") && !cookie.getValue().equals(""))
                         .findFirst()
                         .map(Cookie::getValue)
+                        .map(token -> {
+                            return token.trim();
+                        })
                         .orElse("")
                 );
     }

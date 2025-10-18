@@ -2,11 +2,12 @@ package org.application.spring.configuration.server;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.properties.Properties;
 import org.application.spring.configuration.security.SecurityConfig;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.text.MessageFormat;
@@ -24,8 +25,14 @@ public class ContextPathAndXssFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
+        ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(httpRequest, 4_096);
+        ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper((HttpServletResponse) response);
+
+        request.setAttribute("request-body", ServerUtil.getRequestBody(wrappedRequest));
+        request.setAttribute("response-body", ServerUtil.getResponseBody(wrappedResponse));
 
         String path = "";
         if (httpRequest.getRequestURI().startsWith(contextPath + "/")) {
@@ -41,9 +48,8 @@ public class ContextPathAndXssFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
 
         //res.setHeader("Permissions-Policy", "geolocation=(), camera=(), microphone=()");
-
-        HttpServletRequest wrappedRequest = new ContextPathAndXssRequestWrapper(req, path);
-        chain.doFilter(wrappedRequest, response);
+        HttpServletRequest xssWrappedRequest = new ContextPathAndXssRequestWrapper(req, path);
+        chain.doFilter(xssWrappedRequest, response);
     }
 
     @Override
@@ -51,11 +57,11 @@ public class ContextPathAndXssFilter implements Filter {
         // Cleanup if needed
     }
 
-    private static class ContextPathAndXssRequestWrapper extends HttpServletRequestWrapper {
+    private static class ContextPathAndXssRequestWrapper extends ContentCachingRequestWrapper {
         private final String contextPath;
 
         public ContextPathAndXssRequestWrapper(HttpServletRequest request, String contextPath) {
-            super(request);
+            super(request, 4_096);
             this.contextPath = contextPath;
         }
 

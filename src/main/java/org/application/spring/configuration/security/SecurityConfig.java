@@ -282,8 +282,8 @@ rate-limiting:
         return new OncePerRequestFilter() {
             @Override
             protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-                String authHeader = request.getHeader("Authorization");
-                final String jwt;
+
+                final String jwtToken = ServerUtil.getToken(request);
                 final String username;
                 final String ip;
                 final String firstName;
@@ -291,22 +291,9 @@ rate-limiting:
                 final String phoneNumber;
                 final String[] roles;
 
-                if (authHeader == null || authHeader.trim().equals("")) {
-
-                    authHeader = Optional.ofNullable(request.getCookies())
-                            .map(Arrays::stream)
-                            .orElseGet(Stream::empty)
-                            .filter(cookie -> cookie.getName().equals("access_token") && !cookie.getValue().equals(""))
-                            .findFirst()
-                            .map(Cookie::getValue)
-                            .map((token -> "Bearer " + token))
-                            .orElse("");
-
-                }
                 // for logging
                 request.setAttribute("start-time", System.nanoTime());
-                //request.setAttribute("invalidTokenType", InvalidTokenType.NONE);
-                request.setAttribute("tokenValue", authHeader);
+                request.setAttribute("tokenValue", jwtToken);
                 ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request, 4_096);
                 ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
                 // for logging
@@ -320,17 +307,17 @@ rate-limiting:
                     return;
                 }
                 // **************************************
-                if (authHeader == null || authHeader.trim().equals("") || !authHeader.startsWith("Bearer ")) {
+                if (jwtToken == null || jwtToken.equals("")) {
                     filterChain.doFilter(wrappedRequest, wrappedResponse);
                     request.setAttribute("request-body", ServerUtil.getRequestBody(wrappedRequest));
                     request.setAttribute("response-body", ServerUtil.getResponseBody(wrappedResponse));
                     wrappedResponse.copyBodyToResponse();
                     return;
                 }
-                jwt = authHeader.substring(7);
+
                 // code
                 try {
-                    Claims claims = JwtUtil.extractAllClaims(jwt);
+                    Claims claims = JwtUtil.extractAllClaims(jwtToken);
                     username = (String) claims.get("sub");
                     ip = (String) claims.get("ip");
                     firstName = (String) claims.get("firstName");
@@ -365,7 +352,7 @@ rate-limiting:
                     user.setAuthority(new Authority(roles));
                     user.setUserName(username);
 
-                    if (JwtUtil.isTokenValid(jwt, user)) {
+                    if (JwtUtil.isTokenValid(jwtToken, user)) {
                         UsernamePasswordAuthenticationToken authToken =
                                 new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
