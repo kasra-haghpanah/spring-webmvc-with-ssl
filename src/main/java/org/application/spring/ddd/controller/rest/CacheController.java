@@ -19,7 +19,7 @@ public class CacheController {
     @ResponseBody
     @Cacheable(
             cacheNames = "products",
-            cacheResolver = "productCacheResolver",
+            cacheResolver = "cacheResolver",
             value = "products",
             key = "{#id, #key}",
             // condition = "#result != null and #result.userName() != null"و

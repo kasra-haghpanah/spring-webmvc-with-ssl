@@ -49,8 +49,8 @@ public class CacheConfig {
     }
 
     // تعریف CacheResolver برای کش products با منطق پاک‌سازی دوره‌ای
-    @Bean(name = "productCacheResolver")
-    public CacheResolver productCacheResolver(CacheManager cacheManager) {
+    @Bean(name = "cacheResolver")
+    public CacheResolver cacheResolver(CacheManager cacheManager) {
         return new AbstractCacheResolver(cacheManager) {
             @Override
             protected Collection<String> getCacheNames(CacheOperationInvocationContext<?> context) {
