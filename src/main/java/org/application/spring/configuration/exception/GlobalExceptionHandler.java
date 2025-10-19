@@ -39,15 +39,6 @@ public class GlobalExceptionHandler {
     @InitBinder
     public void initBinder(WebDataBinder binder) {
 
-        binder.registerCustomEditor(String.class, new StringTrimmerEditor(true) {
-            @Override
-            public void setAsText(String text) {
-                setValue(SecurityConfig.sanitize(text));
-                String sanitized = Jsoup.clean(text, Safelist.basic());
-                super.setAsText(sanitized);
-            }
-        });
-
         binder.registerCustomEditor(String.class, new PropertyEditorSupport() {
             @Override
             public void setAsText(String text) {

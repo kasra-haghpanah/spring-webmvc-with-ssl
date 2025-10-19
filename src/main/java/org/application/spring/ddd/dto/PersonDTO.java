@@ -2,6 +2,7 @@ package org.application.spring.ddd.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import org.application.spring.configuration.security.SecurityConfig;
 
 public class PersonDTO {
@@ -15,6 +16,9 @@ public class PersonDTO {
 
     @NotBlank(message = "lastName نباید خالی باشد")
     private String lastName;
+
+    @Pattern(regexp = "[0-9]{11,13}", message = "field.phone")
+    private String phoneNumber;
 
     public PersonDTO() {
     }
@@ -41,5 +45,13 @@ public class PersonDTO {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }
