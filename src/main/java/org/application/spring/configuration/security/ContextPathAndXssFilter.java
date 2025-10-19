@@ -1,10 +1,10 @@
-package org.application.spring.configuration.server;
+package org.application.spring.configuration.security;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.properties.Properties;
-import org.application.spring.configuration.security.SecurityConfig;
+import org.application.spring.configuration.server.ServerUtil;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;

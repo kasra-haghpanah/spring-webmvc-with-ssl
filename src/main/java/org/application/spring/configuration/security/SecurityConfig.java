@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.application.spring.configuration.exception.ErrorResponse;
 import org.application.spring.configuration.log.RequestLoggingInterceptor;
 import org.application.spring.configuration.properties.Properties;
-import org.application.spring.configuration.server.ContextPathAndXssFilter;
 import org.application.spring.configuration.server.InvalidTokenType;
 import org.application.spring.configuration.server.ServerUtil;
 import org.application.spring.ddd.model.entity.User;
