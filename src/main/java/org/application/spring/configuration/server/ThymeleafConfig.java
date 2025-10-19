@@ -7,8 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.*;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -63,12 +62,8 @@ public class ThymeleafConfig implements WebMvcConfigurer {
 
     // for UTF-8
     @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        for (HttpMessageConverter<?> converter : converters) {
-            if (converter instanceof AbstractHttpMessageConverter<?> abstractHttpMessageConverter) {
-                abstractHttpMessageConverter.setDefaultCharset(StandardCharsets.UTF_8);
-            }
-        }
+    public void configureMessageConverters(HttpMessageConverters.ServerBuilder builder) {
+        builder.customMessageConverter(new StringHttpMessageConverter(StandardCharsets.UTF_8));
     }
 
     // for logging
