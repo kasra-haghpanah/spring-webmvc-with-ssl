@@ -20,15 +20,14 @@ public class PersonDTO {
     @Pattern(regexp = "[0-9]{11,13}", message = "field.phone")
     private String phoneNumber;
 
-    public PersonDTO() {
-    }
+    public PersonDTO() {}
 
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = SecurityConfig.sanitize(email);
     }
 
     public String getFirstName() {
@@ -36,7 +35,7 @@ public class PersonDTO {
     }
 
     public void setFirstName(String firstName) {
-        this.firstName = firstName;
+        this.firstName = SecurityConfig.sanitize(firstName);
     }
 
     public String getLastName() {
@@ -44,7 +43,7 @@ public class PersonDTO {
     }
 
     public void setLastName(String lastName) {
-        this.lastName = lastName;
+        this.lastName = SecurityConfig.sanitize(lastName);
     }
 
     public String getPhoneNumber() {
@@ -52,6 +51,6 @@ public class PersonDTO {
     }
 
     public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+        this.phoneNumber = SecurityConfig.sanitize(phoneNumber);
     }
 }

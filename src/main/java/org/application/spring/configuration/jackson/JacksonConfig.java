@@ -34,6 +34,7 @@ public class JacksonConfig {
         ObjectMapper mapper = new ObjectMapper();
 
         SimpleModule module = new SimpleModule();
+
         module.addDeserializer(String.class, new JsonDeserializer<String>() {
             @Override
             public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
@@ -45,7 +46,10 @@ public class JacksonConfig {
         mapper.registerModule(module);
         mapper.setTimeZone(TimeZone.getTimeZone(Properties.getJacksonTimeZone()));
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.NONE);// this code results in disabling to get or set a field directly
+        mapper.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY);// this code forces jackson to use getter when it is serializing dto or model
+        mapper.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY);// this code forces jackson to use setter when it is deserializing dto or model
+
         mapper.registerModule(new JavaTimeModule());
         return mapper;
     }

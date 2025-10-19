@@ -24,7 +24,7 @@ public class StoreDTO {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = SecurityConfig.sanitize(name);
     }
 
     public List<PersonDTO> getPersonDTOS() {
