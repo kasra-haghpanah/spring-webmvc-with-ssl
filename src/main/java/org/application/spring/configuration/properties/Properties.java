@@ -17,12 +17,25 @@ public class Properties {
     public static String Localhost = "localhost";
     private static final Map<String, Object> config = new HashMap<String, Object>();
 
+    private String makeClassPath() {
+        String classPath = "";
+        try {
+            String resourcePath = RestClientConfig.class.getResource("") != null ? Properties.class.getResource("").getPath() : "";
+            if (resourcePath.contains("/classes")) {
+                classPath = resourcePath.substring(0, resourcePath.indexOf("/classes") + 8);
+            } else {
+                // fallback برای native image
+                classPath = System.getProperty("user.dir");
+            }
+        } catch (Exception e) {
+            classPath = System.getProperty("user.dir");
+        }
+        return classPath;
+    }
+
     public Properties(Environment environment) {
 
-        String classPath = RestClientConfig.class.getResource("").getPath();
-        classPath = classPath.substring(0, classPath.indexOf("/classes") + 8);
-
-        config.put("classpath", classPath);
+        config.put("classpath", makeClassPath());
         config.put("version", environment.getProperty("version"));
         config.put("jackson.time-zone", environment.getProperty("jackson.time-zone"));
         config.put("cookie.age.minutes", environment.getProperty("cookie.age.minutes"));

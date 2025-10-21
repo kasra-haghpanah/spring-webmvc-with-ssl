@@ -520,10 +520,16 @@
                                 <buildArg>--initialize-at-build-time=org.apache.tomcat.util.net.SSLHostConfig</buildArg>
                                 <buildArg>--initialize-at-build-time=org.apache.juli.logging.DirectJDKLog</buildArg>
 
-
                                 <buildArg>--initialize-at-build-time=org.apache.tomcat.util.res.StringManager$1</buildArg>
                                 <buildArg>--initialize-at-build-time=org.apache.tomcat.util.res.StringManager</buildArg>
 
+<!--
+                                <buildArg>-H:IncludeResources=.*\\.properties</buildArg>
+                                <buildArg>-H:IncludeResources=.*\\.p12</buildArg>
+                                <buildArg>-H:IncludeResources=templates/.*\\.html</buildArg>
+-->
+
+                                <buildArg>-H:IncludeResources=.*</buildArg>
 
                                 <buildArg>--initialize-at-build-time=sun.security.ssl.SSLContextImpl</buildArg>
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
