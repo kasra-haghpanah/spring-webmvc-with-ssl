@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.0-M3</version>
+        <version>4.0.0-RC1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.application</groupId>
@@ -27,7 +27,7 @@
         <url/>
     </scm>
     <properties>
-        <java.version>24</java.version>
+        <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <logstash-logback.version>8.1</logstash-logback.version>
         <openapi.version>3.0.0-M1</openapi.version>
@@ -493,6 +493,7 @@
             <build>
                 <plugins>
 
+
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
@@ -508,38 +509,29 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <imageName>spring-ssl.exe</imageName>
+                            <imageName>spring-ssl</imageName>
                             <mainClass>org.application.spring.Application</mainClass>
                             <buildArgs>
-                                <buildArg>--enable-http</buildArg>
                                 <buildArg>--enable-https</buildArg>
-                                <buildArg>-H:Name=spring-ssl</buildArg>
-                                <buildArg>-H:Path=target</buildArg>
+                                <buildArg>--enable-http</buildArg>
+                                <buildArg>-H:EnableURLProtocols=https,http</buildArg>
+                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                                <buildArg>--verbose</buildArg>
                                 <buildArg>--initialize-at-build-time=org.springframework.util.unit.DataSize</buildArg>
                                 <buildArg>--initialize-at-build-time=org.apache.tomcat.util.net.SSLUtil</buildArg>
+                                <buildArg>--initialize-at-build-time=sun.security.ssl.SSLContextImpl</buildArg>
                                 <buildArg>--initialize-at-build-time=org.apache.tomcat.util.net.SSLHostConfig</buildArg>
                                 <buildArg>--initialize-at-build-time=org.apache.juli.logging.DirectJDKLog</buildArg>
 
                                 <buildArg>--initialize-at-build-time=org.apache.tomcat.util.res.StringManager$1</buildArg>
                                 <buildArg>--initialize-at-build-time=org.apache.tomcat.util.res.StringManager</buildArg>
 
-<!--
-                                <buildArg>-H:IncludeResources=.*\\.properties</buildArg>
-                                <buildArg>-H:IncludeResources=.*\\.p12</buildArg>
-                                <buildArg>-H:IncludeResources=templates/.*\\.html</buildArg>
--->
-
-                                <buildArg>-H:IncludeResources=.*</buildArg>
-
-                                <buildArg>--initialize-at-build-time=sun.security.ssl.SSLContextImpl</buildArg>
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
-                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
-                                <buildArg>--verbose</buildArg>
+                                <!--<buildArg>-H:NativeImageFile=spring-native</buildArg>-->
                             </buildArgs>
                         </configuration>
                     </plugin>
-
                 </plugins>
             </build>
 
