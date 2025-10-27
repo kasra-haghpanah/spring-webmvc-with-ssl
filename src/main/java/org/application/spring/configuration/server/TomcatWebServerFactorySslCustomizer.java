@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @DependsOn("properties")
 public class TomcatWebServerFactorySslCustomizer implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
 

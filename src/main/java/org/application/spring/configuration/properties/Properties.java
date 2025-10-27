@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Configuration("properties")
+@Configuration(value = "properties",proxyBeanMethods = false)
 public class Properties {
 
     public static String Localhost = "localhost";

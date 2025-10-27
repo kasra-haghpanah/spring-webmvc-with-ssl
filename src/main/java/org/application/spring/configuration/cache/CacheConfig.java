@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableCaching
 @DependsOn({"properties"})
 public class CacheConfig {

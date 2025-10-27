@@ -60,7 +60,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.function.Supplier;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
 @DependsOn({"properties"})
 public class SecurityConfig {

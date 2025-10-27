@@ -14,7 +14,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class MailConfig {
 
     @Bean

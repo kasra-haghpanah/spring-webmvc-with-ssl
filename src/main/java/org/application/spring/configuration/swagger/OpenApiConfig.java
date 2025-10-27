@@ -21,7 +21,7 @@ import java.text.MessageFormat;
 import java.util.List;
 
 // https://localhost:8443/spring/swagger-ui/index.html
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class OpenApiConfig {
 
     @Bean

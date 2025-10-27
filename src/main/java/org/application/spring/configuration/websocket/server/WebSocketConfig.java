@@ -3,7 +3,7 @@ package org.application.spring.configuration.websocket.server;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.*;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
 

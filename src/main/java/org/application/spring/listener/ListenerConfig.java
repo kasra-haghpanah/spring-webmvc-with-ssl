@@ -8,7 +8,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class ListenerConfig {
 
     @EventListener

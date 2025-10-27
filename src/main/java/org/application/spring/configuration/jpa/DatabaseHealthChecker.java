@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableScheduling
 @DependsOn({"mariaHibernateConfig"})
 public class DatabaseHealthChecker {

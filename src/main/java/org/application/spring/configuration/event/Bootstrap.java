@@ -13,7 +13,7 @@ import org.springframework.core.annotation.Order;
 
 import java.util.Arrays;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class Bootstrap {
 
     @Bean(value = "appRunner")

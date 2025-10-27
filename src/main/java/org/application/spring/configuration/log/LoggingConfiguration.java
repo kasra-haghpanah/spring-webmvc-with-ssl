@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.nio.charset.StandardCharsets;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class LoggingConfiguration {
 
     @PostConstruct

@@ -12,7 +12,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import java.io.IOException;
 import java.text.MessageFormat;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class ContextPathAndXssFilter implements Filter {
 
     private String contextPath;

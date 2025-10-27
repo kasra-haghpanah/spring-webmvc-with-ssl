@@ -522,13 +522,28 @@
                                 <buildArg>--initialize-at-build-time=sun.security.ssl.SSLContextImpl</buildArg>
                                 <buildArg>--initialize-at-build-time=org.apache.tomcat.util.net.SSLHostConfig</buildArg>
                                 <buildArg>--initialize-at-build-time=org.apache.juli.logging.DirectJDKLog</buildArg>
-
                                 <buildArg>--initialize-at-build-time=org.apache.tomcat.util.res.StringManager$1</buildArg>
                                 <buildArg>--initialize-at-build-time=org.apache.tomcat.util.res.StringManager</buildArg>
 
+                                <!-- ✅ فقط منابع ضروری -->
+                                <buildArg>-H:IncludeResources=(application\.properties|bean-config\.xml|messages(_fa)?\.properties|p12/.*|static/.*|templates/.*\.html)</buildArg>
+
+                                <!-- Resource configurations -->
+<!--                                <buildArg>-H:IncludeResources=application.properties</buildArg>
+                                <buildArg>-H:IncludeResources=bean-config.xml</buildArg>
+                                <buildArg>-H:IncludeResources=messages.*\.properties</buildArg>
+                                <buildArg>-H:IncludeResources=p12/.*\.(p12|cer)$</buildArg>
+                                <buildArg>-H:IncludeResources=static/.*</buildArg>
+                                <buildArg>-H:IncludeResources=templates/.*</buildArg>
+                                -->
+
+                                <!--<buildArg>-H:IncludeResources=.*</buildArg>-->
+
+
                                 <buildArg>--report-unsupported-elements-at-runtime</buildArg>
                                 <buildArg>--allow-incomplete-classpath</buildArg>
-                                <!--<buildArg>-H:NativeImageFile=spring-native</buildArg>-->
+
+
                             </buildArgs>
                         </configuration>
                     </plugin>

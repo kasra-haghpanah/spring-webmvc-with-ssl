@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.TimeZone;
 
 @DependsOn({"properties"})
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class JacksonConfig {
 
     private static final String dateFormat = "yyyy-MM-dd";

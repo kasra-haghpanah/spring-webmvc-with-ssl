@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Primary;
         name = "monitoring.active",
         havingValue = "true"
 )
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class ActuatorPrometheusConfig {
 
     @Bean

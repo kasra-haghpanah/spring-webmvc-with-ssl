@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.MessageFormat;
 
-@Configuration("mariaHibernateConfig")
+@Configuration(value = "mariaHibernateConfig", proxyBeanMethods = false)
 @EnableTransactionManagement
 @DependsOn({"properties"})
 @EnableJpaRepositories(

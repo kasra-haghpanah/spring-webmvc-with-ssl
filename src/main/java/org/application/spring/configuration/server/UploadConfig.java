@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.util.unit.DataSize;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @DependsOn({"properties"})
 public class UploadConfig {
 
